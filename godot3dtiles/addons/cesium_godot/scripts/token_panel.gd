@@ -9,6 +9,8 @@ var new_token_check: CheckBox
 var create_or_use_token_button: Button
 var test_token_button: Button
 var specific_token_name: TextEdit
+var asset_list_group: BoxContainer
+var asset_list_items: OptionButton
 
 var token_troubleshooting: TokenTroubleshooting
 
@@ -28,6 +30,8 @@ func initialize_fields(token_panel: Popup) -> void:
 	self.new_token_check = token_panel.find_child("NewTokenCheck") as CheckBox
 	self.create_or_use_token_button = token_panel.find_child("CreateOrUseToken") as Button
 	self.test_token_button = token_panel.find_child("TestToken") as Button
+	self.asset_list_group = token_panel.find_child("AssetListGroup") as BoxContainer
+	self.asset_list_items = token_panel.find_child("AssetList") as OptionButton
 	# Then add the ResourcePicker
 	var configuration_container = token_panel.find_child("ConfigurationContainer")
 	self.config_picker = EditorResourcePicker.new()
@@ -43,13 +47,12 @@ func initialize_fields(token_panel: Popup) -> void:
 	self.new_token_check.toggled.connect(on_new_token_check)
 	token_panel.about_to_popup.connect(initialize_panel_buttons_from_state)
 	self.create_or_use_token_button.pressed.connect(apply_or_create_token)
-	self.test_token_button.pressed.connect(on_test_button_pressed)
-	
-
+	self.test_token_button.pressed.connect(on_test_button_pressed)	
 	self.request_node = HTTPRequest.new()
 	token_panel.add_child(self.request_node)
 	self.request_node.request_completed.connect(_on_request_completed)
-	
+	self.token_troubleshooting.set_data(self)
+
 
 
 func _on_request_completed(result: int, responseCode: int, headers: PackedStringArray, body: PackedByteArray) -> void:
@@ -94,7 +97,6 @@ func on_test_button_pressed() -> void:
 	var currentConfig := self.config_picker.edited_resource as CesiumGDConfig
 	self.token_troubleshooting.is_valid_token(currentConfig.accessToken, currentConfig)
 	pass
-	
 
 
 func test_token() -> void:

@@ -2,6 +2,7 @@
 #include "error_names.hpp"
 #include "godot_cpp/classes/http_client.hpp"
 #include "godot_cpp/classes/json.hpp"
+#include "godot_cpp/classes/os.hpp"
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/core/error_macros.hpp"
 #include "godot_cpp/variant/packed_string_array.hpp"
@@ -18,14 +19,14 @@ void TokenTroubleshooting::is_valid_token(const String &token,
   m_httpClient.init_client(1);
   std::string request = ASSET_LIST_URL.data();
   request.append(token.utf8().get_data());
-  m_httpClient.send_get(
+  m_httpClient.send_get_same_thread(
       request.c_str(),
       [this, token](int32_t status, const Vector<uint8_t> &body) { 
         // Get either a list of the available assets, or the error message
         Ref<JSON> jsonObj = memnew(JSON);
-        const char *strPtr = reinterpret_cast<const char *>(body.ptr());
-        String bodyStr = strPtr;
-        WARN_PRINT(bodyStr);
+        std::string tmpStr(reinterpret_cast<const char*>(body.ptr()), body.size());
+        String bodyStr = tmpStr.c_str();
+        
         Error parseErr = jsonObj->parse(bodyStr);
         if (parseErr != Error::OK ||
             jsonObj->get_data().get_type() != Variant::DICTIONARY) {
@@ -33,13 +34,13 @@ void TokenTroubleshooting::is_valid_token(const String &token,
               String("There was an error getting the body of the request: ") +
               REFLECT_ERR_NAME(parseErr);
           ERR_PRINT(msg);
-          on_token_validity_check(token, false, msg);
+          on_token_validity_check(token, false,{ msg });
           return;
         }
 
         if (status >= HTTPClient::ResponseCode::RESPONSE_BAD_REQUEST) {
           String msg = jsonObj->get_data().get("message");
-          on_token_validity_check(token, false, msg);
+          on_token_validity_check(token, false,{ msg });
           return;
         }
 
@@ -56,7 +57,7 @@ void TokenTroubleshooting::is_valid_token(const String &token,
             continue;
           const String &assetName = currItem.get("name");
           int32_t assetId = currItem.get("id");
-          assetList.push_back(assetName + String("; Asset id: ") + assetId);
+          assetList.push_back(assetName + String("; Asset id: ") + itos(assetId));
         }
         Variant args[] = {hasItems, assetList};
         on_token_validity_check(token, hasItems, assetList);
@@ -65,25 +66,51 @@ void TokenTroubleshooting::is_valid_token(const String &token,
 }
 
 
-void TokenTroubleshooting::on_token_validity_check(const String& token, bool isValid, const Variant& data) {
-  // Default impl is nothing for now
-  if (isValid) {
-    WARN_PRINT("Token is valid!");
+void TokenTroubleshooting::set_data(const Variant &data) {
+  printf("Set Data\n");
+  this->m_tokenData = data;
+  Variant asset_list_group = this->m_tokenData.get("asset_list_group");
+  asset_list_group.set("visible", false);
+}
+
+
+void TokenTroubleshooting::on_token_validity_check(const String& token, bool isValid, const PackedStringArray& data) {
+  printf("Valid: %d, size: %lld\n", isValid, data.size());
+  if (!isValid) {
+    OS::get_singleton()->alert("Token is not valid, try signing into Cesium ION");
+    return;
+  }
+  // Show the asset list group.
+  Variant asset_list_group = m_tokenData.get("asset_list_group");
+  asset_list_group.set("visible", true);
+    // Add each entry from data to token_data.asset_list_items.
+  Variant asset_list_items = m_tokenData.get("asset_list_items");
+  if (asset_list_items.get_type() == Variant::OBJECT) {
+      Object *list_items = asset_list_items;
+      for (int i = 0; i < data.size(); i++) {
+          String entry = data[i];
+          list_items->call("add_item", entry);
+      }
+  }
+}
+
+void TokenTroubleshooting::_exit_tree() {
+  
+  Variant asset_list_group = m_tokenData.get("asset_list_group");
+  if (asset_list_group.get_type() == Variant::OBJECT) {
+    Object *group = asset_list_group;
+    group->set("visible", false);
   }
 }
 
 void TokenTroubleshooting::_bind_methods() {
   ClassDB::bind_method(
-      D_METHOD("is_valid_token", "token", "config", "callback"),
+      D_METHOD("is_valid_token", "token", "config"),
       &TokenTroubleshooting::is_valid_token
   );
 
-     ClassDB::bind_method(
-        D_METHOD("on_token_validity_check", "token", "is_valid", "data"),
-        &TokenTroubleshooting::on_token_validity_check
-    );
-
-    // Mark the virtual method as overrideable in scripts
-    BIND_VIRTUAL_METHOD(TokenTroubleshooting, on_token_validity_check); 
+  ClassDB::bind_method(D_METHOD("set_data", "data"), &TokenTroubleshooting::set_data);
+  // Mark the virtual method as overrideable in scripts
+  BIND_VIRTUAL_METHOD(TokenTroubleshooting, on_token_validity_check); 
   
 }

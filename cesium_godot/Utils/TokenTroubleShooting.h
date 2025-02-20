@@ -15,14 +15,18 @@ class TokenTroubleshooting : public Node {
   public:
     void is_valid_token(const String& token, const Ref<CesiumGDConfig>& config);
 
-    virtual void on_token_validity_check(const String& token, bool isValid, const Variant& data);
+    void on_token_validity_check(const String& token, bool isValid, const PackedStringArray& data);
+    
+    void set_data(const Variant &data);
+
+    void _exit_tree() override;
     
   protected:
     static void _bind_methods();
 
   private:
     CurlHttpClient<1> m_httpClient{};
-    
+    Variant m_tokenData;
 };
 
 #endif
