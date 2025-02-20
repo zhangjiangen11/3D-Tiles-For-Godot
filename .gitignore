@@ -1,0 +1,43 @@
+
+# Common stuff
+.vs
+.hx
+*.sln
+*.obj
+*.dll
+*.lib
+*.so
+*.tcl
+.vscode
+*.pdb
+*__pycache__/*
+.cache/*
+
+compile_commands.json
+
+# Ignore the Cesium native directory
+cesium_godot/native
+
+# Ignore the actual godotcpp module
+godot-cpp/
+
+
+
+# Ignore everything in godot3dtiles
+godot3dtiles/**
+# Except the addons subdirectory and its contents
+!godot3dtiles/addons/
+!godot3dtiles/addons/**
+
+!godot3dtiles/bin/
+!godot3dtiles/bin/*.dll
+!godot3dtiles/bin/*.gdextension
+godot3dtiles/bin/*Godot3DTiles*.dll
+
+!godot-html/ultralight/lib/*.lib
+
+# Ignore large files
+*.ipch
+*.vcxproj
+*.vcxproj.filters
+*.dblite
