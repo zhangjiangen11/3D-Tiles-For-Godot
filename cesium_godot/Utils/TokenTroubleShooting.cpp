@@ -67,7 +67,6 @@ void TokenTroubleshooting::is_valid_token(const String &token,
 
 
 void TokenTroubleshooting::set_data(const Variant &data) {
-  printf("Set Data\n");
   this->m_tokenData = data;
   Variant asset_list_group = this->m_tokenData.get("asset_list_group");
   asset_list_group.set("visible", false);
@@ -75,7 +74,6 @@ void TokenTroubleshooting::set_data(const Variant &data) {
 
 
 void TokenTroubleshooting::on_token_validity_check(const String& token, bool isValid, const PackedStringArray& data) {
-  printf("Valid: %d, size: %lld\n", isValid, data.size());
   if (!isValid) {
     OS::get_singleton()->alert("Token is not valid, try signing into Cesium ION");
     return;
