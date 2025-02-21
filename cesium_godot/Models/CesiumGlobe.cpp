@@ -1,4 +1,3 @@
-
 #include "CesiumGlobe.h"
 #include "Utils/AssetManipulation.h"
 #include "godot_cpp/core/math.hpp"
@@ -17,6 +16,16 @@
 
 #include "CesiumGeospatial/Ellipsoid.h"
 #include "../Utils/CesiumMathUtils.h"
+
+
+// Use WSG84, cesium stopped makig that ellipsoid a constexpr, so we'll hardcode it here
+constexpr double WGS84_RADIUS = 6378137.0;
+
+constexpr double WGS84_B = 6.3567523E6;
+constexpr double WGS84_BSQR = WGS84_B * WGS84_B;
+constexpr double WGS84_R_SQR = WGS84_RADIUS * WGS84_RADIUS;
+constexpr double WGS84_E_PRIME_SQR = (WGS84_R_SQR - WGS84_BSQR) / WGS84_BSQR;	
+constexpr double WGS84_E_SQR = (WGS84_R_SQR - WGS84_BSQR) / WGS84_R_SQR;
 
 Transform3D CesiumGlobe::get_tx_engine_to_ecef() const
 {
@@ -134,15 +143,19 @@ glm::dvec3 CesiumGlobe::get_ecef_position() const
 void CesiumGlobe::set_latitude(double lat) {
 	glm::dvec3 lla = this->get_lla();
 	lla.x = lat;
-	// Turn this into ecef and set it
-	
+	this->update_ecef_with_lla(lla);	
 }
 
 void CesiumGlobe::set_longitude(double longitude) {
-	
+	glm::dvec3 lla = this->get_lla();
+	lla.y = longitude;
+	this->update_ecef_with_lla(lla);		
 }
 
 void CesiumGlobe::set_altitude(double alt) {
+	glm::dvec3 lla = this->get_lla();
+	lla.z = alt;
+	this->update_ecef_with_lla(lla);
 }
 
 double CesiumGlobe::get_latitude() const {
@@ -165,24 +178,15 @@ glm::dvec3 CesiumGlobe::get_lla() const {
 	const double& y = this->m_ecefPosition.y;
 	const double& z = this->m_ecefPosition.z;
 
-	// Use WSG84, cesium stopped makig that ellipsoid a constexpr, so we'll hardcode it here
-	constexpr double radius = 6378137.0;
-	constexpr double eccentricity = 8.1819190842622e-2; // Precalculated
-	
-  constexpr double b = 6.3567523E6;
-  constexpr double bsq = b * b;
-  constexpr double asq = radius * radius;
-	constexpr double eprimeSqr = (asq - bsq) / bsq;	
-	constexpr double esq = (asq - bsq) / asq;
 	
   double p = Math::sqrt(Math::pow(x, 2) + Math::pow(y, 2) );
-  double theta = Math::atan2(radius * z, b * p);	
+  double theta = Math::atan2(WGS84_RADIUS * z, WGS84_B * p);	
 
 	double longitude = Math::atan2(y, x);
 
 	// This was a tough one
-	double lat = Math::atan2( (z + eprimeSqr * b * Math::pow(Math::sin(theta), 3)), (p - esq * radius * Math::pow(Math::cos(theta), 3)));
-  double N = radius / (Math::sqrt(1 - (esq * Math::pow(Math::sin(lat), 2))));
+	double lat = Math::atan2( (z + WGS84_E_PRIME_SQR * WGS84_B * Math::pow(Math::sin(theta), 3)), (p - WGS84_E_SQR * WGS84_RADIUS * Math::pow(Math::cos(theta), 3)));
+  double N = WGS84_RADIUS / (Math::sqrt(1 - (WGS84_E_SQR * Math::pow(Math::sin(lat), 2))));
   double m = (p / Math::cos(lat));
   
   double alt = m - N;
@@ -190,9 +194,23 @@ glm::dvec3 CesiumGlobe::get_lla() const {
 }
 
 
-void update_ecef_with_lla(glm::dvec3 lla) {
-	const double& radius = CesiumGeospatial::Ellipsoid::WGS84.getRadii().x;
-		
+/// @brief Approximation solution from Apple's pARk
+/// https://developer.apple.com/library/archive/samplecode/pARk/Introduction/Intro.html
+void CesiumGlobe::update_ecef_with_lla(glm::dvec3 lla) {
+	const double& lat = lla.x;
+	const double& lon = lla.y;
+	const double& alt = lla.z;
+	
+  double clat = cos(Math::deg_to_rad(lat));
+  double slat = sin(Math::deg_to_rad(lat));
+  double clon = cos(Math::deg_to_rad(lon));
+  double slon = sin(Math::deg_to_rad(lon));	
+  
+	double N = WGS84_RADIUS / sqrt(1.0 - WGS84_E_SQR * slat * slat);
+
+	this->m_ecefPosition.x = (N + alt) * clat * clon;
+	this->m_ecefPosition.y = (N + alt) * clat * slon;
+	this->m_ecefPosition.z = (N * (1 - WGS84_E_SQR) + alt) * slat;
 }
 
 
