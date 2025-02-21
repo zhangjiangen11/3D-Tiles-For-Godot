@@ -11,8 +11,10 @@
 #include "godot_cpp/classes/window.hpp"
 #include "godot_cpp/core/error_macros.hpp"
 #include "godot_cpp/core/memory.hpp"
+#include "godot_cpp/variant/array.hpp"
 #include "magic_enum.hpp"
 #include "missing_functions.hpp"
+#include <cstdint>
 #include <winnt.h>
 
 const char* CESIUM_GLOBE_NAME = "CesiumGlobe";
@@ -130,14 +132,10 @@ void Godot3DTiles::AssetManipulation::instantiate_dynamic_cam(Node3D* baseNode) 
 	root->add_child(camera);
 	camera->set_owner(root);
 	auto originType = static_cast<CesiumGlobe::OriginType>(globe->get_origin_type());
-	if (originType == CesiumGlobe::OriginType::CartographicOrigin) {
-		//Use the georef
-		Ref<Resource> script = ResourceLoader::get_singleton()->load(georefCameraScript, "Script");
-		camera->set_script(script);
-		return;
-	}
-	Ref<Resource> script = ResourceLoader::get_singleton()->load(trueOriginCameraScript, "Script");
+	Ref<Resource> script = ResourceLoader::get_singleton()->load(georefCameraScript, "Script");
 	camera->set_script(script);
+	camera->set("tilesets", find_all_tilesets(baseNode));
+	camera->set("globe_node", globe);
 }
 
 
@@ -145,4 +143,19 @@ void Godot3DTiles::AssetManipulation::instantiate_dynamic_cam(Node3D* baseNode) 
 CesiumGDTileset* find_first_tileset(Node3D* baseNode) {
 	//Get a globe
 	return nullptr;
+}
+
+
+Array Godot3DTiles::AssetManipulation::find_all_tilesets(Node3D* baseNode) {
+	// All tilesets will be inside the globe
+	CesiumGlobe* globeNode = find_or_create_globe(baseNode);
+	int32_t count = globeNode->get_child_count();
+	Array results;
+	for (int32_t i = 0; i < count; i++) {
+		Node* child = globeNode->get_child(i);
+		auto* foundTileset = Object::cast_to<CesiumGDTileset>(child);
+		if (foundTileset == nullptr) continue;
+		results.append(globeNode);
+	}
+	return results;
 }

@@ -2,7 +2,7 @@
 
 #include "Models/CesiumGDCreditSystem.h"
 #include "Models/CesiumGDTileset.h"
-#include <algorithm>
+#include "godot_cpp/variant/array.hpp"
 #if defined(CESIUM_GD_EXT)
 #include <godot_cpp/classes/node3d.hpp>
 using namespace godot;
@@ -35,7 +35,8 @@ namespace Godot3DTiles::AssetManipulation {
   CesiumGDTileset* find_first_tileset(Node3D* baseNode);
 
   CesiumGDCreditSystem* find_or_create_credit_system(Node3D* baseNode, bool deferred);
-  
+
+  Array find_all_tilesets(Node3D* baseNode);
   
   template<class T>
   inline T* find_node_in_scene(Node* root) {

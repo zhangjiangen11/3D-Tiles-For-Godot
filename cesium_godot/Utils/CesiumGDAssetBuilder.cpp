@@ -2,6 +2,7 @@
 #include "CesiumGDAssetBuilder.h"
 #include "Models/CesiumGlobe.h"
 #include "Utils/AssetManipulation.h"
+#include "godot_cpp/core/class_db.hpp"
 
 
 void CesiumGDAssetBuilder::instantiate_tileset(int32_t tilesetType) {
@@ -26,6 +27,10 @@ CesiumGlobe* CesiumGDAssetBuilder::find_or_create_globe() {
 	return Godot3DTiles::AssetManipulation::find_or_create_globe(this);
 }
 
+Array CesiumGDAssetBuilder::find_all_tilesets() {
+	return Godot3DTiles::AssetManipulation::find_all_tilesets(this);	
+}
+
 void CesiumGDAssetBuilder::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("instantiate_dynamic_cam"), &CesiumGDAssetBuilder::instantiate_dynamic_cam);
 	ClassDB::bind_method(D_METHOD("instantiate_tileset", "type"), &CesiumGDAssetBuilder::instantiate_tileset);
@@ -33,6 +38,8 @@ void CesiumGDAssetBuilder::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_georeference_camera_script"), &CesiumGDAssetBuilder::get_georeference_camera_script);
 	ClassDB::bind_method(D_METHOD("set_georeference_camera_script", "script"), &CesiumGDAssetBuilder::set_georeference_camera_script);
+
+	ClassDB::bind_method(D_METHOD("find_all_tilesets"), &CesiumGDAssetBuilder::find_all_tilesets);
 	
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "georef_camera_script"), "set_georeference_camera_script", "get_georeference_camera_script");
 }
