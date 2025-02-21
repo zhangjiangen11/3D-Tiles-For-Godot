@@ -1,6 +1,7 @@
 
 #include "CesiumGlobe.h"
 #include "Utils/AssetManipulation.h"
+#include "godot_cpp/core/math.hpp"
 #include "godot_cpp/variant/vector3.hpp"
 #include "missing_functions.hpp"
 #include <cstdint>
@@ -129,6 +130,67 @@ glm::dvec3 CesiumGlobe::get_ecef_position() const
 	return this->m_ecefPosition;
 }
 
+
+void CesiumGlobe::set_latitude(double lat) {
+	glm::dvec3 lla = this->get_lla();
+	lla.x = lat;
+	// Turn this into ecef and set it
+	
+}
+
+void CesiumGlobe::set_longitude(double longitude) {
+	
+}
+
+void CesiumGlobe::set_altitude(double alt) {
+}
+
+double CesiumGlobe::get_latitude() const {
+	return this->get_lla().x;
+}
+
+double CesiumGlobe::get_longitude() const {
+	return this->get_lla().y;
+}
+
+double CesiumGlobe::get_altitude() const {
+	return this->get_lla().z;
+}
+
+glm::dvec3 CesiumGlobe::get_lla() const {
+	// Take ECEF and represent it as lla
+	// long = atan(Px / Py)
+	const double& x = this->m_ecefPosition.x;
+	const double& y = this->m_ecefPosition.y;
+	const double& z = this->m_ecefPosition.z;
+	
+	const double& radius = CesiumGeospatial::Ellipsoid::WGS84.getRadii().x;
+	constexpr double eccentricity = 8.1819190842622e-2; // Precalculated
+	
+	double esq = Math::pow(radius, 2);
+	double asq = Math::pow(eccentricity, 2);
+	
+  double b = Math::sqrt(asq * (1 - esq));
+  double bsq = Math::pow(b, 2);
+  double ep = Math::sqrt((asq - bsq) / bsq);
+  double p = Math::sqrt(Math::pow(x, 2) + Math::pow(y, 2) );
+  double th = Math::atan2(radius * z, b * p);	
+  
+	double longitude = Math::atan2(y, x);
+	
+	double lat = Math::atan2( (z + Math::pow(ep, 2)* b * Math::pow(Math::sin(th), 3)), (p - esq * radius * Math::pow(Math::cos(th), 3)));
+  double N = radius /( Math::sqrt(1 - esq * Math::pow(Math::sin(lat), 2)));
+  double alt = p / Math::cos(lat) - N;
+  return glm::dvec3(lat, longitude, alt);
+}
+
+
+void update_ecef_with_lla(glm::dvec3 lla) {
+	const double& radius = CesiumGeospatial::Ellipsoid::WGS84.getRadii().x;
+		
+}
+
+
 void CesiumGlobe::move_origin()
 {
 	if (!this->m_shouldUpdateOrigin || this->m_originType == OriginType::TrueOrigin) return;
@@ -224,6 +286,22 @@ void CesiumGlobe::_bind_methods()
 	ClassDB::bind_method(D_METHOD("get_scale_factor"), &CesiumGlobe::get_scale_factor);
 	ClassDB::bind_method(D_METHOD("set_scale_factor", "scale_factor"), &CesiumGlobe::set_scale_factor);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "scale_factor"), "set_scale_factor", "get_scale_factor");
+		
+
+	ClassDB::bind_method(D_METHOD("set_latitude", "latitude"), &CesiumGlobe::set_latitude);
+	ClassDB::bind_method(D_METHOD("get_latitude"), &CesiumGlobe::get_latitude);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "get_latitude"), "set_latitude", "get_latitude");
+
+
+	// Longitude
+	ClassDB::bind_method(D_METHOD("set_longitude", "longitude"), &CesiumGlobe::set_longitude);
+	ClassDB::bind_method(D_METHOD("get_longitude"), &CesiumGlobe::get_longitude);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "get_longitude"), "set_longitude", "get_longitude");
+
+	// Altitude
+	ClassDB::bind_method(D_METHOD("set_altitude", "altitude"), &CesiumGlobe::set_altitude);
+	ClassDB::bind_method(D_METHOD("get_altitude"), &CesiumGlobe::get_altitude);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "get_altitude"), "set_altitude", "get_altitude");
 	
 	
 	ClassDB::bind_method(D_METHOD("get_origin_type"), &CesiumGlobe::get_origin_type);

@@ -43,6 +43,7 @@ func _enter_tree() -> void:
 	self.token_panel_data = TokenPanelData.new()
 	self.add_child(self.token_panel)
 	self.token_panel.hide()
+	self.add_inspector_plugin(CesiumTooltips.new())
 	print("Enabled Cesium plugin")
 	self.init_buttons()
 

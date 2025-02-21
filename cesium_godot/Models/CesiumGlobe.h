@@ -73,6 +73,22 @@ public:
 	
 	glm::dvec3 get_ecef_position() const;
 
+	void set_latitude(double lat);
+
+	void set_longitude(double longitude);
+
+	void set_altitude(double alt);
+
+	double get_latitude() const;
+
+	double get_longitude() const;
+
+	double get_altitude() const;
+	
+	glm::dvec3 get_lla() const;
+	
+	void update_ecef_with_lla(glm::dvec3 lla);
+
 	void move_origin();
 
 	void set_should_update_origin(bool updateOrigin);
