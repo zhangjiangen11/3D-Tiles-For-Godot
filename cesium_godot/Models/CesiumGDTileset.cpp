@@ -67,6 +67,10 @@ constexpr const char* MAXIMUM_SIMULTANEOUS_TILE_LOADS_DESC = "The maximum number
 constexpr const char* PRELOAD_ANCESTORS_DESC = "Indicates whether the ancestors of rendered tiles should be preloaded.\nSetting this to true optimizes the zoom-out experience and provides more detail in newly-exposed areas when panning.\nThe down side is that it requires loading more tiles";
 constexpr const char* PRELOAD_SIBLINGS_DESC = "Indicates whether the siblings of rendered tiles should bepreloaded.\nSetting this to true causes tiles with the same parent as arendered tile to be loaded, even if they are culled.\nSetting this to truemay provide a better panning experience at the cost of loading more tiles.";
 constexpr const char* LOADING_DESCENDANT_LIMIT_DESC = "The number of loading descendant tiles that is considered \"too many\".\nIf a tile has too many loading descendants, that tile will be loaded and rendered before any of its descendants are loaded and rendered. \nThis means more feedback for the user that something is happening at the cost of a longer overall load time.\nSetting this to 0 will cause each tile level to be loaded successively, significantly increasing load time.\nSetting it to a large number (e.g. 1000) will minimize the number of tiles that are loaded but tend to make detail appear all at once after a long wait.";
+constexpr const char* FORBID_HOLES_DESC = "Never render a tileset with missing tiles.\n\nWhen true, the tileset will guarantee that the tileset will never be rendered with holes in place of tiles that are not yet loaded.\nIt does this by refusing to refine a parent tile until all of its child tiles are ready to render.\nThus, when the camera moves, we will always have something - even if it's low resolution - to render any part of the tileset that becomes visible.\nWhen false, overall loading will be faster, but newly-visible parts of the tileset may initially be blank.";
+constexpr const char* GENERATE_MISSING_NORMALS_DESC = "Whether to generate smooth normals when normals are missing in theoriginal Gltf.\n\nAccording to the Gltf spec: \"When normals are not specified, clientimplementations should calculate flat normals.\"\nHowever, calculating flatnormals requires duplicating vertices.\nThis option allows the gltfs to besent with explicit smooth normals when the original gltf was missingnormals.";
+
+
 /**
 * @brief This will be the underlying config for the tileset
 * the class basically acts as a builder wrapper to provide
@@ -566,11 +570,11 @@ void CesiumGDTileset::_bind_methods()
 
 	ClassDB::bind_method(D_METHOD("set_forbid_holes", "forbidHoles"), &CesiumGDTileset::set_forbid_holes);
 	ClassDB::bind_method(D_METHOD("get_forbid_holes"), &CesiumGDTileset::get_forbid_holes);
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "forbid_holes"), "set_forbid_holes", "get_forbid_holes");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "forbid_holes", PROPERTY_HINT_NONE, FORBID_HOLES_DESC), "set_forbid_holes", "get_forbid_holes");
 
 	ClassDB::bind_method(D_METHOD("set_generate_missing_normals_smooth", "shouldGenerate"), &CesiumGDTileset::set_generate_missing_normals_smooth);
 	ClassDB::bind_method(D_METHOD("get_generate_missing_normals_smooth"), &CesiumGDTileset::get_generate_missing_normals_smooth);
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "generate_missing_normals_smooth"), "set_generate_missing_normals_smooth", "get_generate_missing_normals_smooth");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "generate_missing_normals_smooth", PROPERTY_HINT_NONE, GENERATE_MISSING_NORMALS_DESC), "set_generate_missing_normals_smooth", "get_generate_missing_normals_smooth");
 
 	ClassDB::bind_method(D_METHOD("set_create_physics_meshes", "shouldGenerate"), &CesiumGDTileset::set_create_physics_meshes);
 	ClassDB::bind_method(D_METHOD("get_create_physics_meshes"), &CesiumGDTileset::get_create_physics_meshes);
@@ -588,6 +592,7 @@ void CesiumGDTileset::_bind_methods()
 	BIND_ENUM_CONSTANT(static_cast<int64_t>(CesiumDataSource::FromUrl));
 
 	ClassDB::bind_method(D_METHOD("set_url", URL_P_NAME), &CesiumGDTileset::set_url);
+	
 	ClassDB::bind_method(D_METHOD("get_url"), &CesiumGDTileset::get_url);
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "url"), "set_url", "get_url");
 
