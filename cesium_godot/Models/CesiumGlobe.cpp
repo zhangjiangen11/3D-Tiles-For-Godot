@@ -157,31 +157,34 @@ double CesiumGlobe::get_altitude() const {
 	return this->get_lla().z;
 }
 
+/// @brief All calculations are based off of https://en.wikipedia.org/wiki/Geographic_coordinate_conversion
+/// using Ferrari's method to avoid iterations with Newton's method and all that stuff
 glm::dvec3 CesiumGlobe::get_lla() const {
 	// Take ECEF and represent it as lla
-	// long = atan(Px / Py)
 	const double& x = this->m_ecefPosition.x;
 	const double& y = this->m_ecefPosition.y;
 	const double& z = this->m_ecefPosition.z;
-	
-	const double& radius = CesiumGeospatial::Ellipsoid::WGS84.getRadii().x;
+
+	// Use WSG84, cesium stopped makig that ellipsoid a constexpr, so we'll hardcode it here
+	constexpr double radius = 6378137.0;
+	// Also kwown as sqrt(e^2)
 	constexpr double eccentricity = 8.1819190842622e-2; // Precalculated
+	constexpr double esqr = eccentricity * eccentricity;
+  constexpr double b = 6.3567523E6;
+  constexpr double asq = radius * radius;
 	
-	double esq = Math::pow(radius, 2);
-	double asq = Math::pow(eccentricity, 2);
-	
-  double b = Math::sqrt(asq * (1 - esq));
-  double bsq = Math::pow(b, 2);
-  double ep = Math::sqrt((asq - bsq) / bsq);
   double p = Math::sqrt(Math::pow(x, 2) + Math::pow(y, 2) );
-  double th = Math::atan2(radius * z, b * p);	
-  
+  double theta = Math::atan2(radius * z, b * p);	
+
 	double longitude = Math::atan2(y, x);
+
+	// This was a tough one
+	double lat = Math::atan2( (z + Math::pow(esqr, 2)* b * Math::pow(Math::sin(theta), 3)), (p - esqr * radius * Math::pow(Math::cos(theta), 3)));
+  
+  double N = radius / (Math::sqrt(1 - esqr * Math::pow(Math::sin(lat), 2)));  
 	
-	double lat = Math::atan2( (z + Math::pow(ep, 2)* b * Math::pow(Math::sin(th), 3)), (p - esq * radius * Math::pow(Math::cos(th), 3)));
-  double N = radius /( Math::sqrt(1 - esq * Math::pow(Math::sin(lat), 2)));
   double alt = p / Math::cos(lat) - N;
-  return glm::dvec3(lat, longitude, alt);
+  return glm::dvec3(Math::rad_to_deg(lat), Math::rad_to_deg(longitude), Math::rad_to_deg(alt));
 }
 
 
