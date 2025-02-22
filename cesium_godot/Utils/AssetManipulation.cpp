@@ -13,7 +13,6 @@
 #include "godot_cpp/core/memory.hpp"
 #include "godot_cpp/variant/array.hpp"
 #include "magic_enum.hpp"
-#include "missing_functions.hpp"
 #include <cstdint>
 #include <winnt.h>
 
@@ -37,7 +36,7 @@ CesiumGlobe* Godot3DTiles::AssetManipulation::find_or_create_globe(Node3D* baseN
 	globe = memnew(CesiumGlobe);
 	globe->set_name(CESIUM_GLOBE_NAME);
 	globe->set_rotation_degrees(Vector3(-90.0, 0.0, 0.0));
-	root->add_child(globe);
+	root->add_child(globe, true);
 	globe->set_owner(root);
 	return globe;
 }
@@ -53,12 +52,13 @@ CesiumGDCreditSystem* Godot3DTiles::AssetManipulation::find_or_create_credit_sys
 	result = memnew(CesiumGDCreditSystem);
 	CesiumGlobe* globe = find_node_in_scene<CesiumGlobe>(root);
 	ERR_FAIL_COND_V_MSG(globe == nullptr, nullptr, "No CesiumGlobe found in scene, please add one manually or with the Cesium Panel!");
+	constexpr bool readableName = true;
 	if (deferred) {
-		globe->get_parent_node_3d()->call_deferred("add_child", result, false, godot::Node::INTERNAL_MODE_FRONT);
+		globe->get_parent_node_3d()->call_deferred("add_child", result, readableName, godot::Node::INTERNAL_MODE_FRONT);
 		result->call_deferred("set_owner", globe->get_parent_node_3d());
 	}
 	else {
-		globe->get_parent_node_3d()->add_child(result, false, godot::Node::INTERNAL_MODE_FRONT);
+		globe->get_parent_node_3d()->add_child(result, readableName, godot::Node::INTERNAL_MODE_FRONT);
 		result->set_owner(globe->get_parent_node_3d());
 	}
 	return result;
@@ -72,7 +72,7 @@ Node3D* Godot3DTiles::AssetManipulation::get_root_of_edit_scene(Node3D* baseNode
 void Godot3DTiles::AssetManipulation::instantiate_tileset(Node3D* baseNode, int32_t tilesetType) {
 	Node3D* root = get_root_of_edit_scene(baseNode);
 	CesiumGDTileset* tileset = memnew(CesiumGDTileset);
-	root->add_child(tileset);
+	root->add_child(tileset, true);
 	
 	
 	TilesetType actualType = static_cast<TilesetType>(tilesetType);
@@ -112,11 +112,11 @@ void Godot3DTiles::AssetManipulation::instantiate_tileset(Node3D* baseNode, int3
 	}
 
 	if (extraTileset != nullptr) {
-		root->add_child(extraTileset);
+		root->add_child(extraTileset, true);
 	}
 
 	if (rasterOverlay != nullptr) {
-		tileset->add_child(rasterOverlay);
+		tileset->add_child(rasterOverlay, true);
 		rasterOverlay->set_owner(root);
 	}
 	
@@ -129,7 +129,7 @@ void Godot3DTiles::AssetManipulation::instantiate_dynamic_cam(Node3D* baseNode) 
 	Node3D* root = get_root_of_edit_scene(baseNode);
 	CesiumGlobe* globe = find_or_create_globe(baseNode);
 	Camera3D* camera = memnew(Camera3D);
-	root->add_child(camera);
+	root->add_child(camera, true);
 	camera->set_owner(root);
 	auto originType = static_cast<CesiumGlobe::OriginType>(globe->get_origin_type());
 	Ref<Resource> script = ResourceLoader::get_singleton()->load(georefCameraScript, "Script");
