@@ -26,6 +26,8 @@ public:
   void set_georeference_camera_script(Variant cameraScript);
 
   CesiumGlobe* find_or_create_globe();
+  
+  Array find_all_tilesets();
 
 private:
   Variant m_georeferenceCameraScript;
