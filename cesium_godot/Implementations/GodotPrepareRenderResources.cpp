@@ -81,7 +81,7 @@ CesiumAsync::Future<Cesium3DTilesSelection::TileLoadResultAndRenderResources> Go
 			position = *reinterpret_cast<const glm::dvec3*>(translationArray.data());
 		}
 
-		CesiumGlobe* geoReferenceNode = nullptr;
+		CesiumGeoreference* geoReferenceNode = nullptr;
 
 		if (this->m_tileset->is_georeferenced(&geoReferenceNode)) {
 			real_t scaleFactor = geoReferenceNode->get_scale_factor();

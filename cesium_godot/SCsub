@@ -27,7 +27,6 @@ sources = [
     cesium_build_utils.get_root_dir() + "/Models/CesiumGDTileset.cpp",
     cesium_build_utils.get_root_dir() + "/Models/CesiumGDPanel.cpp",
     cesium_build_utils.get_root_dir() + "/Models/CesiumGDRasterOverlay.cpp",
-    cesium_build_utils.get_root_dir() + "/Models/CesiumGDGeoreference.cpp",
     cesium_build_utils.get_root_dir() + "/Models/CesiumGlobe.cpp",
     cesium_build_utils.get_root_dir() + "/Models/CesiumGDConfig.cpp",
     cesium_build_utils.get_root_dir() + "/Models/CesiumHTTPRequestNode.cpp",

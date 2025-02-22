@@ -13,8 +13,8 @@ using namespace godot;
 
 class CesiumGDTileset;
 
-class CesiumGDGeoreference : public CesiumGlobe {
-	GDCLASS(CesiumGDGeoreference, CesiumGlobe)
+class CesiumGDGeoreference : public CesiumGeoreference {
+	GDCLASS(CesiumGDGeoreference, CesiumGeoreference)
 public:
 #pragma region Editor methods
 	double get_ecef_x() const;

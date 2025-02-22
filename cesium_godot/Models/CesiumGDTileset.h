@@ -28,7 +28,7 @@ class OpaqueTilesetOptions;
 
 class CesiumGDRasterOverlay;
 
-class CesiumGlobe;
+class CesiumGeoreference;
 
 #if defined(CESIUM_GD_EXT)
 #elif defined(CESIUM_GD_MODULE)
@@ -107,7 +107,7 @@ public:
 
 	void add_overlay(CesiumGDRasterOverlay* overlay);
 
-	bool is_georeferenced(CesiumGlobe** outRef) const;
+	bool is_georeferenced(CesiumGeoreference** outRef) const;
 
 	void _enter_tree() override;
 
@@ -153,7 +153,7 @@ private:
 
 	Ref<CesiumGDConfig> m_configInstance = nullptr;
 
-	CesiumGlobe* m_georeference = nullptr;
+	CesiumGeoreference* m_georeference = nullptr;
 
 	BRThreadPool m_signalingThreadPool;
 

@@ -11,7 +11,7 @@ using namespace godot;
 
 #endif
 
-class CesiumGlobe;
+class CesiumGeoreference;
 
 /// @brief Simple front-facing UI for the AssetManipulation namespace
 class CesiumGDAssetBuilder : public Node3D {
@@ -25,7 +25,7 @@ public:
 
   void set_georeference_camera_script(Variant cameraScript);
 
-  CesiumGlobe* find_or_create_globe();
+  CesiumGeoreference* find_or_create_globe();
   
   Array find_all_tilesets();
 

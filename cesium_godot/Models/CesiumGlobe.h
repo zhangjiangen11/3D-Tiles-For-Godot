@@ -16,8 +16,8 @@ using namespace godot;
 using EcefVector3 = Vector3;
 
 /// @brief We define this in C++ to provide any utility methods from the Globe instance
-class CesiumGlobe : public Node3D {
-	GDCLASS(CesiumGlobe, Node3D)
+class CesiumGeoreference : public Node3D {
+	GDCLASS(CesiumGeoreference, Node3D)
 public:
 
 	enum class OriginType {
@@ -25,7 +25,7 @@ public:
 		TrueOrigin
 	};
 
-	CesiumGlobe() {
+	CesiumGeoreference() {
 		this->m_initialOriginTransform = this->get_global_transform();
 	};
 

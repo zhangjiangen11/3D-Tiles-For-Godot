@@ -16,24 +16,23 @@
 #include <cstdint>
 #include <winnt.h>
 
-const char* CESIUM_GLOBE_NAME = "CesiumGlobe";
-const char* CESIUM_GLOBE_GEOREF = "CesiumGeoreference";
+const char* CESIUM_GLOBE_NAME = "CesiumGeoreference";
 const char* CESIUM_TILESET_NAME = "CesiumGDTileset";
 
-CesiumGlobe* Godot3DTiles::AssetManipulation::find_or_create_globe(Node3D* baseNode) {
+CesiumGeoreference* Godot3DTiles::AssetManipulation::find_or_create_globe(Node3D* baseNode) {
   Node3D* root = get_root_of_edit_scene(baseNode);
-	CesiumGlobe* globe = nullptr;
+	CesiumGeoreference* globe = nullptr;
 	int32_t count = root->get_child_count();
 	for (int32_t i = 0; i < count; i++) {
 		Node* child = root->get_child(i);
-		CesiumGlobe* foundChild = Object::cast_to<CesiumGlobe>(child);
+		CesiumGeoreference* foundChild = Object::cast_to<CesiumGeoreference>(child);
 		if (foundChild != nullptr) {
 			return foundChild;
 		}
 	}
 	
 	//Create a globe
-	globe = memnew(CesiumGlobe);
+	globe = memnew(CesiumGeoreference);
 	globe->set_name(CESIUM_GLOBE_NAME);
 	globe->set_rotation_degrees(Vector3(-90.0, 0.0, 0.0));
 	root->add_child(globe, true);
@@ -50,7 +49,7 @@ CesiumGDCreditSystem* Godot3DTiles::AssetManipulation::find_or_create_credit_sys
 	}
 	
 	result = memnew(CesiumGDCreditSystem);
-	CesiumGlobe* globe = find_node_in_scene<CesiumGlobe>(root);
+	CesiumGeoreference* globe = find_node_in_scene<CesiumGeoreference>(root);
 	ERR_FAIL_COND_V_MSG(globe == nullptr, nullptr, "No CesiumGlobe found in scene, please add one manually or with the Cesium Panel!");
 	constexpr bool readableName = true;
 	if (deferred) {
@@ -127,11 +126,11 @@ void Godot3DTiles::AssetManipulation::instantiate_dynamic_cam(Node3D* baseNode) 
 	const char* georefCameraScript = "res://addons/cesium_godot/scripts/georeference_camera_controller.gd";
 	const char* trueOriginCameraScript = "res://addons/cesium_godot/scripts/cesium_camera_controller.gd";
 	Node3D* root = get_root_of_edit_scene(baseNode);
-	CesiumGlobe* globe = find_or_create_globe(baseNode);
+	CesiumGeoreference* globe = find_or_create_globe(baseNode);
 	Camera3D* camera = memnew(Camera3D);
 	root->add_child(camera, true);
 	camera->set_owner(root);
-	auto originType = static_cast<CesiumGlobe::OriginType>(globe->get_origin_type());
+	auto originType = static_cast<CesiumGeoreference::OriginType>(globe->get_origin_type());
 	Ref<Resource> script = ResourceLoader::get_singleton()->load(georefCameraScript, "Script");
 	camera->set_script(script);
 	camera->set("tilesets", find_all_tilesets(baseNode));
@@ -148,7 +147,7 @@ CesiumGDTileset* find_first_tileset(Node3D* baseNode) {
 
 Array Godot3DTiles::AssetManipulation::find_all_tilesets(Node3D* baseNode) {
 	// All tilesets will be inside the globe
-	CesiumGlobe* globeNode = find_or_create_globe(baseNode);
+	CesiumGeoreference* globeNode = find_or_create_globe(baseNode);
 	int32_t count = globeNode->get_child_count();
 	Array results;
 	for (int32_t i = 0; i < count; i++) {

@@ -34,7 +34,7 @@ void initialize_cesium_godot_module(ModuleInitializationLevel p_level) {
 	if (p_level != ModuleInitializationLevel::MODULE_INITIALIZATION_LEVEL_SCENE)
 		return;
 	//We will have to register all external classes to the class DB (we probably don't want this for common DataStructures, but rather Nodes)
-	ClassDB::register_class<CesiumGlobe>();
+	ClassDB::register_class<CesiumGeoreference>();
 	ClassDB::register_class<CesiumGDGeoreference>();
 	ClassDB::register_class<CesiumGDTileset>();
 	ClassDB::register_class<CesiumHTTPRequestNode>();
@@ -54,8 +54,8 @@ void initialize_cesium_godot_module(ModuleInitializationLevel p_level) {
   GDREGISTER_CLASS(InspectorRect);
   GDREGISTER_CLASS(AppExample);
 	ClassDB::register_class<CesiumGDCreditSystem>(true);
-	ClassDB::bind_integer_constant("CesiumGlobe", "OriginType", "CartographicOrigin", (int32_t)CesiumGlobe::OriginType::CartographicOrigin);
-	ClassDB::bind_integer_constant("CesiumGlobe", "OriginType", "TrueOrigin", (int32_t)CesiumGlobe::OriginType::TrueOrigin);
+	ClassDB::bind_integer_constant("CesiumGlobe", "OriginType", "CartographicOrigin", (int32_t)CesiumGeoreference::OriginType::CartographicOrigin);
+	ClassDB::bind_integer_constant("CesiumGlobe", "OriginType", "TrueOrigin", (int32_t)CesiumGeoreference::OriginType::TrueOrigin);
 }
 
 void uninitialize_cesium_godot_module(ModuleInitializationLevel p_level) {

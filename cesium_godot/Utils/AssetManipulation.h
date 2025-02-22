@@ -10,7 +10,7 @@ using namespace godot;
 
 #endif
 
-class CesiumGlobe;
+class CesiumGeoreference;
 
 
 namespace Godot3DTiles::AssetManipulation {
@@ -28,7 +28,7 @@ namespace Godot3DTiles::AssetManipulation {
   
   void instantiate_dynamic_cam(Node3D* baseNode);
   
-  CesiumGlobe* find_or_create_globe(Node3D* baseNode);
+  CesiumGeoreference* find_or_create_globe(Node3D* baseNode);
 
   Node3D* get_root_of_edit_scene(Node3D* baseNode);
   

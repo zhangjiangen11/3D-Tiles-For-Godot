@@ -23,7 +23,7 @@ void CesiumGDAssetBuilder::set_georeference_camera_script(Variant cameraScript) 
 	this->m_georeferenceCameraScript = cameraScript;
 }
 
-CesiumGlobe* CesiumGDAssetBuilder::find_or_create_globe() {
+CesiumGeoreference* CesiumGDAssetBuilder::find_or_create_globe() {
 	return Godot3DTiles::AssetManipulation::find_or_create_globe(this);
 }
 

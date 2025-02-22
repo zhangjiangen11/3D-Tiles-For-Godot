@@ -328,16 +328,16 @@ void CesiumGDTileset::add_overlay(CesiumGDRasterOverlay* overlay)
 }
 
 
-bool CesiumGDTileset::is_georeferenced(CesiumGlobe** outRef) const
+bool CesiumGDTileset::is_georeferenced(CesiumGeoreference** outRef) const
 {
 	if (this->m_georeference != nullptr) {
 		*outRef = this->m_georeference;
-		return this->m_georeference->get_origin_type() == static_cast<int32_t>(CesiumGlobe::OriginType::CartographicOrigin);
+		return this->m_georeference->get_origin_type() == static_cast<int32_t>(CesiumGeoreference::OriginType::CartographicOrigin);
 	}
 	//Check if the parent is of type CesiumGDGeoreference
 	Node3D* parent = this->get_parent_node_3d();
-	*outRef = Object::cast_to<CesiumGlobe>(parent);
-	return (*outRef)->get_origin_type() == static_cast<int32_t>(CesiumGlobe::OriginType::CartographicOrigin);
+	*outRef = Object::cast_to<CesiumGeoreference>(parent);
+	return (*outRef)->get_origin_type() == static_cast<int32_t>(CesiumGeoreference::OriginType::CartographicOrigin);
 }
 
 void CesiumGDTileset::recreate_tileset()
@@ -671,7 +671,7 @@ bool CesiumGDTileset::_get(const StringName& p_name, Variant& r_property) const
 
 void CesiumGDTileset::_enter_tree() {
 	if (!is_editor_mode()) return;
-	CesiumGlobe* globe = Godot3DTiles::AssetManipulation::find_or_create_globe(this);
+	CesiumGeoreference* globe = Godot3DTiles::AssetManipulation::find_or_create_globe(this);
 	//Parent to the globe
 	this->reparent(globe, true);
 	this->set_rotation_degrees(Vector3(90.0, 0.0, 0.0));
