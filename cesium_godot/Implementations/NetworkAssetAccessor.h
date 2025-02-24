@@ -12,7 +12,7 @@ using namespace godot;
 #include <CesiumAsync/IAssetAccessor.h>
 #include "../Utils/CurlHttpClient.h"
 
-class CesiumGDTileset;
+class Cesium3DTileset;
 class CesiumHTTPRequestNode;
 
 class NetworkAssetAccessor final : public CesiumAsync::IAssetAccessor {

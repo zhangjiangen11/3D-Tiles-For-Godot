@@ -17,7 +17,7 @@
 #include <winnt.h>
 
 const char* CESIUM_GLOBE_NAME = "CesiumGeoreference";
-const char* CESIUM_TILESET_NAME = "CesiumGDTileset";
+const char* CESIUM_TILESET_NAME = "Cesium3DTileset";
 
 CesiumGeoreference* Godot3DTiles::AssetManipulation::find_or_create_globe(Node3D* baseNode) {
   Node3D* root = get_root_of_edit_scene(baseNode);
@@ -50,7 +50,7 @@ CesiumGDCreditSystem* Godot3DTiles::AssetManipulation::find_or_create_credit_sys
 	
 	result = memnew(CesiumGDCreditSystem);
 	CesiumGeoreference* globe = find_node_in_scene<CesiumGeoreference>(root);
-	ERR_FAIL_COND_V_MSG(globe == nullptr, nullptr, "No CesiumGlobe found in scene, please add one manually or with the Cesium Panel!");
+	ERR_FAIL_COND_V_MSG(globe == nullptr, nullptr, "No CesiumGeoreference found in scene, please add one manually or with the Cesium Panel!");
 	constexpr bool readableName = true;
 	if (deferred) {
 		globe->get_parent_node_3d()->call_deferred("add_child", result, readableName, godot::Node::INTERNAL_MODE_FRONT);
@@ -70,13 +70,13 @@ Node3D* Godot3DTiles::AssetManipulation::get_root_of_edit_scene(Node3D* baseNode
 
 void Godot3DTiles::AssetManipulation::instantiate_tileset(Node3D* baseNode, int32_t tilesetType) {
 	Node3D* root = get_root_of_edit_scene(baseNode);
-	CesiumGDTileset* tileset = memnew(CesiumGDTileset);
+	Cesium3DTileset* tileset = memnew(Cesium3DTileset);
 	root->add_child(tileset, true);
 	
 	
 	TilesetType actualType = static_cast<TilesetType>(tilesetType);
-	CesiumGDRasterOverlay* rasterOverlay = nullptr;
-	CesiumGDTileset* extraTileset = nullptr;
+	CesiumIonRasterOverlay* rasterOverlay = nullptr;
+	Cesium3DTileset* extraTileset = nullptr;
 	
 	constexpr int32_t cesiumWorldTerrainId = 1;
 	constexpr int32_t bingMapsAerialWithLabelsId = 3;
@@ -88,21 +88,21 @@ void Godot3DTiles::AssetManipulation::instantiate_tileset(Node3D* baseNode, int3
 			break;
 		case Godot3DTiles::AssetManipulation::TilesetType::BingMapsAerialWithLabels:
 			tileset->set_ion_asset_id(cesiumWorldTerrainId);
-			rasterOverlay = memnew(CesiumGDRasterOverlay);
+			rasterOverlay = memnew(CesiumIonRasterOverlay);
 			rasterOverlay->set_asset_id(bingMapsAerialWithLabelsId);
 			break;
 		
 		case Godot3DTiles::AssetManipulation::TilesetType::BingMapsRoads:
 			tileset->set_ion_asset_id(cesiumWorldTerrainId);
-			rasterOverlay = memnew(CesiumGDRasterOverlay);
+			rasterOverlay = memnew(CesiumIonRasterOverlay);
 			rasterOverlay->set_asset_id(bingRoadsId);
 			break;
 			
 		case Godot3DTiles::AssetManipulation::TilesetType::OsmBuildings:
 			tileset->set_ion_asset_id(cesiumWorldTerrainId);
-			rasterOverlay = memnew(CesiumGDRasterOverlay);
+			rasterOverlay = memnew(CesiumIonRasterOverlay);
 			rasterOverlay->set_asset_id(bingMapsAerialWithLabelsId);
-			extraTileset = memnew(CesiumGDTileset);
+			extraTileset = memnew(Cesium3DTileset);
 			extraTileset->set_ion_asset_id(osmBuildingsId);
 			break;
 		default:
@@ -139,7 +139,7 @@ void Godot3DTiles::AssetManipulation::instantiate_dynamic_cam(Node3D* baseNode) 
 
 
 
-CesiumGDTileset* find_first_tileset(Node3D* baseNode) {
+Cesium3DTileset* find_first_tileset(Node3D* baseNode) {
 	//Get a globe
 	return nullptr;
 }
@@ -152,7 +152,7 @@ Array Godot3DTiles::AssetManipulation::find_all_tilesets(Node3D* baseNode) {
 	Array results;
 	for (int32_t i = 0; i < count; i++) {
 		Node* child = globeNode->get_child(i);
-		auto* foundTileset = Object::cast_to<CesiumGDTileset>(child);
+		auto* foundTileset = Object::cast_to<Cesium3DTileset>(child);
 		if (foundTileset == nullptr) continue;
 		results.append(globeNode);
 	}

@@ -32,7 +32,7 @@ namespace Godot3DTiles::AssetManipulation {
 
   Node3D* get_root_of_edit_scene(Node3D* baseNode);
   
-  CesiumGDTileset* find_first_tileset(Node3D* baseNode);
+  Cesium3DTileset* find_first_tileset(Node3D* baseNode);
 
   CesiumGDCreditSystem* find_or_create_credit_system(Node3D* baseNode, bool deferred);
 

@@ -10,8 +10,6 @@
 using namespace godot;
 #endif
 
-#include <array>
-#include <unordered_set>
 #include "CesiumDataSource.h"
 #include "../Utils/BRThreadPool.h"
 #include "CesiumGDConfig.h"
@@ -26,7 +24,7 @@ namespace Cesium3DTilesSelection {
 class OpaqueTilesetOptions;
 
 
-class CesiumGDRasterOverlay;
+class CesiumIonRasterOverlay;
 
 class CesiumGeoreference;
 
@@ -35,12 +33,12 @@ class CesiumGeoreference;
 class MeshInstance3D;
 #endif
 
-class CesiumGDTileset : public Node3D
+class Cesium3DTileset : public Node3D
 {
-	GDCLASS(CesiumGDTileset, Node3D)
+	GDCLASS(Cesium3DTileset, Node3D)
 
 public:
-	CesiumGDTileset();
+	Cesium3DTileset();
 #pragma region Public Editor Methods
 
 	void set_maximum_screen_space_error(real_t error);
@@ -105,7 +103,7 @@ public:
 
 	Vector3 get_earth_origin() const;
 
-	void add_overlay(CesiumGDRasterOverlay* overlay);
+	void add_overlay(CesiumIonRasterOverlay* overlay);
 
 	bool is_georeferenced(CesiumGeoreference** outRef) const;
 

@@ -50,7 +50,6 @@ using namespace godot;
 #include "../Utils/NetworkUtils.h"
 #include <algorithm>
 #include <execution>
-#include "CesiumGDGeoreference.h"
 #include <CesiumAsync/CachingAssetAccessor.h>
 #include "CesiumAsync/SqliteCache.h"
 
@@ -83,7 +82,7 @@ public:
 	Cesium3DTilesSelection::TilesetContentOptions contentOptions{};
 };
 
-CesiumGDTileset::CesiumGDTileset()
+Cesium3DTileset::Cesium3DTileset()
 {
 	this->m_initialLoadingFinished = false;
 	this->m_tilesetConfig = new OpaqueTilesetOptions();
@@ -112,132 +111,132 @@ CesiumGDTileset::CesiumGDTileset()
 	Cesium3DTilesContent::registerAllTileContentTypes();
 }
 
-void CesiumGDTileset::set_maximum_screen_space_error(real_t error)
+void Cesium3DTileset::set_maximum_screen_space_error(real_t error)
 {
 	this->m_tilesetConfig->options.maximumScreenSpaceError = error;
 }
 
-real_t CesiumGDTileset::get_maximum_screen_space_error() const
+real_t Cesium3DTileset::get_maximum_screen_space_error() const
 {
 	return this->m_tilesetConfig->options.maximumScreenSpaceError;
 }
 
-void CesiumGDTileset::set_maximum_simultaneous_tile_loads(uint32_t count)
+void Cesium3DTileset::set_maximum_simultaneous_tile_loads(uint32_t count)
 {
 	this->m_tilesetConfig->options.maximumSimultaneousTileLoads = count;
 }
 
-uint32_t CesiumGDTileset::get_maximum_simultaneous_tile_loads() const
+uint32_t Cesium3DTileset::get_maximum_simultaneous_tile_loads() const
 {
 	return this->m_tilesetConfig->options.maximumSimultaneousTileLoads;
 }
 
-void CesiumGDTileset::set_preload_ancestors(bool preload)
+void Cesium3DTileset::set_preload_ancestors(bool preload)
 {
 	this->m_tilesetConfig->options.preloadAncestors = preload;
 }
 
-bool CesiumGDTileset::get_preload_ancestors() const
+bool Cesium3DTileset::get_preload_ancestors() const
 {
 	return this->m_tilesetConfig->options.preloadAncestors;
 }
 
-void CesiumGDTileset::set_preload_siblings(bool preload)
+void Cesium3DTileset::set_preload_siblings(bool preload)
 {
 	this->m_tilesetConfig->options.preloadSiblings = preload;
 }
 
-bool CesiumGDTileset::get_preload_siblings() const
+bool Cesium3DTileset::get_preload_siblings() const
 {
 	return this->m_tilesetConfig->options.preloadSiblings;
 }
 
-void CesiumGDTileset::set_loading_descendant_limit(uint32_t limit)
+void Cesium3DTileset::set_loading_descendant_limit(uint32_t limit)
 {
 	this->m_tilesetConfig->options.loadingDescendantLimit = limit;
 }
 
-uint32_t CesiumGDTileset::get_loading_descendant_limit() const
+uint32_t Cesium3DTileset::get_loading_descendant_limit() const
 {
 	return this->m_tilesetConfig->options.loadingDescendantLimit;
 }
 
-void CesiumGDTileset::set_forbid_holes(bool forbidHoles)
+void Cesium3DTileset::set_forbid_holes(bool forbidHoles)
 {
 	this->m_tilesetConfig->options.forbidHoles = forbidHoles;
 }
 
-bool CesiumGDTileset::get_forbid_holes() const
+bool Cesium3DTileset::get_forbid_holes() const
 {
 	return this->m_tilesetConfig->options.forbidHoles;
 }
 
-void CesiumGDTileset::set_url(const String& url)
+void Cesium3DTileset::set_url(const String& url)
 {
 	//Assert the source
 	this->m_url = url;
 	this->recreate_tileset();
 }
 
-const String& CesiumGDTileset::get_url() const
+const String& Cesium3DTileset::get_url() const
 {
 	return this->m_url;
 }
 
-void CesiumGDTileset::set_generate_missing_normals_smooth(bool shouldGenerate)
+void Cesium3DTileset::set_generate_missing_normals_smooth(bool shouldGenerate)
 {
 	this->m_tilesetConfig->contentOptions.generateMissingNormalsSmooth = shouldGenerate;
 }
 
 
-bool CesiumGDTileset::get_generate_missing_normals_smooth() const
+bool Cesium3DTileset::get_generate_missing_normals_smooth() const
 {
 	return this->m_tilesetConfig->contentOptions.generateMissingNormalsSmooth;
 }
 
-int CesiumGDTileset::get_data_source() const
+int Cesium3DTileset::get_data_source() const
 {
 	return static_cast<int>(this->m_selectedDataSource);
 }
 
-void CesiumGDTileset::set_data_source(int data_source)
+void Cesium3DTileset::set_data_source(int data_source)
 {
 	this->m_selectedDataSource = static_cast<CesiumDataSource>(data_source);
 	this->notify_property_list_changed();
 }
 
-void CesiumGDTileset::set_ion_asset_id(int64_t id)
+void Cesium3DTileset::set_ion_asset_id(int64_t id)
 {
 	this->m_cesiumIonAssetId = id;
 }
 
-int64_t CesiumGDTileset::get_ion_asset_id() const
+int64_t Cesium3DTileset::get_ion_asset_id() const
 {
 	return this->m_cesiumIonAssetId;
 }
 
-Ref<CesiumGDConfig> CesiumGDTileset::get_cesium_config() const
+Ref<CesiumGDConfig> Cesium3DTileset::get_cesium_config() const
 {
 	return this->m_configInstance;
 }
 
-void CesiumGDTileset::set_cesium_config(const Ref<CesiumGDConfig>& config)
+void Cesium3DTileset::set_cesium_config(const Ref<CesiumGDConfig>& config)
 {
 	this->m_configInstance = config;
 }
 
 
-void CesiumGDTileset::set_create_physics_meshes(bool shouldCreate)
+void Cesium3DTileset::set_create_physics_meshes(bool shouldCreate)
 {
 	this->m_createPhysicsMeshes = shouldCreate;
 }
 
-bool CesiumGDTileset::get_create_physics_meshes() const
+bool Cesium3DTileset::get_create_physics_meshes() const
 {
 	return this->m_createPhysicsMeshes;
 }
 
-void CesiumGDTileset::update_tileset(const Transform3D& cameraTransform)
+void Cesium3DTileset::update_tileset(const Transform3D& cameraTransform)
 {
 	
 	bool isGeoreferenced = this->is_georeferenced(&this->m_georeference);
@@ -303,32 +302,32 @@ void CesiumGDTileset::update_tileset(const Transform3D& cameraTransform)
 	}
 }
 
-CesiumHTTPRequestNode* CesiumGDTileset::get_available_request_node() noexcept
+CesiumHTTPRequestNode* Cesium3DTileset::get_available_request_node() noexcept
 {
 	//TODO: Remove this func
 	return nullptr;
 }
 
-bool CesiumGDTileset::is_initial_loading_finished() const
+bool Cesium3DTileset::is_initial_loading_finished() const
 {
 	return this->m_initialLoadingFinished;
 }
 
-Vector3 CesiumGDTileset::get_earth_origin() const
+Vector3 Cesium3DTileset::get_earth_origin() const
 {
 	//The origin (for now at least) will be definined by
 	//the zero vector - the Z component (in Cesium Y is depth, this is equivalent to Godot's Z) of the radius, scaled down
 	return Vector3(0.0, 0.0, -CesiumGeospatial::Ellipsoid::WGS84.getRadii().y);
 }
 
-void CesiumGDTileset::add_overlay(CesiumGDRasterOverlay* overlay)
+void Cesium3DTileset::add_overlay(CesiumIonRasterOverlay* overlay)
 {
 	if (overlay == nullptr) return;
 	this->m_activeTileset->getOverlays().add(overlay->get_overlay_instance());
 }
 
 
-bool CesiumGDTileset::is_georeferenced(CesiumGeoreference** outRef) const
+bool Cesium3DTileset::is_georeferenced(CesiumGeoreference** outRef) const
 {
 	if (this->m_georeference != nullptr) {
 		*outRef = this->m_georeference;
@@ -340,11 +339,11 @@ bool CesiumGDTileset::is_georeferenced(CesiumGeoreference** outRef) const
 	return (*outRef)->get_origin_type() == static_cast<int32_t>(CesiumGeoreference::OriginType::CartographicOrigin);
 }
 
-void CesiumGDTileset::recreate_tileset()
+void Cesium3DTileset::recreate_tileset()
 {
 }
 
-void CesiumGDTileset::load_tileset()
+void Cesium3DTileset::load_tileset()
 {
 	//Get the options to read the tileset and then load it into memory
 	const Cesium3DTilesSelection::TilesetOptions& options = this->m_tilesetConfig->options;
@@ -372,14 +371,14 @@ void CesiumGDTileset::load_tileset()
 	for (int32_t i = 0; i < childCount; i++)
 	{
 		Node* currChild = this->get_child(i);
-		CesiumGDRasterOverlay* overlay = Object::cast_to<CesiumGDRasterOverlay>(currChild);
+		CesiumIonRasterOverlay* overlay = Object::cast_to<CesiumIonRasterOverlay>(currChild);
 		if (overlay == nullptr) continue;
 		overlay->add_to_tileset(this);
 	}
 
 }
 
-Cesium3DTilesSelection::TilesetExternals CesiumGDTileset::create_tileset_externals()
+Cesium3DTilesSelection::TilesetExternals Cesium3DTileset::create_tileset_externals()
 {
 	const String cachePath = "user://cache";
 	Ref<DirAccess> userAccess = DirAccess::open("user://");
@@ -410,7 +409,7 @@ Cesium3DTilesSelection::TilesetExternals CesiumGDTileset::create_tileset_externa
 	return result;
 }
 
-void CesiumGDTileset::render_tile_as_node(const Cesium3DTilesSelection::Tile& tile)
+void Cesium3DTileset::render_tile_as_node(const Cesium3DTilesSelection::Tile& tile)
 {
 	//Check if it's already in the scene tree first
 	const Cesium3DTilesSelection::TileID& tileId = tile.getTileID();
@@ -466,7 +465,7 @@ void CesiumGDTileset::render_tile_as_node(const Cesium3DTilesSelection::Tile& ti
 	instance->set_name(itos(hash));
 }
 
-void CesiumGDTileset::despawn_tile(const Cesium3DTilesSelection::Tile& tile)
+void Cesium3DTileset::despawn_tile(const Cesium3DTilesSelection::Tile& tile)
 {
 	size_t hash = std::visit(CesiumVariantHash{}, tile.getTileID());
 
@@ -493,7 +492,7 @@ void CesiumGDTileset::despawn_tile(const Cesium3DTilesSelection::Tile& tile)
 	}
 }
 
-void CesiumGDTileset::despawn_tile_deferred(const Cesium3DTilesSelection::Tile& tile)
+void Cesium3DTileset::despawn_tile_deferred(const Cesium3DTilesSelection::Tile& tile)
 {
 	size_t hash = std::visit(CesiumVariantHash{}, tile.getTileID());
 
@@ -511,14 +510,14 @@ void CesiumGDTileset::despawn_tile_deferred(const Cesium3DTilesSelection::Tile& 
 	foundNode->call_deferred("hide");
 }
 
-bool CesiumGDTileset::try_get_tile_from_instance_id(const ObjectID& objectId, MeshInstance3D** outNode)
+bool Cesium3DTileset::try_get_tile_from_instance_id(const ObjectID& objectId, MeshInstance3D** outNode)
 {
 	*outNode = Object::cast_to<MeshInstance3D>(ObjectDB::get_instance(objectId));
 	return *outNode != nullptr;
 }
 
 
-void CesiumGDTileset::process_tile_chunk(const std::vector<Cesium3DTilesSelection::Tile*> &tilesView, int32_t offset, int32_t size) {
+void Cesium3DTileset::process_tile_chunk(const std::vector<Cesium3DTilesSelection::Tile*> &tilesView, int32_t offset, int32_t size) {
 	// NOTE: This function is meant to run on a worker thread
 	// Given a certain buffer window for our chunk, we can access the memory and render those tiles individually
 	for (int32_t i = offset; i < size; i++)
@@ -528,7 +527,7 @@ void CesiumGDTileset::process_tile_chunk(const std::vector<Cesium3DTilesSelectio
 }
 
 
-void CesiumGDTileset::register_tile(MeshInstance3D *instance, size_t hash) {
+void Cesium3DTileset::register_tile(MeshInstance3D *instance, size_t hash) {
 	auto internalMode = this->m_showHierarchy ? Node::InternalMode::INTERNAL_MODE_DISABLED : Node::InternalMode::INTERNAL_MODE_FRONT; 
 	this->add_child(instance, false, internalMode);
 	this->m_instancedTilesByHash.insert({ hash, instance });
@@ -536,85 +535,85 @@ void CesiumGDTileset::register_tile(MeshInstance3D *instance, size_t hash) {
 }
 
 
-bool CesiumGDTileset::get_show_hierarchy() const {
+bool Cesium3DTileset::get_show_hierarchy() const {
 	return this->m_showHierarchy;
 }
 
-void CesiumGDTileset::set_show_hierarchy(bool show) {
+void Cesium3DTileset::set_show_hierarchy(bool show) {
 	this->m_showHierarchy = show;
 }
 
-void CesiumGDTileset::_bind_methods()
+void Cesium3DTileset::_bind_methods()
 {
 #pragma region Inspector properties
-	ClassDB::bind_method(D_METHOD("set_maximum_screen_space_error", "error"), &CesiumGDTileset::set_maximum_screen_space_error);
-	ClassDB::bind_method(D_METHOD("get_maximum_screen_space_error"), &CesiumGDTileset::get_maximum_screen_space_error);
+	ClassDB::bind_method(D_METHOD("set_maximum_screen_space_error", "error"), &Cesium3DTileset::set_maximum_screen_space_error);
+	ClassDB::bind_method(D_METHOD("get_maximum_screen_space_error"), &Cesium3DTileset::get_maximum_screen_space_error);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "maximum_screen_space_error", PROPERTY_HINT_NONE, MAXIMUM_SCREEN_SPACE_DESC), "set_maximum_screen_space_error", "get_maximum_screen_space_error");
 
 	
-	ClassDB::bind_method(D_METHOD("set_maximum_simultaneous_tile_loads", "count"), &CesiumGDTileset::set_maximum_simultaneous_tile_loads);
-	ClassDB::bind_method(D_METHOD("get_maximum_simultaneous_tile_loads"), &CesiumGDTileset::get_maximum_simultaneous_tile_loads);
+	ClassDB::bind_method(D_METHOD("set_maximum_simultaneous_tile_loads", "count"), &Cesium3DTileset::set_maximum_simultaneous_tile_loads);
+	ClassDB::bind_method(D_METHOD("get_maximum_simultaneous_tile_loads"), &Cesium3DTileset::get_maximum_simultaneous_tile_loads);
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "maximum_simultaneous_tile_loads", PROPERTY_HINT_NONE, MAXIMUM_SIMULTANEOUS_TILE_LOADS_DESC), "set_maximum_simultaneous_tile_loads", "get_maximum_simultaneous_tile_loads");
 
-	ClassDB::bind_method(D_METHOD("set_preload_ancestors", "preload"), &CesiumGDTileset::set_preload_ancestors);
-	ClassDB::bind_method(D_METHOD("get_preload_ancestors"), &CesiumGDTileset::get_preload_ancestors);
+	ClassDB::bind_method(D_METHOD("set_preload_ancestors", "preload"), &Cesium3DTileset::set_preload_ancestors);
+	ClassDB::bind_method(D_METHOD("get_preload_ancestors"), &Cesium3DTileset::get_preload_ancestors);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "preload_ancestors", PROPERTY_HINT_NONE, PRELOAD_ANCESTORS_DESC), "set_preload_ancestors", "get_preload_ancestors");
 
-	ClassDB::bind_method(D_METHOD("set_preload_siblings", "preload"), &CesiumGDTileset::set_preload_siblings);
-	ClassDB::bind_method(D_METHOD("get_preload_siblings"), &CesiumGDTileset::get_preload_siblings);
+	ClassDB::bind_method(D_METHOD("set_preload_siblings", "preload"), &Cesium3DTileset::set_preload_siblings);
+	ClassDB::bind_method(D_METHOD("get_preload_siblings"), &Cesium3DTileset::get_preload_siblings);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "preload_siblings", PROPERTY_HINT_NONE, PRELOAD_SIBLINGS_DESC), "set_preload_siblings", "get_preload_siblings");
 
-	ClassDB::bind_method(D_METHOD("set_loading_descendant_limit", "limit"), &CesiumGDTileset::set_loading_descendant_limit);
-	ClassDB::bind_method(D_METHOD("get_loading_descendant_limit"), &CesiumGDTileset::get_loading_descendant_limit);
+	ClassDB::bind_method(D_METHOD("set_loading_descendant_limit", "limit"), &Cesium3DTileset::set_loading_descendant_limit);
+	ClassDB::bind_method(D_METHOD("get_loading_descendant_limit"), &Cesium3DTileset::get_loading_descendant_limit);
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "loading_descendant_limit", PROPERTY_HINT_NONE, LOADING_DESCENDANT_LIMIT_DESC), "set_loading_descendant_limit", "get_loading_descendant_limit");
 
-	ClassDB::bind_method(D_METHOD("set_forbid_holes", "forbidHoles"), &CesiumGDTileset::set_forbid_holes);
-	ClassDB::bind_method(D_METHOD("get_forbid_holes"), &CesiumGDTileset::get_forbid_holes);
+	ClassDB::bind_method(D_METHOD("set_forbid_holes", "forbidHoles"), &Cesium3DTileset::set_forbid_holes);
+	ClassDB::bind_method(D_METHOD("get_forbid_holes"), &Cesium3DTileset::get_forbid_holes);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "forbid_holes", PROPERTY_HINT_NONE, FORBID_HOLES_DESC), "set_forbid_holes", "get_forbid_holes");
 
-	ClassDB::bind_method(D_METHOD("set_generate_missing_normals_smooth", "shouldGenerate"), &CesiumGDTileset::set_generate_missing_normals_smooth);
-	ClassDB::bind_method(D_METHOD("get_generate_missing_normals_smooth"), &CesiumGDTileset::get_generate_missing_normals_smooth);
+	ClassDB::bind_method(D_METHOD("set_generate_missing_normals_smooth", "shouldGenerate"), &Cesium3DTileset::set_generate_missing_normals_smooth);
+	ClassDB::bind_method(D_METHOD("get_generate_missing_normals_smooth"), &Cesium3DTileset::get_generate_missing_normals_smooth);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "generate_missing_normals_smooth", PROPERTY_HINT_NONE, GENERATE_MISSING_NORMALS_DESC), "set_generate_missing_normals_smooth", "get_generate_missing_normals_smooth");
 
-	ClassDB::bind_method(D_METHOD("set_create_physics_meshes", "shouldGenerate"), &CesiumGDTileset::set_create_physics_meshes);
-	ClassDB::bind_method(D_METHOD("get_create_physics_meshes"), &CesiumGDTileset::get_create_physics_meshes);
+	ClassDB::bind_method(D_METHOD("set_create_physics_meshes", "shouldGenerate"), &Cesium3DTileset::set_create_physics_meshes);
+	ClassDB::bind_method(D_METHOD("get_create_physics_meshes"), &Cesium3DTileset::get_create_physics_meshes);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "create_physics_meshes"), "set_create_physics_meshes", "get_create_physics_meshes");
 
-	ClassDB::bind_method(D_METHOD("get_cesium_config"), &CesiumGDTileset::get_cesium_config);
-	ClassDB::bind_method(D_METHOD("set_cesium_config", "cesiumConfig"), &CesiumGDTileset::set_cesium_config);
+	ClassDB::bind_method(D_METHOD("get_cesium_config"), &Cesium3DTileset::get_cesium_config);
+	ClassDB::bind_method(D_METHOD("set_cesium_config", "cesiumConfig"), &Cesium3DTileset::set_cesium_config);
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "cesiumConfig", PROPERTY_HINT_RESOURCE_TYPE, "CesiumGDConfig"), "set_cesium_config", "get_cesium_config");
 
 
-	ClassDB::bind_method(D_METHOD("get_data_source"), &CesiumGDTileset::get_data_source);
-	ClassDB::bind_method(D_METHOD("set_data_source", "data_source"), &CesiumGDTileset::set_data_source);
+	ClassDB::bind_method(D_METHOD("get_data_source"), &Cesium3DTileset::get_data_source);
+	ClassDB::bind_method(D_METHOD("set_data_source", "data_source"), &Cesium3DTileset::set_data_source);
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "data_source", PROPERTY_HINT_ENUM, "From Cesium Ion,From Url"), "set_data_source", "get_data_source");
 	BIND_ENUM_CONSTANT(static_cast<int64_t>(CesiumDataSource::FromCesiumIon));
 	BIND_ENUM_CONSTANT(static_cast<int64_t>(CesiumDataSource::FromUrl));
 
-	ClassDB::bind_method(D_METHOD("set_url", URL_P_NAME), &CesiumGDTileset::set_url);
+	ClassDB::bind_method(D_METHOD("set_url", URL_P_NAME), &Cesium3DTileset::set_url);
 	
-	ClassDB::bind_method(D_METHOD("get_url"), &CesiumGDTileset::get_url);
+	ClassDB::bind_method(D_METHOD("get_url"), &Cesium3DTileset::get_url);
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "url"), "set_url", "get_url");
 
-	ClassDB::bind_method(D_METHOD("set_ion_asset_id", ION_ASSET_ID_P_NAME), &CesiumGDTileset::set_ion_asset_id);
-	ClassDB::bind_method(D_METHOD("get_ion_asset_id"), &CesiumGDTileset::get_ion_asset_id);
+	ClassDB::bind_method(D_METHOD("set_ion_asset_id", ION_ASSET_ID_P_NAME), &Cesium3DTileset::set_ion_asset_id);
+	ClassDB::bind_method(D_METHOD("get_ion_asset_id"), &Cesium3DTileset::get_ion_asset_id);
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "ion_asset_id"), "set_ion_asset_id", "get_ion_asset_id");
 
 
-	ClassDB::bind_method(D_METHOD("set_show_hierarchy", "showHierarchy"), &CesiumGDTileset::set_show_hierarchy);
-	ClassDB::bind_method(D_METHOD("get_show_hierarchy"), &CesiumGDTileset::get_show_hierarchy);
+	ClassDB::bind_method(D_METHOD("set_show_hierarchy", "showHierarchy"), &Cesium3DTileset::set_show_hierarchy);
+	ClassDB::bind_method(D_METHOD("get_show_hierarchy"), &Cesium3DTileset::get_show_hierarchy);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "show_hierarchy"), "set_show_hierarchy", "get_show_hierarchy");
 	
 #pragma endregion
 
 #pragma region Public methods
-	ClassDB::bind_method(D_METHOD("is_initial_loading_finished"), &CesiumGDTileset::is_initial_loading_finished);
-	ClassDB::bind_method(D_METHOD("update_tileset", "camera_transform"), &CesiumGDTileset::update_tileset);
-	ClassDB::bind_method(D_METHOD("get_earth_origin"), &CesiumGDTileset::get_earth_origin);
+	ClassDB::bind_method(D_METHOD("is_initial_loading_finished"), &Cesium3DTileset::is_initial_loading_finished);
+	ClassDB::bind_method(D_METHOD("update_tileset", "camera_transform"), &Cesium3DTileset::update_tileset);
+	ClassDB::bind_method(D_METHOD("get_earth_origin"), &Cesium3DTileset::get_earth_origin);
 #pragma endregion
 }
 
-void CesiumGDTileset::_get_property_list(List<PropertyInfo>* properties) const
+void Cesium3DTileset::_get_property_list(List<PropertyInfo>* properties) const
 {
 	#if defined(CESIUM_GD_MODULE)
 	for (int32_t i = 0; i < properties->size(); i++) {
@@ -628,7 +627,7 @@ void CesiumGDTileset::_get_property_list(List<PropertyInfo>* properties) const
 }
 
 
-uint32_t CesiumGDTileset::update_property_usage_flags(const PropertyInfo& propertyRef) const
+uint32_t Cesium3DTileset::update_property_usage_flags(const PropertyInfo& propertyRef) const
 {	
 	const String urlNameProp = "url";
 	const String assetIdNameProp = "ion_asset_id";
@@ -642,7 +641,7 @@ uint32_t CesiumGDTileset::update_property_usage_flags(const PropertyInfo& proper
 	return propertyRef.usage;
 }
 
-bool CesiumGDTileset::_set(const StringName& p_name, const Variant& p_property)
+bool Cesium3DTileset::_set(const StringName& p_name, const Variant& p_property)
 {
 	if (p_name == StringName(URL_P_NAME)) {
 		this->set_url(p_property);
@@ -655,7 +654,7 @@ bool CesiumGDTileset::_set(const StringName& p_name, const Variant& p_property)
 	return false;
 }
 
-bool CesiumGDTileset::_get(const StringName& p_name, Variant& r_property) const
+bool Cesium3DTileset::_get(const StringName& p_name, Variant& r_property) const
 {
 	if (p_name == StringName(URL_P_NAME)) {
 		r_property = this->get_url();
@@ -669,7 +668,7 @@ bool CesiumGDTileset::_get(const StringName& p_name, Variant& r_property) const
 	return false;
 }
 
-void CesiumGDTileset::_enter_tree() {
+void Cesium3DTileset::_enter_tree() {
 	if (!is_editor_mode()) return;
 	CesiumGeoreference* globe = Godot3DTiles::AssetManipulation::find_or_create_globe(this);
 	//Parent to the globe

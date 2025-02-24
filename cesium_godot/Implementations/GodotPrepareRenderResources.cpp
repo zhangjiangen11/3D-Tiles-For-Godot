@@ -21,7 +21,6 @@ using namespace godot;
 #include "CesiumGltf/Node.h"
 #include <glm/gtc/quaternion.hpp>
 #include "../Models/CesiumGDTileset.h"
-#include "../Models/CesiumGDGeoreference.h"
 
 using namespace CesiumAsync;
 using namespace Cesium3DTilesSelection;

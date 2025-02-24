@@ -5,9 +5,9 @@ class_name CesiumAssetBuilder
 enum TILESET_TYPE { Blank, OsmBuildings, GooglePhotorealistic, BingMapsAerial, BingMapsWithLabels }
 
 
-const CESIUM_GLOBE_NAME = "CesiumGlobe"
+const CESIUM_GLOBE_NAME = "CesiumGeoreference"
 const CESIUM_GLOBE_GEOREF = "CesiumGeoreference"
-const CESIUM_TILESET_NAME = "CesiumGDTileset"
+const CESIUM_TILESET_NAME = "Cesium3DTileset"
 
 const cesiumConfig : Resource = preload("res://addons/cesium_godot/cesium_gd_config.tres")
 
@@ -16,8 +16,8 @@ var use_georeferences : bool
 func instantiate_tileset(tileset_type: TILESET_TYPE) -> void:	
 	# Create a new Globe
 	var root : Node3D = self._get_root_of_edit_scene()
-	var globe : CesiumGlobe = self._find_or_create_globe()
-	var tileset := CesiumGDTileset.new()
+	var globe : CesiumGeoreference = self._find_or_create_globe()
+	var tileset := Cesium3DTileset.new()
 	globe.add_child(tileset)
 	tileset.owner = globe.get_parent()
 	
@@ -38,7 +38,7 @@ func instantiate_dynamic_cam() -> void:
 	print("Created Cesium cam!")
 	camera.globe_node = globe
 	camera.tilesets = []
-	camera.tilesets.append(globe.find_child(CESIUM_TILESET_NAME) as CesiumGDTileset)
+	camera.tilesets.append(globe.find_child(CESIUM_TILESET_NAME) as Cesium3DTileset)
 	camera.near = 9
 	camera.fov = 39
 	if (camera.tilesets[0] == null):
@@ -50,21 +50,16 @@ func instantiate_dynamic_cam() -> void:
 func _add_overlay() -> void:
 	pass
 
-func _find_or_create_globe() -> CesiumGlobe:
+func _find_or_create_globe() -> CesiumGeoreference:
 	var root : Node3D = self._get_root_of_edit_scene()
 	# Try to find the globe
-	var globe : CesiumGlobe = null
+	var globe : CesiumGeoreference = null
 	for child in root.get_children():
-		var found_globe := child as CesiumGlobe
+		var found_globe := child as CesiumGeoreference
 		if found_globe != null: return found_globe
 	print("Globe not found, creating one...")
-	if (self.use_georeferences):
-		globe = CesiumGDGeoreference.new()
-		globe.name = CESIUM_GLOBE_GEOREF
-	else:
-		globe = CesiumGlobe.new()
-		globe.name = CESIUM_GLOBE_NAME	
-	
+	globe = CesiumGeoreference.new()
+	globe.name = CESIUM_GLOBE_NAME		
 	# Add it to the scene
 	root.add_child(globe)
 	globe.owner = root

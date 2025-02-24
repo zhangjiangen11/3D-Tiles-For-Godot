@@ -4,7 +4,7 @@ class_name CesiumTooltips
 
 
 func _can_handle(object: Object) -> bool:
-	return object is CesiumGDTileset
+	return object is Cesium3DTileset
 
 func _parse_property(object, type, name, hint_type, hint_string, usage, wide):
 	if parse_numeric_properties(object, type, name, hint_type, hint_string, usage, wide):
@@ -26,7 +26,7 @@ func parse_boolean_properties(object, type, name, hint_string) -> bool:
 
 
 func parse_numeric_properties(object, type, name, hint_type, hint_string, usage, wide):
-	if !object.is_class("CesiumGDTileset"):
+	if !object.is_class("Cesium3DTileset"):
 		return false
 	var accepted_names := ["maximum_screen_space_error", "maximum_simultaneous_tile_loads", "loading_descendant_limit"]
 	if (name in accepted_names):

@@ -3,10 +3,10 @@ extends Camera3D
 class_name GeoreferenceCameraController
 
 @export
-var globe_node : CesiumGlobe
+var globe_node : CesiumGeoreference
 
 @export
-var tilesets : Array[CesiumGDTileset]
+var tilesets : Array[Cesium3DTileset]
 		
 @export
 var move_speed : float = 100
@@ -38,7 +38,7 @@ var info_labels_ui : InfoLabelsUI
 func _ready() -> void:
 	self.loaded = false
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	if (self.globe_node.origin_type == CesiumGlobe.OriginType.TrueOrigin):
+	if (self.globe_node.origin_type == CesiumGeoreference.OriginType.TrueOrigin):
 		var ecefPos : Vector3 = Vector3(self.globe_node.ecefX, self.globe_node.ecefY, self.globe_node.ecefZ)
 		var enginePos: Vector3 = self.globe_node.get_initial_tx_ecef_to_engine() * ecefPos
 		self.global_position = enginePos + self.globe_node.global_position
@@ -47,7 +47,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	self.move_speed = self.adjusted_speed()
 	
-	if (self.globe_node.origin_type == CesiumGlobe.OriginType.TrueOrigin):
+	if (self.globe_node.origin_type == CesiumGeoreference.OriginType.TrueOrigin):
 		self.camera_walk_physical(self.moving_direction)
 		self.update_camera_pos_physical()
 	
