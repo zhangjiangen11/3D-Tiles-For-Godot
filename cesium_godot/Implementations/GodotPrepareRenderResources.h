@@ -6,11 +6,11 @@
 #include "../Utils/BRThreadPool.h"
 #include "CesiumGltf/ImageAsset.h"
 
-class CesiumGDTileset;
+class Cesium3DTileset;
 
 class GodotPrepareRenderResources final : public Cesium3DTilesSelection::IPrepareRendererResources {
 public:
-	GodotPrepareRenderResources(CesiumGDTileset* source) : m_tileset(source) {
+	GodotPrepareRenderResources(Cesium3DTileset* source) : m_tileset(source) {
 		constexpr size_t physicsMeshLoaderThreadCount = 4;
 		this->m_physicsMeshThread.init(physicsMeshLoaderThreadCount);
 	}
@@ -89,7 +89,7 @@ public:
 		void* pMainThreadResult) noexcept override;
 
 private:
-	CesiumGDTileset* m_tileset;
+	Cesium3DTileset* m_tileset;
 	BRThreadPool m_physicsMeshThread;
 };
 

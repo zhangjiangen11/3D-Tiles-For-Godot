@@ -21,7 +21,6 @@ using namespace godot;
 #include "CesiumGltf/Node.h"
 #include <glm/gtc/quaternion.hpp>
 #include "../Models/CesiumGDTileset.h"
-#include "../Models/CesiumGDGeoreference.h"
 
 using namespace CesiumAsync;
 using namespace Cesium3DTilesSelection;
@@ -81,7 +80,7 @@ CesiumAsync::Future<Cesium3DTilesSelection::TileLoadResultAndRenderResources> Go
 			position = *reinterpret_cast<const glm::dvec3*>(translationArray.data());
 		}
 
-		CesiumGlobe* geoReferenceNode = nullptr;
+		CesiumGeoreference* geoReferenceNode = nullptr;
 
 		if (this->m_tileset->is_georeferenced(&geoReferenceNode)) {
 			real_t scaleFactor = geoReferenceNode->get_scale_factor();

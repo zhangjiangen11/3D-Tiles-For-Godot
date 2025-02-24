@@ -4,27 +4,27 @@
 #include "CesiumGDTileset.h"
 #include "CesiumGDConfig.h"
 
-int64_t CesiumGDRasterOverlay::get_asset_id() const
+int64_t CesiumIonRasterOverlay::get_asset_id() const
 {
 	return this->m_assetId;
 }
 
-void CesiumGDRasterOverlay::set_asset_id(int64_t id)
+void CesiumIonRasterOverlay::set_asset_id(int64_t id)
 {
 	this->m_assetId = id;
 }
 
-void CesiumGDRasterOverlay::set_material_key(const String& key)
+void CesiumIonRasterOverlay::set_material_key(const String& key)
 {
 	this->m_materialKey = key;
 }
 
-const String& CesiumGDRasterOverlay::get_material_key() const
+const String& CesiumIonRasterOverlay::get_material_key() const
 {
 	return this->m_materialKey;
 }
 
-Error CesiumGDRasterOverlay::add_to_tileset(CesiumGDTileset* tilesetInstance)
+Error CesiumIonRasterOverlay::add_to_tileset(Cesium3DTileset* tilesetInstance)
 {
 	if (tilesetInstance == nullptr) return Error::ERR_INVALID_PARAMETER;
 	this->m_configInstance = tilesetInstance->get_cesium_config();
@@ -37,17 +37,17 @@ Error CesiumGDRasterOverlay::add_to_tileset(CesiumGDTileset* tilesetInstance)
 	return Error::OK;
 }
 
-void CesiumGDRasterOverlay::remove_from_tileset(CesiumGDTileset* tilesetInstance)
+void CesiumIonRasterOverlay::remove_from_tileset(Cesium3DTileset* tilesetInstance)
 {
 
 }
 
-CesiumUtility::IntrusivePointer<CesiumRasterOverlays::IonRasterOverlay> CesiumGDRasterOverlay::get_overlay_instance()
+CesiumUtility::IntrusivePointer<CesiumRasterOverlays::IonRasterOverlay> CesiumIonRasterOverlay::get_overlay_instance()
 {
 	return this->m_overlayInstance;
 }
 
-void CesiumGDRasterOverlay::create_and_add_overlay(CesiumGDTileset* tilesetInstance)
+void CesiumIonRasterOverlay::create_and_add_overlay(Cesium3DTileset* tilesetInstance)
 {
 	const String& ionAccessToken = this->m_configInstance->get_access_token();
 	this->m_overlayInstance = new CesiumRasterOverlays::IonRasterOverlay(
@@ -60,15 +60,15 @@ void CesiumGDRasterOverlay::create_and_add_overlay(CesiumGDTileset* tilesetInsta
 	tilesetInstance->add_overlay(this);
 }
 
-void CesiumGDRasterOverlay::_bind_methods()
+void CesiumIonRasterOverlay::_bind_methods()
 {
 
-	ClassDB::bind_method(D_METHOD("set_material_key", "key"), &CesiumGDRasterOverlay::set_material_key);
-	ClassDB::bind_method(D_METHOD("get_material_key"), &CesiumGDRasterOverlay::get_material_key);
+	ClassDB::bind_method(D_METHOD("set_material_key", "key"), &CesiumIonRasterOverlay::set_material_key);
+	ClassDB::bind_method(D_METHOD("get_material_key"), &CesiumIonRasterOverlay::get_material_key);
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "key"), "set_material_key", "get_material_key");
 
 
-	ClassDB::bind_method(D_METHOD("set_asset_id", "id"), &CesiumGDRasterOverlay::set_asset_id);
-	ClassDB::bind_method(D_METHOD("get_asset_id"), &CesiumGDRasterOverlay::get_asset_id);
+	ClassDB::bind_method(D_METHOD("set_asset_id", "id"), &CesiumIonRasterOverlay::set_asset_id);
+	ClassDB::bind_method(D_METHOD("get_asset_id"), &CesiumIonRasterOverlay::get_asset_id);
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "asset_id"), "set_asset_id", "get_asset_id");
 }

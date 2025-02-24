@@ -17,12 +17,12 @@ using namespace godot;
 #include <CesiumUtility/IntrusivePointer.h>
 #include <CesiumRasterOverlays/IonRasterOverlay.h>
 
-class CesiumGDTileset;
+class Cesium3DTileset;
 
 class CesiumGDConfig;
 
-class CesiumGDRasterOverlay : public Node3D {
-	GDCLASS(CesiumGDRasterOverlay, Node3D)
+class CesiumIonRasterOverlay : public Node3D {
+	GDCLASS(CesiumIonRasterOverlay, Node3D)
 public:
 #pragma region Editor Properties
 	int64_t get_asset_id() const;
@@ -35,16 +35,16 @@ public:
 
 #pragma endregion
 
-	Error add_to_tileset(CesiumGDTileset* tilesetInstance);
+	Error add_to_tileset(Cesium3DTileset* tilesetInstance);
 
-	void remove_from_tileset(CesiumGDTileset* tilesetInstance);
+	void remove_from_tileset(Cesium3DTileset* tilesetInstance);
 
 	CesiumUtility::IntrusivePointer<CesiumRasterOverlays::IonRasterOverlay> get_overlay_instance();
 
 private:
 
 
-	void create_and_add_overlay(CesiumGDTileset* tilesetInstance);
+	void create_and_add_overlay(Cesium3DTileset* tilesetInstance);
 
 	int64_t m_assetId = 0;
 

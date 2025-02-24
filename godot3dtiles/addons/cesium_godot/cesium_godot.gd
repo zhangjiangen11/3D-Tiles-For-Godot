@@ -5,8 +5,8 @@ const editorAddon := preload("res://addons/cesium_godot/panels/cesium_panel.tscn
 
 const token_panel_popup := preload("res://addons/cesium_godot/panels/token_panel.tscn")
 
-const CESIUM_GLOBE_NAME = "CesiumGlobe"
-const CESIUM_TILESET_NAME = "CesiumGDTileset"
+const CESIUM_GLOBE_NAME = "CesiumGeoreference"
+const CESIUM_TILESET_NAME = "Cesium3DTileset"
 
 var docked_scene : Control
 

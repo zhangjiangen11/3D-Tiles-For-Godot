@@ -9,7 +9,6 @@
 #include "Models/CesiumGDRasterOverlay.h"
 #include "Models/CesiumGDPanel.h"
 #include "Models/CesiumGDConfig.h"
-#include "Models/CesiumGDGeoreference.h"
 #include "Utils/CesiumGDAssetBuilder.h"
 #include "Utils/TokenTroubleShooting.h"
 #include "app_example.hpp"
@@ -34,13 +33,12 @@ void initialize_cesium_godot_module(ModuleInitializationLevel p_level) {
 	if (p_level != ModuleInitializationLevel::MODULE_INITIALIZATION_LEVEL_SCENE)
 		return;
 	//We will have to register all external classes to the class DB (we probably don't want this for common DataStructures, but rather Nodes)
-	ClassDB::register_class<CesiumGlobe>();
-	ClassDB::register_class<CesiumGDGeoreference>();
-	ClassDB::register_class<CesiumGDTileset>();
+	ClassDB::register_class<CesiumGeoreference>();
+	ClassDB::register_class<Cesium3DTileset>();
 	ClassDB::register_class<CesiumHTTPRequestNode>();
 	ClassDB::register_class<CesiumDebugUtils>();
 	ClassDB::register_class<CesiumGDPanel>();
-	ClassDB::register_class<CesiumGDRasterOverlay>();
+	ClassDB::register_class<CesiumIonRasterOverlay>();
 	ClassDB::register_class<CesiumGDConfig>();
 	ClassDB::register_class<CesiumGDAssetBuilder>();
 	ClassDB::register_class<TokenTroubleshooting>();
@@ -54,8 +52,8 @@ void initialize_cesium_godot_module(ModuleInitializationLevel p_level) {
   GDREGISTER_CLASS(InspectorRect);
   GDREGISTER_CLASS(AppExample);
 	ClassDB::register_class<CesiumGDCreditSystem>(true);
-	ClassDB::bind_integer_constant("CesiumGlobe", "OriginType", "CartographicOrigin", (int32_t)CesiumGlobe::OriginType::CartographicOrigin);
-	ClassDB::bind_integer_constant("CesiumGlobe", "OriginType", "TrueOrigin", (int32_t)CesiumGlobe::OriginType::TrueOrigin);
+	ClassDB::bind_integer_constant("CesiumGeoreference", "OriginType", "CartographicOrigin", (int32_t)CesiumGeoreference::OriginType::CartographicOrigin);
+	ClassDB::bind_integer_constant("CesiumGeoreference", "OriginType", "TrueOrigin", (int32_t)CesiumGeoreference::OriginType::TrueOrigin);
 }
 
 void uninitialize_cesium_godot_module(ModuleInitializationLevel p_level) {
