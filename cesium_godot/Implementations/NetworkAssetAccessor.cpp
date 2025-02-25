@@ -106,6 +106,9 @@ CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>> NetworkAssetAcc
 					const char *strPtr = reinterpret_cast<const char *>(body.ptr());
 					String bodyStr = strPtr;
 					ERR_PRINT(errorMessage + String("\nURL: ") + String(url.c_str()) + String("\nFailed request's body: ") + bodyStr);
+					if (responseCode == HTTPClient::ResponseCode::RESPONSE_UNAUTHORIZED) {
+						ERR_PRINT("Access to data denied, make sure you're logged into CesiumION and your token has access to the desired asset!");
+					}
 					std::exception exc(errorMessage.utf8().get_data());
 					p_promise.reject(&exc);
 					return;

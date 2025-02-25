@@ -7,12 +7,14 @@ A Godot 4 extension that integrates Cesium 3D Tiles capabilities into Godot Engi
 
 ## Prerequisites
 
-- **Windows 10/11** (64-bit)
+- **C++ 20**
+- **CMake 3.1+**
 - **Python 3.8+** (with pip)
 - **SCons** (`pip install scons`)
 - **Visual Studio 2022** with C++ desktop development workload (If you plan on contributing or developing)
 - **Git**
 - **Godot 4.1+** (with GDExtension support)
+- **Windows 10/11** (64-bit)
 
 ## Installation (as GDExtension)
 
@@ -83,11 +85,11 @@ Alternatively, you can choose to create a new project using the `godot3dtiles/` 
 
 ## Getting Started
 
-### Using the Cesium Panel
+### Using the Cesium Ion Panel
 
 ![PanelDemo1](readme_resources/panel_default.png)
 
-The Cesium Panel provides essential tools for managing geospatial content and configuring plugin integration with Cesium services.
+The Cesium Ion Panel provides essential tools for managing geospatial content and configuring plugin integration with Cesium services.
 
 **Connect to Cesium ION**
 
@@ -100,16 +102,31 @@ The Cesium Panel provides essential tools for managing geospatial content and co
 
 * Maintains session security through OAuth2 authorization flow.
 
-**Access Token Management**
+### Setting up your first scene
 
-Upon successful authentication:
+**Create a new 3D scene**
+![CreateScene](readme_resources/create_scene.png)
 
-* Access tokens are stored by default in `addons/cesium_godot/cesium_gd_config.tres`
-* The `cesium_gd_config.tres` resource file controls the following parameters
-  * `accessToken`: Empty by default and will be filled in after connecting with ION
-  * `serverUrl`: Points to `https://ion.cesium.com` by default, could be changed for self-hosting purposes
-  * `apiUrl`: Points to `https://api.cesium.com/` by default, could be changed for self-hosting purposes
-  * `applicationId`: The Cesium ION identifier for this application, by default, 3D Tiles For Godot uses id `891`
+**Add a new tileset**
+You can choose between the different pre-defined tilesets provided to you on the Cesium Ion Panel, or create a new blank tileset to customize it with your desired asset id and data source URL.
+
+You should now see multiple nodes were added to your scene, depending on the option you picked.
+
+*Example with pre-defined tileset Cesium World Terrain + Bing Maps Aerial Imagery*
+![AddTileset](readme_resources/add_tileset.png)
+
+**Add a dynamic camera**
+
+Back to the Cesium Panel, you should now be able to click on the dynamic camera button and see it get added to your scene.
+
+[!DynamicCamera](readme_resources/dynamic_camera.png)
+
+You should also see the tilesets and CesiumGeoreference have been added automatically to the camera's properties in the inspector.
+
+[!CameraProperties](readme_resources/camera_properties.png)
+
+**Hit the Play button**
+Tiles should start loading in now!
 
 #### Note: This plugin is currently Windows-only. Linux/MacOS support is planned for future releases.
 
