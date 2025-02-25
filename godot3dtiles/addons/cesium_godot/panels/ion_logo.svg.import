@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ch4tilnu5t68j"
-path="res://.godot/imported/Cesium_dark_color.png-31af53b34ae8e6c26f6a653d996fedc4.ctex"
+uid="uid://hiailyk0q8lq"
+path="res://.godot/imported/ion_logo.svg-4b0d460da10aa540eff58dc8dbdcb8f0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/cesium_godot/panels/Cesium_dark_color.png"
-dest_files=["res://.godot/imported/Cesium_dark_color.png-31af53b34ae8e6c26f6a653d996fedc4.ctex"]
+source_file="res://addons/cesium_godot/panels/ion_logo.svg"
+dest_files=["res://.godot/imported/ion_logo.svg-4b0d460da10aa540eff58dc8dbdcb8f0.ctex"]
 
 [params]
 
@@ -32,3 +32,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

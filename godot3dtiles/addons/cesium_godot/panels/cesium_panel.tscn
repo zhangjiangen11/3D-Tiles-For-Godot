@@ -1,15 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://cvqjpxi8g18cp"]
+[gd_scene load_steps=3 format=3 uid="uid://cvqjpxi8g18cp"]
 
-[ext_resource type="Texture2D" uid="uid://ch4tilnu5t68j" path="res://addons/cesium_godot/panels/Cesium_dark_color.png" id="1_43y2k"]
+[ext_resource type="Texture2D" uid="uid://hiailyk0q8lq" path="res://addons/cesium_godot/panels/ion_logo.svg" id="1_ldapw"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_h2mxq"]
 font_size = 24
 
-[sub_resource type="LabelSettings" id="LabelSettings_o68q6"]
-font_size = 24
-font_color = Color(0, 0, 0, 1)
-
-[node name="CesiumPanel" type="MarginContainer"]
+[node name="Cesium Ion Panel" type="MarginContainer"]
 custom_minimum_size = Vector2(100, 100)
 offset_right = 486.0
 offset_bottom = 551.0
@@ -127,14 +123,11 @@ text = "Add"
 [node name="TextureRect" type="TextureRect" parent="VSplitContainer/VBoxContainer"]
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
-texture = ExtResource("1_43y2k")
-expand_mode = 3
+texture = ExtResource("1_ldapw")
 
-[node name="Label" type="Label" parent="VSplitContainer/VBoxContainer"]
+[node name="MarginContainer4" type="MarginContainer" parent="VSplitContainer/VBoxContainer"]
+custom_minimum_size = Vector2(1.45519e-11, 50)
 layout_mode = 2
-text = "For Godot (in development)"
-label_settings = SubResource("LabelSettings_o68q6")
-horizontal_alignment = 1
 
 [node name="Label2" type="Label" parent="VSplitContainer/VBoxContainer"]
 custom_minimum_size = Vector2(300, 1.45519e-11)
