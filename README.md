@@ -119,11 +119,11 @@ You should now see multiple nodes were added to your scene, depending on the opt
 
 Back to the Cesium Panel, you should now be able to click on the dynamic camera button and see it get added to your scene.
 
-[!DynamicCamera](readme_resources/dynamic_camera.png)
+![DynamicCamera](readme_resources/dynamic_camera.png)
 
 You should also see the tilesets and CesiumGeoreference have been added automatically to the camera's properties in the inspector.
 
-[!CameraProperties](readme_resources/camera_properties.png)
+![CameraProperties](readme_resources/camera_properties.png)
 
 **Hit the Play button**
 Tiles should start loading in now!
