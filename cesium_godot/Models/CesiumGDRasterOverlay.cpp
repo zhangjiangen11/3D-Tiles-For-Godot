@@ -1,5 +1,4 @@
 #include "CesiumGDRasterOverlay.h"
-#include "../Utils/NetworkUtils.h"
 #include <CesiumRasterOverlays/IonRasterOverlay.h>
 #include "CesiumGDTileset.h"
 #include "CesiumGDConfig.h"
@@ -27,7 +26,6 @@ const String& CesiumIonRasterOverlay::get_material_key() const
 Error CesiumIonRasterOverlay::add_to_tileset(Cesium3DTileset* tilesetInstance)
 {
 	if (tilesetInstance == nullptr) return Error::ERR_INVALID_PARAMETER;
-	this->m_configInstance = tilesetInstance->get_cesium_config();
 	if (this->m_assetId <= 0) return Error::ERR_CANT_ACQUIRE_RESOURCE;
 
 	//Overlay already added
@@ -49,13 +47,12 @@ CesiumUtility::IntrusivePointer<CesiumRasterOverlays::IonRasterOverlay> CesiumIo
 
 void CesiumIonRasterOverlay::create_and_add_overlay(Cesium3DTileset* tilesetInstance)
 {
-	const String& ionAccessToken = this->m_configInstance->get_access_token();
+	const String& ionAccessToken = CesiumGDConfig::get_singleton(this)->get_access_token();
 	this->m_overlayInstance = new CesiumRasterOverlays::IonRasterOverlay(
 		this->m_materialKey.utf8().get_data(),
 		this->m_assetId,
 		ionAccessToken.utf8().get_data(),
-		{},
-		this->m_configInstance->get_api_url().utf8().get_data()
+		{}
 	);
 	tilesetInstance->add_overlay(this);
 }

@@ -28,7 +28,7 @@ public:
 #else
 #error "Unknown compiler"
 #endif
-private:
+
 	template <uint32_t N1, uint32_t N2>
 	static constexpr auto CompileTimeConcat(const char(&str1)[N1], const char(&str2)[N2])
 	{

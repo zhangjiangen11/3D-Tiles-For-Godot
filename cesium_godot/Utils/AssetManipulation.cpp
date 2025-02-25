@@ -1,6 +1,7 @@
 #include "AssetManipulation.h"
 
 #include "../Models/CesiumGlobe.h"
+#include "Models/CesiumGDConfig.h"
 #include "Models/CesiumGDCreditSystem.h"
 #include "Models/CesiumGDRasterOverlay.h"
 #include "Models/CesiumGDTileset.h"
@@ -19,8 +20,8 @@
 const char* CESIUM_GLOBE_NAME = "CesiumGeoreference";
 const char* CESIUM_TILESET_NAME = "Cesium3DTileset";
 
-CesiumGeoreference* Godot3DTiles::AssetManipulation::find_or_create_globe(Node3D* baseNode) {
-  Node3D* root = get_root_of_edit_scene(baseNode);
+CesiumGeoreference* Godot3DTiles::AssetManipulation::find_or_create_globe(Node* baseNode) {
+  Node* root = get_root_of_edit_scene(baseNode);
 	CesiumGeoreference* globe = nullptr;
 	int32_t count = root->get_child_count();
 	for (int32_t i = 0; i < count; i++) {
@@ -40,7 +41,19 @@ CesiumGeoreference* Godot3DTiles::AssetManipulation::find_or_create_globe(Node3D
 	return globe;
 }
 
-CesiumGDCreditSystem* Godot3DTiles::AssetManipulation::find_or_create_credit_system(Node3D* baseNode, bool deferred) {
+CesiumGDConfig* Godot3DTiles::AssetManipulation::find_or_create_config_node(Node* baseNode) {
+	Node* root = baseNode->get_tree()->get_root();
+	CesiumGDConfig* result = find_node_in_scene<CesiumGDConfig>(root);
+	if (result != nullptr) {
+		return result;
+	}
+	result = memnew(CesiumGDConfig);
+	root->add_child(result);
+	result->set_owner(root);
+	return result;
+}
+
+CesiumGDCreditSystem* Godot3DTiles::AssetManipulation::find_or_create_credit_system(Node* baseNode, bool deferred) {
 	// HACK: assume we will always have this root as a node 3d on the child of the window
 	Node* root = baseNode->get_tree()->get_root();
 	CesiumGDCreditSystem* result = find_node_in_scene<CesiumGDCreditSystem>(root);
@@ -63,13 +76,13 @@ CesiumGDCreditSystem* Godot3DTiles::AssetManipulation::find_or_create_credit_sys
 	return result;
 }
 
-Node3D* Godot3DTiles::AssetManipulation::get_root_of_edit_scene(Node3D* baseNode) {
-  return Object::cast_to<Node3D>(baseNode->get_tree()->get_edited_scene_root());
+Node* Godot3DTiles::AssetManipulation::get_root_of_edit_scene(Node* baseNode) {
+  return Object::cast_to<Node>(baseNode->get_tree()->get_edited_scene_root());
 }
 
 
-void Godot3DTiles::AssetManipulation::instantiate_tileset(Node3D* baseNode, int32_t tilesetType) {
-	Node3D* root = get_root_of_edit_scene(baseNode);
+void Godot3DTiles::AssetManipulation::instantiate_tileset(Node* baseNode, int32_t tilesetType) {
+	Node* root = get_root_of_edit_scene(baseNode);
 	Cesium3DTileset* tileset = memnew(Cesium3DTileset);
 	root->add_child(tileset, true);
 	
@@ -122,10 +135,10 @@ void Godot3DTiles::AssetManipulation::instantiate_tileset(Node3D* baseNode, int3
 }
 
 
-void Godot3DTiles::AssetManipulation::instantiate_dynamic_cam(Node3D* baseNode) {
+void Godot3DTiles::AssetManipulation::instantiate_dynamic_cam(Node* baseNode) {
 	const char* georefCameraScript = "res://addons/cesium_godot/scripts/georeference_camera_controller.gd";
 	const char* trueOriginCameraScript = "res://addons/cesium_godot/scripts/cesium_camera_controller.gd";
-	Node3D* root = get_root_of_edit_scene(baseNode);
+	Node* root = get_root_of_edit_scene(baseNode);
 	CesiumGeoreference* globe = find_or_create_globe(baseNode);
 	Camera3D* camera = memnew(Camera3D);
 	root->add_child(camera, true);
@@ -139,13 +152,13 @@ void Godot3DTiles::AssetManipulation::instantiate_dynamic_cam(Node3D* baseNode) 
 
 
 
-Cesium3DTileset* find_first_tileset(Node3D* baseNode) {
+Cesium3DTileset* find_first_tileset(Node* baseNode) {
 	//Get a globe
 	return nullptr;
 }
 
 
-Array Godot3DTiles::AssetManipulation::find_all_tilesets(Node3D* baseNode) {
+Array Godot3DTiles::AssetManipulation::find_all_tilesets(Node* baseNode) {
 	// All tilesets will be inside the globe
 	CesiumGeoreference* globeNode = find_or_create_globe(baseNode);
 	int32_t count = globeNode->get_child_count();
@@ -154,7 +167,7 @@ Array Godot3DTiles::AssetManipulation::find_all_tilesets(Node3D* baseNode) {
 		Node* child = globeNode->get_child(i);
 		auto* foundTileset = Object::cast_to<Cesium3DTileset>(child);
 		if (foundTileset == nullptr) continue;
-		results.append(globeNode);
+		results.append(foundTileset);
 	}
 	return results;
 }

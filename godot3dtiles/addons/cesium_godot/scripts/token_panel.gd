@@ -19,9 +19,10 @@ var request_node: HTTPRequest
 
 var current_token_usage: TokenUsageType = TokenUsageType.Specific
 
-const default_config: CesiumGDConfig = preload("res://addons/cesium_godot/cesium_gd_config.tres")
+var default_config: CesiumGDConfig = null
 
 func initialize_fields(token_panel: Popup) -> void:
+	self.default_config = CesiumGDConfig.get_singleton(token_panel)
 	self.token_troubleshooting = TokenTroubleshooting.new()
 	token_panel.add_child(self.token_troubleshooting)
 	self.token_troubleshooting.owner = token_panel
@@ -34,13 +35,9 @@ func initialize_fields(token_panel: Popup) -> void:
 	self.asset_list_items = token_panel.find_child("AssetList") as OptionButton
 	# Then add the ResourcePicker
 	var configuration_container = token_panel.find_child("ConfigurationContainer")
-	self.config_picker = EditorResourcePicker.new()
-	self.config_picker.custom_minimum_size = Vector2(200, 50)
-	self.config_picker.edited_resource = self.default_config
-	configuration_container.add_child(self.config_picker)
-	
+
 	self.specific_token_name = self.find_sibling(self.specific_token_check, "TokenName") as TextEdit
-	self.specific_token_name.text = (self.config_picker.edited_resource as CesiumGDConfig).accessToken
+	self.specific_token_name.text = self.default_config.accessToken
 	
 	self.existing_token_check.toggled.connect(on_existing_token_check)
 	self.specific_token_check.toggled.connect(on_specific_token_check)
@@ -94,23 +91,13 @@ func on_existing_token_check(checked: bool) -> void:
 
 
 func on_test_button_pressed() -> void:
-	var currentConfig := self.config_picker.edited_resource as CesiumGDConfig
-	self.token_troubleshooting.is_valid_token(currentConfig.accessToken, currentConfig)
-	pass
-
-
-func test_token() -> void:
-	# Get the config
-	print("Token working")
-	
-	print("Token not working")
+	self.token_troubleshooting.is_valid_token(self.default_config.accessToken)
 	
 
 func apply_or_create_token() -> void:
 	var usage := self.current_token_usage
 	if (usage == TokenUsageType.Specific):
-		var config := self.config_picker.edited_resource as CesiumGDConfig
-		config.accessToken = self.specific_token_name.text
+		self.default_config.accessToken = self.specific_token_name.text
 
 	OS.alert("Token changed in configuration, you can now close this window...", "Changes applied!")
 

@@ -10,7 +10,7 @@
 #elif defined(CESIUM_GD_MODULE)
 
 //TODO: See if this will work
-#define REFLECT_REFLECT_ERR_NAME(x) error_names[x]
+#define REFLECT_ERR_NAME(x) error_names[x]
 
 #endif
 #endif

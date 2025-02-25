@@ -80,11 +80,7 @@ public:
 	void set_ion_asset_id(int64_t id);
 
 	int64_t get_ion_asset_id() const;
-
-	Ref<CesiumGDConfig> get_cesium_config() const;
-
-	void set_cesium_config(const Ref<CesiumGDConfig>& config);
-
+	
 	void set_create_physics_meshes(bool shouldCreate);
 
 	bool get_create_physics_meshes() const;
@@ -148,8 +144,6 @@ private:
 	bool m_showHierarchy;
 
 	CesiumDataSource m_selectedDataSource = CesiumDataSource::FromCesiumIon;
-
-	Ref<CesiumGDConfig> m_configInstance = nullptr;
 
 	CesiumGeoreference* m_georeference = nullptr;
 

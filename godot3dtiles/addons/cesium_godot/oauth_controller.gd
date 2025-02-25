@@ -22,7 +22,7 @@ var signedIn: bool = false
 var config : CesiumGDConfig
 
 func _ready() -> void:
-	self.config = ResourceLoader.load("res://addons/cesium_godot/cesium_gd_config.tres")
+	self.config = CesiumGDConfig.get_singleton(self)
 	self.signedIn = !self.config.accessToken.is_empty()
 	self.set_process(false)
 	pass

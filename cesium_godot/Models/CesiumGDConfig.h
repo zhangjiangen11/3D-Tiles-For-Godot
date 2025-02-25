@@ -1,6 +1,7 @@
 #ifndef CESIUM_GD_CONFIG
 #define CESIUM_GD_CONFIG
 
+#include "godot_cpp/classes/node3d.hpp"
 #if defined(CESIUM_GD_EXT)
 #include <godot_cpp/classes/resource.hpp>
 using namespace godot;
@@ -9,11 +10,12 @@ using namespace godot;
 #endif
 
 /// @brief Configuration resource for Cesium's server components
-class CesiumGDConfig : public Resource {
-	GDCLASS(CesiumGDConfig, Resource)
+class CesiumGDConfig : public Node3D {
+	GDCLASS(CesiumGDConfig, Node3D)
 public:
 	static constexpr std::string_view DEFAULT_ION_API_URL = "https://api.cesium.com/";
 	static constexpr std::string_view DEFAULT_SERVER_URL = "https://ion.cesium.com";
+	static constexpr int32_t DEFAULT_APPLICATION_ID = 891;
 
 	CesiumGDConfig() = default;
 
@@ -21,23 +23,16 @@ public:
 
 	const String& get_access_token() const;
 
-	void set_server_url(const String& serverUrl);
+	static CesiumGDConfig* get_singleton(Node* baseNode);
 
-	const String& get_server_url() const;
-
-	void set_api_url(const String& apiUrl);
-
-	const String& get_api_url() const;
-
-	void set_application_id(int32_t applicationId);
-
-	int32_t get_application_id() const;
-
+	static void clear_session();
+		
+	void _enter_tree() override;
+	
 private:
-	String m_accessToken{};
-	String m_serverUrl = DEFAULT_SERVER_URL.data();
-	String m_apiUrl = DEFAULT_ION_API_URL.data();
-	int32_t m_applicationId = 891;
+	String m_accessToken = "";
+	static inline CesiumGDConfig* s_instance = nullptr;
+	
 protected:
 	static void _bind_methods();
 };

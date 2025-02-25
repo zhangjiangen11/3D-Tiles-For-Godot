@@ -1,5 +1,4 @@
 #include "Models/CesiumGDCreditSystem.h"
-#include "godot_cpp/classes/resource_loader.hpp"
 #define SPDLOG_COMPILED_LIB
 #include "Models/CesiumGlobe.h"
 #define SPDLOG_FMT_EXTERNAL
@@ -47,9 +46,6 @@ using namespace godot;
 #include "../Utils/CesiumVariantHash.h"
 #include <glm/gtc/quaternion.hpp>
 #include "CesiumGDRasterOverlay.h"
-#include "../Utils/NetworkUtils.h"
-#include <algorithm>
-#include <execution>
 #include <CesiumAsync/CachingAssetAccessor.h>
 #include "CesiumAsync/SqliteCache.h"
 
@@ -215,17 +211,6 @@ int64_t Cesium3DTileset::get_ion_asset_id() const
 	return this->m_cesiumIonAssetId;
 }
 
-Ref<CesiumGDConfig> Cesium3DTileset::get_cesium_config() const
-{
-	return this->m_configInstance;
-}
-
-void Cesium3DTileset::set_cesium_config(const Ref<CesiumGDConfig>& config)
-{
-	this->m_configInstance = config;
-}
-
-
 void Cesium3DTileset::set_create_physics_meshes(bool shouldCreate)
 {
 	this->m_createPhysicsMeshes = shouldCreate;
@@ -350,12 +335,12 @@ void Cesium3DTileset::load_tileset()
 	const Cesium3DTilesSelection::TilesetContentOptions& contentOptions = this->m_tilesetConfig->contentOptions;
 
 	if (this->m_selectedDataSource == CesiumDataSource::FromCesiumIon) {
+		const String& token = CesiumGDConfig::get_singleton(this)->get_access_token();
 		this->m_activeTileset = std::make_unique<Cesium3DTilesSelection::Tileset>(
 			this->create_tileset_externals(),
 			this->m_cesiumIonAssetId,
-			this->m_configInstance->get_access_token().utf8().get_data(),
-			options,
-			this->m_configInstance->get_api_url().utf8().get_data()
+			token.utf8().get_data(),
+			options
 		);
 	}
 	//Else this is coming from a URL
@@ -579,11 +564,6 @@ void Cesium3DTileset::_bind_methods()
 	ClassDB::bind_method(D_METHOD("get_create_physics_meshes"), &Cesium3DTileset::get_create_physics_meshes);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "create_physics_meshes"), "set_create_physics_meshes", "get_create_physics_meshes");
 
-	ClassDB::bind_method(D_METHOD("get_cesium_config"), &Cesium3DTileset::get_cesium_config);
-	ClassDB::bind_method(D_METHOD("set_cesium_config", "cesiumConfig"), &Cesium3DTileset::set_cesium_config);
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "cesiumConfig", PROPERTY_HINT_RESOURCE_TYPE, "CesiumGDConfig"), "set_cesium_config", "get_cesium_config");
-
-
 	ClassDB::bind_method(D_METHOD("get_data_source"), &Cesium3DTileset::get_data_source);
 	ClassDB::bind_method(D_METHOD("set_data_source", "data_source"), &Cesium3DTileset::set_data_source);
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "data_source", PROPERTY_HINT_ENUM, "From Cesium Ion,From Url"), "set_data_source", "get_data_source");
@@ -675,9 +655,6 @@ void Cesium3DTileset::_enter_tree() {
 	this->reparent(globe, true);
 	this->set_rotation_degrees(Vector3(90.0, 0.0, 0.0));
 	this->set_owner(globe->get_parent_node_3d());
-	if (this->m_configInstance == nullptr) {
-		this->m_configInstance = ResourceLoader::get_singleton()->load("res://addons/cesium_godot/cesium_gd_config.tres");
-	}
 }
 	
 
