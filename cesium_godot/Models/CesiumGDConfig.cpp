@@ -56,7 +56,6 @@ CesiumGDConfig* CesiumGDConfig::get_singleton(Node* baseNode) {
 	// Alright, so for some reason FileAccess does not work here, so we'll use std::ifstream, womp womp
 	String globalPath = ProjectSettings::get_singleton()->globalize_path(CONFIG_FILE_PATH);
 	const char* globalPathCStr = globalPath.utf8().get_data();
-	printf("Global path: %s\n", globalPathCStr);
 	std::ifstream file(globalPathCStr);
 
 	if (!file.is_open()) {
