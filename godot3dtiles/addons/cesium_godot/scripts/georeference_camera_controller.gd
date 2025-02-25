@@ -56,6 +56,7 @@ func _physics_process(delta: float) -> void:
 	camera_walk_ecef(-ecefDir.normalized())
 
 func _process(delta: float) -> void:
+	self.post_init()	
 	self.surface_basis = self.calculate_surface_basis()
 	handle_input(delta)
 	self.update_camera_rotation()
@@ -73,14 +74,12 @@ func update_tilesets() -> void:
 		tileset.update_tileset(camera_xform)
 
 func handle_input(delta: float):
-	control_input()
 	movement_input(delta)
 
-
-func control_input():
-	if (Input.is_key_pressed(KEY_SPACE) && !self.loaded):
+func post_init() -> void:
+	if (!self.loaded):
 		self.loaded = true
-
+					
 	
 func calculate_surface_basis() -> Basis:
 	var engineToEcefTransform := Vector3(self.globe_node.ecefX, self.globe_node.ecefY, self.globe_node.ecefZ)
