@@ -9,8 +9,6 @@ const CESIUM_GLOBE_NAME = "CesiumGeoreference"
 const CESIUM_GLOBE_GEOREF = "CesiumGeoreference"
 const CESIUM_TILESET_NAME = "Cesium3DTileset"
 
-const cesiumConfig : Resource = preload("res://addons/cesium_godot/cesium_gd_config.tres")
-
 var use_georeferences : bool
 
 func instantiate_tileset(tileset_type: TILESET_TYPE) -> void:	

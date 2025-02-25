@@ -14,8 +14,7 @@ constexpr std::string_view ASSET_LIST_URL =
     "https://api.cesium.com/v1/assets?access_token=";
 
 
-void TokenTroubleshooting::is_valid_token(const String &token,
-                                          const Ref<CesiumGDConfig> &config) {
+void TokenTroubleshooting::is_valid_token(const String& token) {
   m_httpClient.init_client(1);
   std::string request = ASSET_LIST_URL.data();
   request.append(token.utf8().get_data());
@@ -103,7 +102,7 @@ void TokenTroubleshooting::_exit_tree() {
 
 void TokenTroubleshooting::_bind_methods() {
   ClassDB::bind_method(
-      D_METHOD("is_valid_token", "token", "config"),
+      D_METHOD("is_valid_token", "token"),
       &TokenTroubleshooting::is_valid_token
   );
 

@@ -50,8 +50,6 @@ private:
 
 	String m_materialKey = "0";
 
-	Ref<CesiumGDConfig> m_configInstance;
-
 	CesiumUtility::IntrusivePointer<CesiumRasterOverlays::IonRasterOverlay> m_overlayInstance;
 
 protected:

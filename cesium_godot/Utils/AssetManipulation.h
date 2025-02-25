@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Models/CesiumGDConfig.h"
 #include "Models/CesiumGDCreditSystem.h"
 #include "Models/CesiumGDTileset.h"
 #include "godot_cpp/variant/array.hpp"
@@ -24,19 +25,21 @@ namespace Godot3DTiles::AssetManipulation {
   };  
 
 
-  void instantiate_tileset(Node3D* baseNode, int32_t tilesetType);
+  void instantiate_tileset(Node* baseNode, int32_t tilesetType);
   
-  void instantiate_dynamic_cam(Node3D* baseNode);
+  void instantiate_dynamic_cam(Node* baseNode);
   
-  CesiumGeoreference* find_or_create_globe(Node3D* baseNode);
+  CesiumGeoreference* find_or_create_globe(Node* baseNode);
 
-  Node3D* get_root_of_edit_scene(Node3D* baseNode);
+  Node* get_root_of_edit_scene(Node* baseNode);
   
-  Cesium3DTileset* find_first_tileset(Node3D* baseNode);
+  Cesium3DTileset* find_first_tileset(Node* baseNode);
 
-  CesiumGDCreditSystem* find_or_create_credit_system(Node3D* baseNode, bool deferred);
+  CesiumGDCreditSystem* find_or_create_credit_system(Node* baseNode, bool deferred);
 
-  Array find_all_tilesets(Node3D* baseNode);
+  CesiumGDConfig* find_or_create_config_node(Node* baseNode);
+  
+  Array find_all_tilesets(Node* baseNode);
   
   template<class T>
   inline T* find_node_in_scene(Node* root) {

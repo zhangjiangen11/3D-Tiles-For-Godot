@@ -1,7 +1,6 @@
 #ifndef TOKEN_TROBLESHOOTING_H
 #define TOKEN_TROBLESHOOTING_H
 
-#include "Models/CesiumGDConfig.h"
 #include "Utils/CurlHttpClient.h"
 #include "godot_cpp/variant/variant.hpp"
 #if defined(CESIUM_GD_EXT)
@@ -13,7 +12,7 @@ using namespace godot;
 class TokenTroubleshooting : public Node {
   GDCLASS(TokenTroubleshooting, Node)
   public:
-    void is_valid_token(const String& token, const Ref<CesiumGDConfig>& config);
+    void is_valid_token(const String& token);
 
     void on_token_validity_check(const String& token, bool isValid, const PackedStringArray& data);
     
