@@ -18,6 +18,7 @@ layout_mode = 2
 alignment = 1
 
 [node name="AddButton" type="Button" parent="VSplitContainer/ButtonsHContainer"]
+visible = false
 layout_mode = 2
 text = "Add"
 
@@ -69,6 +70,31 @@ custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "Add"
 
+[node name="HBoxContainer2" type="HBoxContainer" parent="VSplitContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Dynamic Camera" type="Label" parent="VSplitContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "Dynamic Camera"
+
+[node name="MarginContainer" type="MarginContainer" parent="VSplitContainer/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(75, 1.45519e-11)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DynamicCameraButton" type="Button" parent="VSplitContainer/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "Add"
+
+[node name="Add assets label2" type="Label" parent="VSplitContainer/VBoxContainer"]
+layout_mode = 2
+text = "Quick Add Cesium ION Assets"
+label_settings = SubResource("LabelSettings_h2mxq")
+
+[node name="HSeparator2" type="HSeparator" parent="VSplitContainer/VBoxContainer"]
+layout_mode = 2
+
 [node name="HBoxContainer5" type="HBoxContainer" parent="VSplitContainer/VBoxContainer"]
 layout_mode = 2
 
@@ -103,19 +129,19 @@ custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "Add"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VSplitContainer/VBoxContainer"]
+[node name="HBoxContainer7" type="HBoxContainer" parent="VSplitContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Dynamic Camera" type="Label" parent="VSplitContainer/VBoxContainer/HBoxContainer2"]
+[node name="Blank 3D Label" type="Label" parent="VSplitContainer/VBoxContainer/HBoxContainer7"]
 layout_mode = 2
-text = "Dynamic Camera"
+text = "Google Photorealistic 3D Tiles"
 
-[node name="MarginContainer" type="MarginContainer" parent="VSplitContainer/VBoxContainer/HBoxContainer2"]
-custom_minimum_size = Vector2(75, 1.45519e-11)
+[node name="MarginContainer" type="MarginContainer" parent="VSplitContainer/VBoxContainer/HBoxContainer7"]
+custom_minimum_size = Vector2(25, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="DynamicCameraButton" type="Button" parent="VSplitContainer/VBoxContainer/HBoxContainer2"]
+[node name="Google3DTilesButton" type="Button" parent="VSplitContainer/VBoxContainer/HBoxContainer7"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "Add"
