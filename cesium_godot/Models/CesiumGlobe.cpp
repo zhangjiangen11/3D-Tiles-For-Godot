@@ -179,18 +179,18 @@ glm::dvec3 CesiumGeoreference::get_lla() const {
 	const double& z = this->m_ecefPosition.z;
 
 	
-  double p = Math::sqrt(Math::pow(x, 2) + Math::pow(y, 2) );
-  double theta = Math::atan2(WGS84_RADIUS * z, WGS84_B * p);	
+	double p = Math::sqrt((x * x) + (y * y));
+	double theta = Math::atan2(WGS84_RADIUS * z, WGS84_B * p);	
 
 	double longitude = Math::atan2(y, x);
 
 	// This was a tough one
 	double lat = Math::atan2( (z + WGS84_E_PRIME_SQR * WGS84_B * Math::pow(Math::sin(theta), 3)), (p - WGS84_E_SQR * WGS84_RADIUS * Math::pow(Math::cos(theta), 3)));
-  double N = WGS84_RADIUS / (Math::sqrt(1 - (WGS84_E_SQR * Math::pow(Math::sin(lat), 2))));
-  double m = (p / Math::cos(lat));
+	double N = WGS84_RADIUS / (Math::sqrt(1 - (WGS84_E_SQR * Math::pow(Math::sin(lat), 2))));
+	double m = (p / Math::cos(lat));
   
-  double alt = m - N;
-  return glm::dvec3(Math::rad_to_deg(lat), Math::rad_to_deg(longitude), alt);
+	double alt = m - N;
+	return glm::dvec3(Math::rad_to_deg(lat), Math::rad_to_deg(longitude), alt);
 }
 
 

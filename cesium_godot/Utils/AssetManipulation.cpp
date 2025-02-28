@@ -118,6 +118,9 @@ void Godot3DTiles::AssetManipulation::instantiate_tileset(Node* baseNode, int32_
 			extraTileset = memnew(Cesium3DTileset);
 			extraTileset->set_ion_asset_id(osmBuildingsId);
 			break;
+		case Godot3DTiles::AssetManipulation::TilesetType::GooglePhotorealistic:
+			tileset->set_ion_asset_id(2275207);
+			break;
 		default:
 			ERR_PRINT(String("Tileset type not implemented: ") + magic_enum::enum_name(actualType).data());
 			break;	

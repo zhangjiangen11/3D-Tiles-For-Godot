@@ -21,6 +21,9 @@ var blank_tileset_button : Button
 var dynamic_camera_button : Button
 var osm_buildings_button : Button
 var world_and_bing_button : Button
+var google_3d_button : Button
+
+var ion_asset_buttons : Array[Button] = [self.osm_buildings_button, self.world_and_bing_button, self.google_3d_button]
 
 var auth_controller_node : OAuthController = null
 var cesium_builder_node : CesiumGDAssetBuilder = null
@@ -34,7 +37,7 @@ var token_panel_data : TokenPanelData = null
 func _enter_tree() -> void:
 	self.docked_scene = editorAddon.instantiate()
 	add_control_to_dock(EditorPlugin.DOCK_SLOT_RIGHT_UL, self.docked_scene)
-	self.set_utility_buttons_enabled(false)
+	self.set_session_buttons_enabled(false)
 	self.auth_controller_node = OAuthController.new()
 	self.add_child(self.auth_controller_node)
 	self.cesium_builder_node = CesiumGDAssetBuilder.new()
@@ -65,6 +68,7 @@ func init_buttons() -> void:
 	self.dynamic_camera_button = self.docked_scene.find_child("DynamicCameraButton") as Button
 	self.world_and_bing_button = self.docked_scene.find_child("WorldAndBingButton") as Button
 	self.osm_buildings_button = self.docked_scene.find_child("WorldAndOsmButton") as Button
+	self.google_3d_button = self.docked_scene.find_child("Google3DTilesButton") as Button
 	self.token_panel_data.initialize_fields(self.token_panel)
 	# Connect to their signals
 	self.upload_button.pressed.connect(on_upload_pressed)
@@ -77,6 +81,13 @@ func init_buttons() -> void:
 	self.token_button.pressed.connect(on_token_panel_pressed)
 	self.world_and_bing_button.pressed.connect(on_world_and_bing_button)
 	self.osm_buildings_button.pressed.connect(on_osm_buildings_pressed)
+	self.google_3d_button.pressed.connect(on_google_button_pressed)
+
+
+# TODO: Solve magic numbers
+
+func on_google_button_pressed() -> void:
+	self.cesium_builder_node.instantiate_tileset(2)
 
 func on_world_and_bing_button() -> void:
 	self.cesium_builder_node.instantiate_tileset(3)
@@ -87,8 +98,9 @@ func on_osm_buildings_pressed() -> void:
 func on_token_panel_pressed() -> void:
 	self.token_panel.popup()
 
-func set_utility_buttons_enabled(enabled: bool) -> void:
+func set_session_buttons_enabled(enabled: bool) -> void:
 	var utilityButtons := self.get_utility_buttons();
+	utilityButtons.append_array(self.ion_asset_buttons)
 	for btn in utilityButtons:
 		if btn == null: continue
 		(btn as Button).disabled = !enabled
@@ -96,10 +108,10 @@ func set_utility_buttons_enabled(enabled: bool) -> void:
 func _process(delta: float) -> void:
 	if self.auth_controller_node == null:
 		return
-	if (self.auth_controller_node.signedIn):
+	if (self.auth_controller_node.is_signed_in):
 		connect_button.text = "Connected!"
 		connect_button.disabled = true
-	self.set_utility_buttons_enabled(self.auth_controller_node.signedIn)
+	self.set_session_buttons_enabled(self.auth_controller_node.is_signed_in)
 
 # All of the buttons that become available once the user logs in
 func get_utility_buttons() -> Array[Button]:

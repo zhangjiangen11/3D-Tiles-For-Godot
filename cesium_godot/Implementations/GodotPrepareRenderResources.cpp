@@ -156,7 +156,8 @@ void GodotPrepareRenderResources::attachRasterInMainThread(const Tile& tile, int
 			const CesiumGltf::Material& mat = model.materials.at(primitive.material);
 			Error err = CesiumGDModelLoader::copy_material_properties(mat, godotMaterial, model);
 			godotMaterial->set_texture(BaseMaterial3D::TEXTURE_ALBEDO, godotTexture);
-
+			godotMaterial->set_uv1_scale(Vector3(scale.x, -scale.y, 1.0));
+			godotMaterial->set_uv1_offset(Vector3(translation.x, 1 - translation.y, 1.0));
 			if (err != Error::OK) {
 				ERR_PRINT(String("Could not set texture for Raster Overlay, error: ") + REFLECT_ERR_NAME(err));
 				continue;

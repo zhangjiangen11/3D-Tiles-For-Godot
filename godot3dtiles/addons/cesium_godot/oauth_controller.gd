@@ -17,13 +17,13 @@ var redirect_server := TCPServer.new()
 
 var is_connecting : bool = false
 
-var signedIn: bool = false
+var is_signed_in: bool = false
 
 var config : CesiumGDConfig
 
 func _ready() -> void:
 	self.config = CesiumGDConfig.get_singleton(self)
-	self.signedIn = !self.config.accessToken.is_empty()
+	self.is_signed_in = !self.config.accessToken.is_empty()
 	self.set_process(false)
 	pass
 
@@ -49,7 +49,7 @@ func _process(delta: float) -> void:
 			return
 		# Send the you can close this window page
 		send_success_page(connection)
-		self.signedIn = true
+		self.is_signed_in = true
 
 func send_success_page(connection: StreamPeerTCP) -> void:
 	var pageStr : String = FileAccess.get_file_as_string("res://addons/cesium_godot/success_page.html")
@@ -72,7 +72,7 @@ func send_page(connection: StreamPeerTCP, page: String) -> void:
 
 func get_auth_code() -> void:
 	set_process(true)
-	self.signedIn = false
+	self.is_signed_in = false
 	self.is_connecting = true
 	var err : Error = self.redirect_server.listen(self.PORT, self.BINDING)
 	if err != OK:
@@ -129,5 +129,5 @@ func add_query_params(url: String, params: Array[String]) -> String:
 	return url + "?" + "&".join(params)
 
 func sign_out() -> void:
-	self.signedIn = false
+	self.is_signed_in = false
 	self.config.accessToken = ""
