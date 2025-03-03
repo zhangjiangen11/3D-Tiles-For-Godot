@@ -22,11 +22,14 @@ var dynamic_camera_button : Button
 var osm_buildings_button : Button
 var world_and_bing_button : Button
 var google_3d_button : Button
+var ion_button_holder : Control
 
 var ion_asset_buttons : Array[Button] = [self.osm_buildings_button, self.world_and_bing_button, self.google_3d_button]
 
 var auth_controller_node : OAuthController = null
 var cesium_builder_node : CesiumGDAssetBuilder = null
+var request_node : HTTPRequest = null
+
 
 # So, for some reason we cannot have a custom popup because some definitions get lost in instantiation
 # We don't really know why this is, but we circunvent it by just storing the data on another class
@@ -48,6 +51,8 @@ func _enter_tree() -> void:
 	self.token_panel.hide()
 	self.add_inspector_plugin(CesiumTooltips.new())
 	print("Enabled Cesium plugin")
+	self.request_node = HTTPRequest.new()
+	self.add_child(self.request_node)
 	self.init_buttons()
 
 
@@ -57,6 +62,7 @@ func _exit_tree() -> void:
 	self.docked_scene.free()
 
 func init_buttons() -> void:
+	self.add_ion_buttons()
 	self.add_button = self.docked_scene.find_child("AddButton") as Button
 	self.upload_button = self.docked_scene.find_child("UploadButton") as Button
 	self.token_button = self.docked_scene.find_child("TokenButton") as Button
@@ -150,3 +156,55 @@ func add_tileset():
 func create_dynamic_camera():
 	print("Create dynamic camera!")
 	self.cesium_builder_node.instantiate_dynamic_cam()
+
+func add_ion_buttons() -> void:
+	self.ion_button_holder = self.docked_scene.find_child("IonAssetButtonHolder") as Control
+	const url := "https://api.cesium.com/v1/assets";
+	var token : String = CesiumGDConfig.get_singleton(self).accessToken;
+	var headers: PackedStringArray = ["Authorization: Bearer " + token]
+	var error: int = self.request_node.request(url, headers, HTTPClient.Method.METHOD_GET)
+	if (error != OK):
+		push_error("Error getting the asset list from Cesium: " + error_string(error))
+		return
+	var response = await self.request_node.request_completed
+	var status = response[1]
+	var bodyBytes := response[3] as PackedByteArray
+	var body := JSON.parse_string(bodyBytes.get_string_from_utf8()) as Dictionary
+
+	if (status >= HTTPClient.ResponseCode.RESPONSE_BAD_REQUEST):
+		push_error("Error connecting to the Cesium API for assets, server responded with: " + str(status) + "\nBody: " + str(body))
+		return
+	# For each one of the assets, parse and create a button
+	var items := body.get("items") as Array
+	if (items == null):
+		push_error("Failed to parse request, in body expected \"items\", found: " + str(body))
+		return
+	for item in items:
+		item = item as Dictionary
+		var id := int(item.get("id"))
+		var name = item.get("name")
+		var type = item.get("type")
+		self.ion_asset_buttons.append(self.create_ion_button(id, name, type))
+
+func create_ion_button(assetId: int, name: String, type: String) -> Button:
+	# Create a button
+	var hbox := HBoxContainer.new()
+	var margin := MarginContainer.new()
+	margin.custom_minimum_size.x = 10
+	margin.size_flags_horizontal = Control.SizeFlags.SIZE_EXPAND_FILL 
+	var label := Label.new()
+	var button := Button.new()
+	button.text = "Add"
+	button.custom_minimum_size.x = 60
+	label.text = name
+	
+	self.ion_button_holder.add_child(hbox)
+	hbox.add_child(label)
+	hbox.add_child(margin)
+	hbox.add_child(button)
+	# Connect with the signal
+	button.pressed.connect(func():
+		self.cesium_builder_node.instantiate_tileset(assetId)
+	)
+	return button
+

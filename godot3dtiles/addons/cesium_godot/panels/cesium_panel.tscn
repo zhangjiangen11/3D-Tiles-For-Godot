@@ -95,53 +95,56 @@ label_settings = SubResource("LabelSettings_h2mxq")
 [node name="HSeparator2" type="HSeparator" parent="VSplitContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="HBoxContainer5" type="HBoxContainer" parent="VSplitContainer/VBoxContainer"]
+[node name="IonAssetButtonHolder" type="VBoxContainer" parent="VSplitContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Blank 3D Label" type="Label" parent="VSplitContainer/VBoxContainer/HBoxContainer5"]
+[node name="HBoxContainer5" type="HBoxContainer" parent="VSplitContainer/VBoxContainer/IonAssetButtonHolder"]
+layout_mode = 2
+
+[node name="Blank 3D Label" type="Label" parent="VSplitContainer/VBoxContainer/IonAssetButtonHolder/HBoxContainer5"]
 layout_mode = 2
 text = "Cesium World Terrain + Bing Maps Aerial Imagery"
 
-[node name="MarginContainer" type="MarginContainer" parent="VSplitContainer/VBoxContainer/HBoxContainer5"]
+[node name="MarginContainer" type="MarginContainer" parent="VSplitContainer/VBoxContainer/IonAssetButtonHolder/HBoxContainer5"]
 custom_minimum_size = Vector2(10, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="WorldAndBingButton" type="Button" parent="VSplitContainer/VBoxContainer/HBoxContainer5"]
+[node name="WorldAndBingButton" type="Button" parent="VSplitContainer/VBoxContainer/IonAssetButtonHolder/HBoxContainer5"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "Add"
 
-[node name="HBoxContainer6" type="HBoxContainer" parent="VSplitContainer/VBoxContainer"]
+[node name="HBoxContainer6" type="HBoxContainer" parent="VSplitContainer/VBoxContainer/IonAssetButtonHolder"]
 layout_mode = 2
 
-[node name="Blank 3D Label" type="Label" parent="VSplitContainer/VBoxContainer/HBoxContainer6"]
+[node name="Blank 3D Label" type="Label" parent="VSplitContainer/VBoxContainer/IonAssetButtonHolder/HBoxContainer6"]
 layout_mode = 2
 text = "Cesium World Terrain + OSM Buildings"
 
-[node name="MarginContainer" type="MarginContainer" parent="VSplitContainer/VBoxContainer/HBoxContainer6"]
+[node name="MarginContainer" type="MarginContainer" parent="VSplitContainer/VBoxContainer/IonAssetButtonHolder/HBoxContainer6"]
 custom_minimum_size = Vector2(25, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="WorldAndOsmButton" type="Button" parent="VSplitContainer/VBoxContainer/HBoxContainer6"]
+[node name="WorldAndOsmButton" type="Button" parent="VSplitContainer/VBoxContainer/IonAssetButtonHolder/HBoxContainer6"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "Add"
 
-[node name="HBoxContainer7" type="HBoxContainer" parent="VSplitContainer/VBoxContainer"]
+[node name="HBoxContainer7" type="HBoxContainer" parent="VSplitContainer/VBoxContainer/IonAssetButtonHolder"]
 layout_mode = 2
 
-[node name="Blank 3D Label" type="Label" parent="VSplitContainer/VBoxContainer/HBoxContainer7"]
+[node name="Blank 3D Label" type="Label" parent="VSplitContainer/VBoxContainer/IonAssetButtonHolder/HBoxContainer7"]
 layout_mode = 2
 text = "Google Photorealistic 3D Tiles"
 
-[node name="MarginContainer" type="MarginContainer" parent="VSplitContainer/VBoxContainer/HBoxContainer7"]
+[node name="MarginContainer" type="MarginContainer" parent="VSplitContainer/VBoxContainer/IonAssetButtonHolder/HBoxContainer7"]
 custom_minimum_size = Vector2(25, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Google3DTilesButton" type="Button" parent="VSplitContainer/VBoxContainer/HBoxContainer7"]
+[node name="Google3DTilesButton" type="Button" parent="VSplitContainer/VBoxContainer/IonAssetButtonHolder/HBoxContainer7"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "Add"
