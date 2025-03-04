@@ -9,6 +9,7 @@
 #include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/classes/resource_loader.hpp"
 #include "godot_cpp/classes/scene_tree.hpp"
+#include "godot_cpp/classes/tile_set.hpp"
 #include "godot_cpp/classes/window.hpp"
 #include "godot_cpp/core/error_macros.hpp"
 #include "godot_cpp/core/memory.hpp"
@@ -81,60 +82,38 @@ Node* Godot3DTiles::AssetManipulation::get_root_of_edit_scene(Node* baseNode) {
 }
 
 
-void Godot3DTiles::AssetManipulation::instantiate_tileset(Node* baseNode, int32_t tilesetType) {
+void Godot3DTiles::AssetManipulation::instantiate_tileset(Node* baseNode, int32_t assetId, const String& assetType) {
 	Node* root = get_root_of_edit_scene(baseNode);
 	Cesium3DTileset* tileset = memnew(Cesium3DTileset);
 	root->add_child(tileset, true);
 	
-	
-	TilesetType actualType = static_cast<TilesetType>(tilesetType);
 	CesiumIonRasterOverlay* rasterOverlay = nullptr;
-	Cesium3DTileset* extraTileset = nullptr;
-	
-	constexpr int32_t cesiumWorldTerrainId = 1;
-	constexpr int32_t bingMapsAerialWithLabelsId = 3;
-	constexpr int32_t osmBuildingsId = 96188;
-	constexpr int32_t bingRoadsId = 4;
-	
-	switch(actualType) {
-		case Godot3DTiles::AssetManipulation::TilesetType::Blank:
-			break;
-		case Godot3DTiles::AssetManipulation::TilesetType::BingMapsAerialWithLabels:
-			tileset->set_ion_asset_id(cesiumWorldTerrainId);
-			rasterOverlay = memnew(CesiumIonRasterOverlay);
-			rasterOverlay->set_asset_id(bingMapsAerialWithLabelsId);
-			break;
 		
-		case Godot3DTiles::AssetManipulation::TilesetType::BingMapsRoads:
-			tileset->set_ion_asset_id(cesiumWorldTerrainId);
-			rasterOverlay = memnew(CesiumIonRasterOverlay);
-			rasterOverlay->set_asset_id(bingRoadsId);
-			break;
-			
-		case Godot3DTiles::AssetManipulation::TilesetType::OsmBuildings:
-			tileset->set_ion_asset_id(cesiumWorldTerrainId);
-			rasterOverlay = memnew(CesiumIonRasterOverlay);
-			rasterOverlay->set_asset_id(bingMapsAerialWithLabelsId);
-			extraTileset = memnew(Cesium3DTileset);
-			extraTileset->set_ion_asset_id(osmBuildingsId);
-			break;
-		case Godot3DTiles::AssetManipulation::TilesetType::GooglePhotorealistic:
-			tileset->set_ion_asset_id(2275207);
-			break;
-		default:
-			ERR_PRINT(String("Tileset type not implemented: ") + magic_enum::enum_name(actualType).data());
-			break;	
-	}
-
-	if (extraTileset != nullptr) {
-		root->add_child(extraTileset, true);
-	}
-
-	if (rasterOverlay != nullptr) {
-		tileset->add_child(rasterOverlay, true);
-		rasterOverlay->set_owner(root);
+	if (assetId == 0) {
+		// We just create the current tileset and that's it
+		return;
 	}
 	
+	// If the asset type is terrain or 3D tiles, just set the asset id
+	if (assetType == "3DTILES" || assetType == "TERRAIN") {
+		tileset->set_ion_asset_id(assetId);
+		return;
+	}
+	if (assetType != "IMAGERY") {
+		// We currently do not support any other asset types, so these will have to be added manually
+		ERR_PRINT("3D Tiles For Godot currently does not support the asset you're trying to add, try adding it manually through the Cesium3DTileset Node!");
+		return;
+	}
+	
+	// For imagery we can create a tileset with Cesium's world terrain and then add the imagery on top of it
+	// In the future we might wanna check if the tileset already exists, but I do not want to assume too much rn
+	constexpr int64_t worldTerrainId = 1; 
+	tileset->set_ion_asset_id(worldTerrainId);
+
+	rasterOverlay = memnew(CesiumIonRasterOverlay);
+	rasterOverlay->set_asset_id(assetId);
+	tileset->add_child(rasterOverlay, true);
+	rasterOverlay->set_owner(root);
 }
 
 

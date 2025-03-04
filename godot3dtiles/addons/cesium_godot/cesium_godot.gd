@@ -19,12 +19,9 @@ var sign_out_button : Button
 var connect_button : Button
 var blank_tileset_button : Button
 var dynamic_camera_button : Button
-var osm_buildings_button : Button
-var world_and_bing_button : Button
-var google_3d_button : Button
 var ion_button_holder : Control
 
-var ion_asset_buttons : Array[Button] = [self.osm_buildings_button, self.world_and_bing_button, self.google_3d_button]
+var ion_asset_buttons : Array[Button] = []
 
 var auth_controller_node : OAuthController = null
 var cesium_builder_node : CesiumGDAssetBuilder = null
@@ -72,9 +69,6 @@ func init_buttons() -> void:
 	self.connect_button = self.docked_scene.find_child("ConnectButton") as Button
 	self.blank_tileset_button = self.docked_scene.find_child("BlankTilesetButton") as Button
 	self.dynamic_camera_button = self.docked_scene.find_child("DynamicCameraButton") as Button
-	self.world_and_bing_button = self.docked_scene.find_child("WorldAndBingButton") as Button
-	self.osm_buildings_button = self.docked_scene.find_child("WorldAndOsmButton") as Button
-	self.google_3d_button = self.docked_scene.find_child("Google3DTilesButton") as Button
 	self.token_panel_data.initialize_fields(self.token_panel)
 	# Connect to their signals
 	self.upload_button.pressed.connect(on_upload_pressed)
@@ -85,21 +79,6 @@ func init_buttons() -> void:
 	self.blank_tileset_button.pressed.connect(add_tileset)
 	self.dynamic_camera_button.pressed.connect(create_dynamic_camera)
 	self.token_button.pressed.connect(on_token_panel_pressed)
-	self.world_and_bing_button.pressed.connect(on_world_and_bing_button)
-	self.osm_buildings_button.pressed.connect(on_osm_buildings_pressed)
-	self.google_3d_button.pressed.connect(on_google_button_pressed)
-
-
-# TODO: Solve magic numbers
-
-func on_google_button_pressed() -> void:
-	self.cesium_builder_node.instantiate_tileset(2)
-
-func on_world_and_bing_button() -> void:
-	self.cesium_builder_node.instantiate_tileset(3)
-
-func on_osm_buildings_pressed() -> void:
-	self.cesium_builder_node.instantiate_tileset(1)
 
 func on_token_panel_pressed() -> void:
 	self.token_panel.popup()
@@ -151,7 +130,7 @@ func on_georef_checked(is_checked: bool) -> void:
 	self.cesium_builder_node.use_georeferences = is_checked
 
 func add_tileset():
-	self.cesium_builder_node.instantiate_tileset(CesiumAssetBuilder.TILESET_TYPE.Blank)
+	self.cesium_builder_node.instantiate_tileset(CesiumAssetBuilder.TILESET_TYPE.Blank, "")
 
 func create_dynamic_camera():
 	print("Create dynamic camera!")
@@ -204,7 +183,7 @@ func create_ion_button(assetId: int, name: String, type: String) -> Button:
 	hbox.add_child(button)
 	# Connect with the signal
 	button.pressed.connect(func():
-		self.cesium_builder_node.instantiate_tileset(assetId)
+		self.cesium_builder_node.instantiate_tileset(assetId, type)
 	)
 	return button
 
