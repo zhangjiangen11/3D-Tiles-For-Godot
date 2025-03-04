@@ -4,6 +4,7 @@
 #include "Models/CesiumGDCreditSystem.h"
 #include "Models/CesiumGDTileset.h"
 #include "godot_cpp/variant/array.hpp"
+#include "godot_cpp/variant/string.hpp"
 #if defined(CESIUM_GD_EXT)
 #include <godot_cpp/classes/node3d.hpp>
 using namespace godot;
@@ -25,7 +26,7 @@ namespace Godot3DTiles::AssetManipulation {
   };  
 
 
-  void instantiate_tileset(Node* baseNode, int32_t tilesetType);
+  void instantiate_tileset(Node* baseNode, int32_t assetId = 0, const String& assetType = "");
   
   void instantiate_dynamic_cam(Node* baseNode);
   
