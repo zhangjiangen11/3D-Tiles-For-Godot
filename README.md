@@ -8,7 +8,7 @@ A Godot 4 extension that integrates Cesium 3D Tiles capabilities into Godot Engi
 
 3D Tiles for Godot supports cloud and private network content and services based on open standards and APIs. You are free to use any combination of supported content sources, standards, APIs with 3D Tiles for Godot.
 
-⛓️ Godot Engine Integration
+## Godot Engine Integration
 3D Tiles for Godot is tightly integrated with the Godot Engine making it possible to visualize and interact with real-world content in editor and at runtime. The plugin also has support for Godot physics, collisions, and character interaction. Leverage decades worth of cutting-edge advancements from the 3D Tiles standard to create cohesive, interactive, and realistic simulations and applications.
 
 
