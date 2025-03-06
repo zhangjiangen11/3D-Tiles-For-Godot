@@ -1,9 +1,17 @@
 
 # 3D Tiles for Godot
 
-3D Tiles for Godot brings the 3D geospatial ecosystem to the Godot Engine. By combining a high-accuracy full-scale WGS84 globe, open APIs and open standards for spatial indexing such as 3D Tiles, and cloud-based real-world content from Cesium ion with the Godot Engine, this project enables a new era of 3D geospatial software.
-
 A Godot 4 extension that integrates Cesium 3D Tiles capabilities into Godot Engine through GDExtension.
+
+## 3D Tiles and the 3D Geospatial Ecosystem
+3D Tiles for Godot streams real-world 3D content such as high-resolution photogrammetry, terrain, imagery, and 3D buildings from Cesium Ion and other sources available as optional commercial subscriptions. The plugin includes Cesium Ion integration for instant access to global high-resolution 3D content ready for runtime streaming. Cesium ion users can also leverage cloud-based 3D tiling pipelines to create end-to-end workflows to transform massive heterogenous content into semantically-rich 3D Tiles, ready for streaming to the Godot Engine.
+
+3D Tiles for Godot supports cloud and private network content and services based on open standards and APIs. You are free to use any combination of supported content sources, standards, APIs with 3D Tiles for Godot.
+
+⛓️ Godot Engine Integration
+3D Tiles for Godot is tightly integrated with the Godot Engine making it possible to visualize and interact with real-world content in editor and at runtime. The plugin also has support for Godot physics, collisions, and character interaction. Leverage decades worth of cutting-edge advancements from the 3D Tiles standard to create cohesive, interactive, and realistic simulations and applications.
+
+
 
 ![Godot Cesium Plugin](readme_resources/demo1.jpg)
 
