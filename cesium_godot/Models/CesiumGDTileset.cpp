@@ -1,8 +1,11 @@
-#include "Models/CesiumGDCreditSystem.h"
 #define SPDLOG_COMPILED_LIB
 #include "Models/CesiumGlobe.h"
 #define SPDLOG_FMT_EXTERNAL
 
+#include "Models/CesiumGDCreditSystem.h"
+#include "missing_functions.hpp"
+#include "Cesium3DTilesSelection/Tile.h"
+#include "Cesium3DTilesSelection/TileContent.h"
 #include "CesiumGDTileset.h"
 
 #if defined(CESIUM_GD_EXT)
@@ -33,16 +36,13 @@ using namespace godot;
 
 #include "Utils/AssetManipulation.h"
 #include "Cesium3DTilesSelection/Tileset.h"
-#include "../CesiumGDModelLoader.h"
 #include "Cesium3DTilesSelection/TilesetExternals.h"
-#include "../Implementations/LocalAssetAccesor.h"
 #include "SimpleTaskProcessor.h"
 #include "../Utils/CesiumMathUtils.h"
 #include "../Implementations/NetworkAssetAccessor.h"
 #include "../Implementations/GodotPrepareRenderResources.h"
 #include "CesiumHTTPRequestNode.h"
 #include "Cesium3DTilesContent/registerAllTileContentTypes.h"
-#include "../../CesiumGeometry/include/CesiumGeometry/QuadtreeTileID.h"
 #include "../Utils/CesiumVariantHash.h"
 #include <glm/gtc/quaternion.hpp>
 #include "CesiumGDRasterOverlay.h"
@@ -311,6 +311,13 @@ void Cesium3DTileset::add_overlay(CesiumIonRasterOverlay* overlay)
 	this->m_activeTileset->getOverlays().add(overlay->get_overlay_instance());
 }
 
+void Cesium3DTileset::free_tile(MeshInstance3D* tileInstance, size_t tileHash) {
+	if (tileInstance == nullptr) {
+		return;
+	}
+	// Mark for deletion and empty the slot on the hash map
+	tileInstance->queue_free();
+}
 
 bool Cesium3DTileset::is_georeferenced(CesiumGeoreference** outRef) const
 {
@@ -329,7 +336,7 @@ void Cesium3DTileset::recreate_tileset()
 }
 
 void Cesium3DTileset::load_tileset()
-{
+{	
 	//Get the options to read the tileset and then load it into memory
 	const Cesium3DTilesSelection::TilesetOptions& options = this->m_tilesetConfig->options;
 	const Cesium3DTilesSelection::TilesetContentOptions& contentOptions = this->m_tilesetConfig->contentOptions;
@@ -396,103 +403,65 @@ Cesium3DTilesSelection::TilesetExternals Cesium3DTileset::create_tileset_externa
 
 void Cesium3DTileset::render_tile_as_node(const Cesium3DTilesSelection::Tile& tile)
 {
-	//Check if it's already in the scene tree first
-	const Cesium3DTilesSelection::TileID& tileId = tile.getTileID();
-	size_t hash = std::visit(CesiumVariantHash{}, tileId);
-
-	if (this->m_instancedTilesByHash.find(hash) != this->m_instancedTilesByHash.end()) {
-		this->m_initialLoadingFinished = true;
-		MeshInstance3D* foundNode = m_instancedTilesByHash[hash];
-		if (foundNode == nullptr) {
-			WARN_PRINT("Failed to get a tile from the instance id");
-			return;
-		}
-		foundNode->show();
-
-		if (this->m_createPhysicsMeshes) {
-			Node* collisionNode = foundNode->get_child_count() < 1 ? nullptr : foundNode->get_child(0);
-			if (collisionNode == nullptr) return;
-			CollisionShape3D* shape = collisionNode->get_child_count() < 1 ? nullptr : Object::cast_to<CollisionShape3D>(collisionNode->get_child(0));
-			if (shape == nullptr) return;
-			shape->set_disabled(false);
-		}
-
-		return;
-	}
-
-	bool renderable = tile.isRenderable();
-	bool empty = tile.isEmptyContent();
-	if (!tile.isRenderable() || tile.getContent().isEmptyContent()) return;
-
 	if (tile.getState() == Cesium3DTilesSelection::TileLoadState::Failed) {
 		std::string tileIdStr = Cesium3DTilesSelection::TileIdUtilities::createTileIdString(tile.getTileID());
 		ERR_PRINT(String("Failed to load tile ") + tileIdStr.c_str());
 		return;
 	}
-
-	Error err;
-	const CesiumGltf::Model& model = tile.getContent().getRenderContent()->getModel();
-
-	MeshInstance3D* instance = static_cast<MeshInstance3D*>(tile.getContent().getRenderContent()->getRenderResources());
-	if (instance == nullptr) {
-		//FIXME: This might actually have a bug
-		//If we didn't load a render resource, create the new mesh (we'll register this to cache later)
-		Ref<ArrayMesh> meshData = CesiumGDModelLoader::generate_meshes_from_model(model, &err);
-		if (err != Error::OK) {
-			ERR_PRINT(String("Could not generate render resources for tile: ") + itos(hash));
-			return;
-		}
-		instance = memnew(MeshInstance3D);
-		instance->set_mesh(meshData);
+	
+	if (tile.getState() != Cesium3DTilesSelection::TileLoadState::Done) {
+		return;
 	}
 
-	this->register_tile(instance, hash);
-	instance->set_name(itos(hash));
+	const Cesium3DTilesSelection::TileContent& content = tile.getContent();
+	const Cesium3DTilesSelection::TileRenderContent* renderContent = content.getRenderContent();
+	
+	if (renderContent == nullptr) {
+		return;
+	}
+	MeshInstance3D* foundNode = static_cast<MeshInstance3D*>(renderContent->getRenderResources());
+	if (foundNode == nullptr) return;
+	
+	if (this->m_createPhysicsMeshes) {
+		Node* collisionNode = foundNode->get_child_count() < 1 ? nullptr : foundNode->get_child(0);
+		if (collisionNode == nullptr) return;
+		CollisionShape3D* shape = collisionNode->get_child_count() < 1 ? nullptr : Object::cast_to<CollisionShape3D>(collisionNode->get_child(0));
+		if (shape == nullptr) return;
+		shape->set_disabled(false);
+	}
+
+	if (!foundNode->is_inside_tree()) {
+		size_t hash = std::visit(CesiumVariantHash{}, tile.getTileID());
+		this->register_tile(foundNode, hash);
+		foundNode->set_name(itos(hash));
+	}
+	
+	foundNode->show();
 }
 
 void Cesium3DTileset::despawn_tile(const Cesium3DTilesSelection::Tile& tile)
 {
-	size_t hash = std::visit(CesiumVariantHash{}, tile.getTileID());
-
-	if (this->m_instancedTilesByHash.find(hash) == this->m_instancedTilesByHash.end()) {
+	if (tile.getState() != Cesium3DTilesSelection::TileLoadState::Done) {
 		return;
 	}
-
-	MeshInstance3D* foundNode = this->m_instancedTilesByHash[hash];
-	if (foundNode == nullptr) {
-		WARN_PRINT("Failed to despawn tile, address is nullptr");
-		return;
-	}
-	
 	const Cesium3DTilesSelection::TileRenderContent* renderContent = tile.getContent().getRenderContent();
-	
+	if (renderContent == nullptr) return;
+	MeshInstance3D* foundNode = static_cast<MeshInstance3D*>(renderContent->getRenderResources());
+	if (!foundNode->is_inside_tree()) return;
 	foundNode->hide();
 	// Deactivate the collisions
 	if (this->m_createPhysicsMeshes) {
-		Node* collisionNode = foundNode->get_child_count() < 1 ? nullptr : foundNode->get_child(0);
+		int32_t childCount = foundNode->get_child_count();
+		Node* collisionNode = childCount < 1 ? nullptr : foundNode->get_child(0);
 		if (collisionNode == nullptr) return;
-			CollisionShape3D* shape = collisionNode->get_child_count() < 1 ? nullptr : Object::cast_to<CollisionShape3D>(collisionNode->get_child(0));
-			if (shape == nullptr) return;
-			shape->set_disabled(true);
+		CollisionShape3D* shape = collisionNode->get_child_count() < 1 ? nullptr : Object::cast_to<CollisionShape3D>(collisionNode->get_child(0));
+		if (shape == nullptr) return;
+		shape->set_disabled(true);
 	}
 }
 
 void Cesium3DTileset::despawn_tile_deferred(const Cesium3DTilesSelection::Tile& tile)
 {
-	size_t hash = std::visit(CesiumVariantHash{}, tile.getTileID());
-
-	if (this->m_instancedTilesByHash.find(hash) == this->m_instancedTilesByHash.end()) {
-		std::string tileIdStr = Cesium3DTilesSelection::TileIdUtilities::createTileIdString(tile.getTileID());
-		ERR_PRINT(String("Could not find node with name ") + itos(hash));
-		return;
-	}
-
-	
-	MeshInstance3D* foundNode = this->m_instancedTilesByHash[hash];
-	if (foundNode != nullptr && foundNode->is_inside_tree()) {
-		return;
-	}
-	foundNode->call_deferred("hide");
 }
 
 bool Cesium3DTileset::try_get_tile_from_instance_id(const ObjectID& objectId, MeshInstance3D** outNode)
@@ -513,9 +482,8 @@ void Cesium3DTileset::process_tile_chunk(const std::vector<Cesium3DTilesSelectio
 
 
 void Cesium3DTileset::register_tile(MeshInstance3D *instance, size_t hash) {
-	auto internalMode = this->m_showHierarchy ? Node::InternalMode::INTERNAL_MODE_DISABLED : Node::InternalMode::INTERNAL_MODE_FRONT; 
-	this->add_child(instance, false, internalMode);
-	this->m_instancedTilesByHash.insert({ hash, instance });
+	this->add_child(instance, false);
+	instance->set_owner(this);
 	tileCount++;
 }
 
@@ -590,6 +558,7 @@ void Cesium3DTileset::_bind_methods()
 	ClassDB::bind_method(D_METHOD("is_initial_loading_finished"), &Cesium3DTileset::is_initial_loading_finished);
 	ClassDB::bind_method(D_METHOD("update_tileset", "camera_transform"), &Cesium3DTileset::update_tileset);
 	ClassDB::bind_method(D_METHOD("get_earth_origin"), &Cesium3DTileset::get_earth_origin);
+	ClassDB::bind_method(D_METHOD("free_tile"), &Cesium3DTileset::free_tile);
 #pragma endregion
 }
 

@@ -2,6 +2,7 @@
 #include "CesiumGltf/ImageAsset.h"
 #include "CesiumGltfReader/ImageDecoder.h"
 #include "Models/CesiumGlobe.h"
+#include "Utils/CesiumVariantHash.h"
 #include "error_names.hpp"
 
 #if defined(CESIUM_GD_EXT)
@@ -113,12 +114,11 @@ void* GodotPrepareRenderResources::prepareInMainThread(Tile& tile, void* pLoadTh
 }
 
 void GodotPrepareRenderResources::free(Tile& tile, void* pLoadThreadResult, void* pMainThreadResult) noexcept
-{
+{	
+	const auto& tileId = tile.getTileID();
+	size_t hash = std::visit(CesiumVariantHash{}, tileId);
 	auto* instance = static_cast<MeshInstance3D*>(pMainThreadResult);
-	if (instance == nullptr){
-		return;
-	} 
-	instance->queue_free();
+	this->m_tileset->call_deferred("free_tile", instance, hash);
 }
 
 void GodotPrepareRenderResources::attachRasterInMainThread(const Tile& tile, int32_t overlayTextureCoordinateID, const CesiumRasterOverlays::RasterOverlayTile& rasterTile, void* pMainThreadRendererResources, const glm::dvec2& translation, const glm::dvec2& scale)

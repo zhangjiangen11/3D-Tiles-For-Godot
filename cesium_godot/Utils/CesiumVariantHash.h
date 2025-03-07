@@ -2,6 +2,7 @@
 #define CESIUM_VARIANT_HASH_H
 #include <type_traits>
 #include "CesiumGeometry/OctreeTileID.h"
+#include "CesiumGeometry/QuadtreeTileID.h"
 
 
 struct CesiumVariantHash {
