@@ -101,6 +101,8 @@ public:
 
 	void add_overlay(CesiumIonRasterOverlay* overlay);
 
+	void free_tile(MeshInstance3D* tileInstance, size_t tileHash);
+	
 	bool is_georeferenced(CesiumGeoreference** outRef) const;
 
 	void _enter_tree() override;
@@ -137,7 +139,6 @@ private:
 	String m_url{};
 
 	int64_t m_cesiumIonAssetId = 0;
-	std::unordered_map<size_t, MeshInstance3D*> m_instancedTilesByHash{};
 
 	bool m_initialLoadingFinished;
 
