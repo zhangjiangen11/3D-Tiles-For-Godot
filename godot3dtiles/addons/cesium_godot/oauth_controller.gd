@@ -50,6 +50,7 @@ func _process(delta: float) -> void:
 		# Send the you can close this window page
 		send_success_page(connection)
 		self.is_signed_in = true
+		self.get_parent().call("add_ion_buttons")
 
 func send_success_page(connection: StreamPeerTCP) -> void:
 	var pageStr : String = FileAccess.get_file_as_string("res://addons/cesium_godot/success_page.html")
