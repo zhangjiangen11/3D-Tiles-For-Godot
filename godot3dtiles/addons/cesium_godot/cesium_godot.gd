@@ -1,6 +1,8 @@
 @tool
 extends EditorPlugin
 
+class_name CesiumGodotEditorTool
+
 const editorAddon := preload("res://addons/cesium_godot/panels/cesium_panel.tscn")
 
 const token_panel_popup := preload("res://addons/cesium_godot/panels/token_panel.tscn")
@@ -35,6 +37,7 @@ var token_panel: Popup = null
 var token_panel_data : TokenPanelData = null
 
 func _enter_tree() -> void:
+	self.set_process(false)
 	self.docked_scene = editorAddon.instantiate()
 	add_control_to_dock(EditorPlugin.DOCK_SLOT_RIGHT_UL, self.docked_scene)
 	self.set_session_buttons_enabled(false)
@@ -150,6 +153,7 @@ func add_ion_buttons() -> void:
 	var bodyBytes := response[3] as PackedByteArray
 	var body := JSON.parse_string(bodyBytes.get_string_from_utf8()) as Dictionary
 
+	self.set_process(true)
 	if (status >= HTTPClient.ResponseCode.RESPONSE_BAD_REQUEST):
 		push_error("Error connecting to the Cesium API for assets, server responded with: " + str(status) + "\nBody: " + str(body))
 		return
@@ -164,6 +168,14 @@ func add_ion_buttons() -> void:
 		var name = item.get("name")
 		var type = item.get("type")
 		self.ion_asset_buttons.append(self.create_ion_button(id, name, type))
+
+
+func is_http_request_busy(http_request: HTTPRequest) -> bool:
+	return http_request.get_http_client_status() in [
+		HTTPClient.STATUS_CONNECTING,
+		HTTPClient.STATUS_REQUESTING,
+		HTTPClient.STATUS_BODY
+	]
 
 func create_ion_button(assetId: int, name: String, type: String) -> Button:
 	# Create a button
