@@ -15,7 +15,7 @@ Leverage decades worth of cutting-edge advancements from the 3D Tiles standard t
 
 
 
-![Godot Cesium Plugin](readme_resources/demo1.jpg)
+![Godot Cesium Plugin](readme_resources/NYC_Screenshot.png)
 
 ## Prerequisites
 
