@@ -117,6 +117,7 @@ The Cesium Ion Panel provides essential tools for managing geospatial content an
 ### Setting up your first scene
 
 ![CreateScene](readme_resources/create_scene.png)
+
 **Create a new 3D scene**
 
 **Add a new tileset**
