@@ -116,8 +116,8 @@ The Cesium Ion Panel provides essential tools for managing geospatial content an
 
 ### Setting up your first scene
 
-**Create a new 3D scene**
 ![CreateScene](readme_resources/create_scene.png)
+**Create a new 3D scene**
 
 **Add a new tileset**
 You can choose between the different pre-defined tilesets provided to you on the Cesium Ion Panel, or create a new blank tileset to customize it with your desired asset id and data source URL.
