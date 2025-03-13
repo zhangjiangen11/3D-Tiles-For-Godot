@@ -155,7 +155,7 @@ func add_ion_buttons() -> void:
 
 	self.set_process(true)
 	if (status >= HTTPClient.ResponseCode.RESPONSE_BAD_REQUEST):
-		push_error("Error connecting to the Cesium API for assets, server responded with: " + str(status) + "\nBody: " + str(body))
+		push_error("Error connecting to the Cesium API for assets, try signing in manually, server responded with: " + str(status) + "\nBody: " + str(body))
 		return
 	# For each one of the assets, parse and create a button
 	var items := body.get("items") as Array

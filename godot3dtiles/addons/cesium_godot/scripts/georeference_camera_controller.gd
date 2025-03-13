@@ -37,7 +37,6 @@ var info_labels_ui : InfoLabelsUI
 
 func _ready() -> void:
 	self.loaded = false
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	if (self.globe_node.origin_type == CesiumGeoreference.OriginType.TrueOrigin):
 		var ecefPos : Vector3 = Vector3(self.globe_node.ecefX, self.globe_node.ecefY, self.globe_node.ecefZ)
 		var enginePos: Vector3 = self.globe_node.get_initial_tx_ecef_to_engine() * ecefPos
@@ -101,11 +100,11 @@ func calculate_surface_basis() -> Basis:
 	return result
 
 func movement_input(delta: float):
-	#if (Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)):
-	var mouse_velocity : Vector2 = Input.get_last_mouse_velocity()
-	var delta_yaw : float = mouse_velocity.x * delta * self.rotation_speed
-	var delta_pitch : float = mouse_velocity.y * delta * self.rotation_speed
-	self.rotate_camera(delta_pitch, delta_yaw)
+	if (Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)):
+		var mouse_velocity : Vector2 = Input.get_last_mouse_velocity()
+		var delta_yaw : float = mouse_velocity.x * delta * self.rotation_speed
+		var delta_pitch : float = mouse_velocity.y * delta * self.rotation_speed
+		self.rotate_camera(delta_pitch, delta_yaw)
 	
 	var direction := Vector3.ZERO
 	var movingBasis : Basis = self.global_transform.basis

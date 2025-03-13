@@ -3,6 +3,7 @@ class_name TokenPanelData
 enum TokenUsageType { New, Existing, Specific }
 
 var existing_token_check: CheckBox
+var existing_tokens_list: OptionButton
 var specific_token_check: CheckBox
 var config_picker: EditorResourcePicker
 var new_token_check: CheckBox
@@ -11,6 +12,9 @@ var test_token_button: Button
 var specific_token_name: TextEdit
 var asset_list_group: BoxContainer
 var asset_list_items: OptionButton
+var asset_list_id: TextEdit
+
+var last_existing_tokens: Dictionary
 
 var token_troubleshooting: TokenTroubleshooting
 
@@ -33,6 +37,7 @@ func initialize_fields(token_panel: Popup) -> void:
 	self.test_token_button = token_panel.find_child("TestToken") as Button
 	self.asset_list_group = token_panel.find_child("AssetListGroup") as BoxContainer
 	self.asset_list_items = token_panel.find_child("AssetList") as OptionButton
+	self.existing_tokens_list = token_panel.find_child("ExistingToken") as OptionButton
 	# Then add the ResourcePicker
 	var configuration_container = token_panel.find_child("ConfigurationContainer")
 
@@ -47,13 +52,8 @@ func initialize_fields(token_panel: Popup) -> void:
 	self.test_token_button.pressed.connect(on_test_button_pressed)	
 	self.request_node = HTTPRequest.new()
 	token_panel.add_child(self.request_node)
-	self.request_node.request_completed.connect(_on_request_completed)
 	self.token_troubleshooting.set_data(self)
 
-
-
-func _on_request_completed(result: int, responseCode: int, headers: PackedStringArray, body: PackedByteArray) -> void:
-	pass
 
 func initialize_panel_buttons_from_state() -> void:
 	var usage = self.current_token_usage
@@ -87,18 +87,46 @@ func on_existing_token_check(checked: bool) -> void:
 	self.new_token_check.button_pressed = false
 	self.specific_token_check.button_pressed = false
 	self.current_token_usage = TokenPanelData.TokenUsageType.Existing
-	pass
+	# Send a request to get the token we want to use
+	const url := "https://api.cesium.com/v2/tokens"
+	var token : String = self.default_config.accessToken;
+	var headers: PackedStringArray = ["Authorization: Bearer " + token]
+	var err : int = self.request_node.request(url, headers)
+	if (err != OK):
+		push_error("Error getting tokens from Cesium Ion, try connecting manually!")
+		return
+	
+	var response = await self.request_node.request_completed
+	var status = response[1]
+	var bodyBytes := response[3] as PackedByteArray
+	var body := JSON.parse_string(bodyBytes.get_string_from_utf8()) as Dictionary
+
+	if (status >= HTTPClient.ResponseCode.RESPONSE_BAD_REQUEST):
+		push_error("Error connecting to the Cesium API for tokens, try signing in manually, server responded with: " + str(status) + "\nBody: " + str(body))
+		return
+	var items := body.get("items") as Array
+	if (items == null):
+		push_error("Failed to parse request, in body expected \"items\", found: " + str(body))
+		return
+	for item in items:
+		item = item as Dictionary
+		var name = item.get("name")
+		var tokenContent = item.get("token")
+		self.last_existing_tokens[name] = tokenContent
+		self.existing_tokens_list.add_item(name)
 
 
 func on_test_button_pressed() -> void:
 	self.token_troubleshooting.is_valid_token(self.default_config.accessToken)
-	
 
 func apply_or_create_token() -> void:
 	var usage := self.current_token_usage
 	if (usage == TokenUsageType.Specific):
 		self.default_config.accessToken = self.specific_token_name.text
-
+	if (usage == TokenUsageType.Existing):
+		var tkName = self.existing_tokens_list.get_item_text(self.existing_tokens_list.selected)
+		var currToken: String = self.last_existing_tokens.get(tkName)
+		self.default_config.accessToken = currToken
 	OS.alert("Token changed in configuration, you can now close this window...", "Changes applied!")
 
 

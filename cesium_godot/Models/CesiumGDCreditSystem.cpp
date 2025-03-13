@@ -49,7 +49,6 @@ void CesiumGDCreditSystem::update_credits() {
   }
 
   this->m_rect->set_html(finalHtml);
-  //printf("%s\n", finalHtml.utf8().get_data());*/
 }
 
   void CesiumGDCreditSystem::add_credit_system(std::shared_ptr<CesiumUtility::CreditSystem> creditSystem) {

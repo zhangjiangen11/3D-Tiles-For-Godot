@@ -34,6 +34,7 @@ label_settings = SubResource("LabelSettings_200ih")
 autowrap_mode = 2
 
 [node name="HSeparator" type="HSeparator" parent="VSplitContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VSplitContainer/VBoxContainer"]
@@ -76,12 +77,11 @@ size_flags_horizontal = 3
 text = "Use an existing token"
 label_settings = SubResource("LabelSettings_r4tjn")
 
-[node name="ItemList" type="ItemList" parent="VSplitContainer/VBoxContainer/HBoxContainer2"]
-custom_minimum_size = Vector2(1.45519e-11, 40)
+[node name="ExistingToken" type="OptionButton" parent="VSplitContainer/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_horizontal = 3
-item_count = 1
-item_0/text = "Default Token"
+autowrap_mode = 2
 
 [node name="Spacing2" type="MarginContainer" parent="VSplitContainer/VBoxContainer"]
 custom_minimum_size = Vector2(150, 50)
@@ -145,9 +145,15 @@ text = "The selected token has access to:"
 label_settings = SubResource("LabelSettings_r4tjn")
 
 [node name="AssetList" type="OptionButton" parent="VSplitContainer/VBoxContainer/AssetListGroup"]
-custom_minimum_size = Vector2(200, 30)
+custom_minimum_size = Vector2(100, 30)
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="AssetId" type="TextEdit" parent="VSplitContainer/VBoxContainer/AssetListGroup"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+editable = false
 
 [node name="MarginContainer4" type="MarginContainer" parent="VSplitContainer/VBoxContainer"]
 custom_minimum_size = Vector2(1.45519e-11, 50)
