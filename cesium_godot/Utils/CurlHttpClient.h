@@ -82,7 +82,7 @@ struct MemoryStruct {
 /// @brief Wrapper around libcurl, but without worrying about polling constantly
 template<uint32_t N_MAX_HANDLES>
 class CurlHttpClient {
-	static_assert(N_MAX_HANDLES <= 80); //Just to handle around 80 handles at once, multiple transfers will happen on the same handle
+	static_assert(N_MAX_HANDLES <= 100); //Just to handle around 80 handles at once, multiple transfers will happen on the same handle
 
 public:
 	CurlHttpClient() {

@@ -53,9 +53,17 @@ CesiumGDConfig* CesiumGDConfig::get_singleton(Node* baseNode) {
 	
 	s_instance = Godot3DTiles::AssetManipulation::find_or_create_config_node(baseNode);
 
+	
+	// Write to cache
+	String errMsg("Could not write access token to cache path, error: ");
+	Ref<DirAccess> userAccess = DirAccess::open("user://");
+	Error err = userAccess->make_dir_recursive(CACHE_PATH);
+	if (err != Error::OK) {
+		ERR_PRINT(errMsg + REFLECT_ERR_NAME(err));
+		return s_instance;
+	}	
 	// Try to read the token data
-	Error err;
-	Ref<FileAccess> file = open_file_access_with_err(CONFIG_FILE_PATH, FileAccess::ModeFlags::READ, &err);
+	Ref<FileAccess> file = open_file_access_with_err(CONFIG_FILE_PATH, FileAccess::ModeFlags::WRITE_READ, &err);
 	
 	if (err != Error::OK) {
 		ERR_PRINT("Error opening cached session file:" + String(REFLECT_ERR_NAME(err)) + ", please try to connect to Cesium ION and reopen the project! ");

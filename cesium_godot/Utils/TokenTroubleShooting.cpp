@@ -87,7 +87,7 @@ void TokenTroubleshooting::on_token_validity_check(const String& token, bool isV
   if (asset_list_items.get_type() == Variant::OBJECT) {
       Object *list_items = asset_list_items;
       for (const auto& kv : data) {
-        list_items->call("add_item", kv.first);
+        list_items->call("add_item", kv.first.c_str());
       }
   }
 }
@@ -109,7 +109,5 @@ void TokenTroubleshooting::_bind_methods() {
 
   ClassDB::bind_method(D_METHOD("set_data", "data"), &TokenTroubleshooting::set_data);
   ClassDB::bind_method(D_METHOD("get_asset_id_by_name"), &TokenTroubleshooting::get_asset_id_by_name);
-  // Mark the virtual method as overrideable in scripts
-  BIND_VIRTUAL_METHOD(TokenTroubleshooting, on_token_validity_check); 
   
 }

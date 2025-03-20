@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <fstream>
 #include <memory>
+#include <thread>
 
 #if defined (CESIUM_GD_EXT)
 #include <godot_cpp/classes/http_client.hpp>
@@ -26,7 +27,7 @@ using FutureResult_t = std::shared_ptr<CesiumAsync::IAssetRequest>;
 
 NetworkAssetAccessor::NetworkAssetAccessor()
 {
-	constexpr size_t maxThreadsPerClient = 8;
+	constexpr size_t maxThreadsPerClient = 16;
 	this->m_curlClient.init_client(maxThreadsPerClient);
 }
 
