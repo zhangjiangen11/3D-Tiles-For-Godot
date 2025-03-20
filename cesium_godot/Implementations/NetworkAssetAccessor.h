@@ -37,7 +37,7 @@ public:
 private:
 	CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>> process_request(HTTPClient::Method method, const CesiumAsync::AsyncSystem &asyncSystem, const std::string &url, const std::vector<THeader> &headers = {});
 
-	CurlHttpClient<80> m_curlClient{};
+	CurlHttpClient<100> m_curlClient{};
 };
 
 #endif

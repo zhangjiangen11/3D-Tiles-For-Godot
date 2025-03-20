@@ -5,10 +5,12 @@
 #include "godot_cpp/classes/os.hpp"
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/core/error_macros.hpp"
+#include "godot_cpp/variant/dictionary.hpp"
 #include "godot_cpp/variant/packed_string_array.hpp"
 #include "godot_cpp/variant/string.hpp"
 #include <cstdint>
 #include <string_view>
+#include <unordered_map>
 
 constexpr std::string_view ASSET_LIST_URL =
     "https://api.cesium.com/v1/assets?access_token=";
@@ -18,7 +20,7 @@ void TokenTroubleshooting::is_valid_token(const String& token) {
   m_httpClient.init_client(1);
   std::string request = ASSET_LIST_URL.data();
   request.append(token.utf8().get_data());
-  m_httpClient.send_get_same_thread(
+  m_httpClient.send_get(
       request.c_str(),
       [this, token](int32_t status, const Vector<uint8_t> &body) { 
         // Get either a list of the available assets, or the error message
@@ -33,19 +35,18 @@ void TokenTroubleshooting::is_valid_token(const String& token) {
               String("There was an error getting the body of the request: ") +
               REFLECT_ERR_NAME(parseErr);
           ERR_PRINT(msg);
-          on_token_validity_check(token, false,{ msg });
+          on_token_validity_check(token, false,{ {msg.utf8().get_data(), 0}});
           return;
         }
 
         if (status >= HTTPClient::ResponseCode::RESPONSE_BAD_REQUEST) {
           String msg = jsonObj->get_data().get("message");
-          on_token_validity_check(token, false,{ msg });
+          on_token_validity_check(token, false,{ {msg.utf8().get_data(), 0} });
           return;
         }
 
         // Build the list of assets
-        PackedStringArray assetList;
-
+        std::unordered_map<std::string, int32_t> assetDict{};
         // Get the items
         bool hasItems;
         Array items = jsonObj->get_data().get("items", &hasItems);
@@ -56,10 +57,9 @@ void TokenTroubleshooting::is_valid_token(const String& token) {
             continue;
           const String &assetName = currItem.get("name");
           int32_t assetId = currItem.get("id");
-          assetList.push_back(assetName + String("; Asset id: ") + itos(assetId));
+          assetDict.insert_or_assign(assetName.utf8().get_data(), assetId);
         }
-        Variant args[] = {hasItems, assetList};
-        on_token_validity_check(token, hasItems, assetList);
+        on_token_validity_check(token, hasItems, assetDict);
       },
       {});
 }
@@ -72,7 +72,7 @@ void TokenTroubleshooting::set_data(const Variant &data) {
 }
 
 
-void TokenTroubleshooting::on_token_validity_check(const String& token, bool isValid, const PackedStringArray& data) {
+void TokenTroubleshooting::on_token_validity_check(const String& token, bool isValid, const std::unordered_map<std::string, int32_t>& data) {
   if (!isValid) {
     OS::get_singleton()->alert("Token is not valid, try signing into Cesium ION");
     return;
@@ -80,13 +80,14 @@ void TokenTroubleshooting::on_token_validity_check(const String& token, bool isV
   // Show the asset list group.
   Variant asset_list_group = m_tokenData.get("asset_list_group");
   asset_list_group.set("visible", true);
-    // Add each entry from data to token_data.asset_list_items.
+  // Add each entry from data to token_data.asset_list_items.
   Variant asset_list_items = m_tokenData.get("asset_list_items");
+  this->m_lastAssetLists = data;
+  Variant asset_id_text = m_tokenData.get("asset_id_text");
   if (asset_list_items.get_type() == Variant::OBJECT) {
       Object *list_items = asset_list_items;
-      for (int i = 0; i < data.size(); i++) {
-          String entry = data[i];
-          list_items->call("add_item", entry);
+      for (const auto& kv : data) {
+        list_items->call("add_item", kv.first.c_str());
       }
   }
 }
@@ -107,7 +108,6 @@ void TokenTroubleshooting::_bind_methods() {
   );
 
   ClassDB::bind_method(D_METHOD("set_data", "data"), &TokenTroubleshooting::set_data);
-  // Mark the virtual method as overrideable in scripts
-  BIND_VIRTUAL_METHOD(TokenTroubleshooting, on_token_validity_check); 
+  ClassDB::bind_method(D_METHOD("get_asset_id_by_name"), &TokenTroubleshooting::get_asset_id_by_name);
   
 }

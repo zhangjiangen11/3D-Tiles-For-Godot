@@ -7,12 +7,14 @@ var globe_node : CesiumGeoreference
 
 @export
 var tilesets : Array[Cesium3DTileset]
-		
+
 @export
 var move_speed : float = 100
 
+var offset_speed: float = 0;
+
 @export
-var rotation_speed : float = 0.01
+var rotation_speed : float = 0.005
 
 var desired_cam_pos : Vector3 = Vector3.ZERO
 
@@ -29,15 +31,43 @@ var curr_pitch: float
 var moving_direction: Vector3
 var last_hit_distance: float
 
+@onready
+var post_process_mesh = preload("res://addons/cesium_godot/visuals/post-process.tscn")
+
+@onready
+var skybox = preload("res://addons/cesium_godot/resources/rosendal_park_sunset_puresky_4k.hdr")
+
+var atmosphere_manager: AtmosphereManager
 
 const RADII := 6378137.0
 
 @export
 var info_labels_ui : InfoLabelsUI
 
+
+func find_directional_light(node: Node) -> DirectionalLight3D:
+	if node is DirectionalLight3D:
+		return node
+
+	for child in node.get_children():
+		var light = find_directional_light(child)
+		if light:
+			return light
+
+	return null
+
 func _ready() -> void:
 	self.loaded = false
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	# self.atmosphere_manager = AtmosphereManager.new()
+	# self.atmosphere_manager.display_atmosphere = true
+	# self.atmosphere_manager.globe = self.globe_node
+	# var atmosphereNode = self.post_process_mesh.instantiate()
+	# self.add_child(atmosphereNode)
+	# self.atmosphere_manager.mesh_atmosphere = atmosphereNode
+	# self.atmosphere_manager.camera = self
+	# self.atmosphere_manager.sun = self.find_directional_light(self.get_tree().current_scene)
+	# self.add_child(self.atmosphere_manager)
+	# self.atmosphere_manager.owner = self
 	if (self.globe_node.origin_type == CesiumGeoreference.OriginType.TrueOrigin):
 		var ecefPos : Vector3 = Vector3(self.globe_node.ecefX, self.globe_node.ecefY, self.globe_node.ecefZ)
 		var enginePos: Vector3 = self.globe_node.get_initial_tx_ecef_to_engine() * ecefPos
@@ -45,7 +75,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	self.move_speed = self.adjusted_speed()
+	self.move_speed = self.adjusted_speed() + self.offset_speed
 	
 	if (self.globe_node.origin_type == CesiumGeoreference.OriginType.TrueOrigin):
 		self.camera_walk_physical(self.moving_direction)
@@ -101,20 +131,20 @@ func calculate_surface_basis() -> Basis:
 	return result
 
 func movement_input(delta: float):
-	#if (Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)):
-	var mouse_velocity : Vector2 = Input.get_last_mouse_velocity()
-	var delta_yaw : float = mouse_velocity.x * delta * self.rotation_speed
-	var delta_pitch : float = mouse_velocity.y * delta * self.rotation_speed
-	self.rotate_camera(delta_pitch, delta_yaw)
+	if (Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)):
+		var mouse_velocity : Vector2 = Input.get_last_mouse_velocity()
+		var delta_yaw : float = mouse_velocity.x * delta * self.rotation_speed
+		var delta_pitch : float = mouse_velocity.y * delta * self.rotation_speed
+		self.rotate_camera(delta_pitch, delta_yaw)
 	
 	var direction := Vector3.ZERO
 	var movingBasis : Basis = self.global_transform.basis
 
 	if (Input.is_key_pressed(KEY_KP_ADD) || Input.is_key_pressed(KEY_PLUS)):
-		self.move_speed = lerpf(self.move_speed, self.move_speed * 1.2, delta * 2)
+		self.offset_speed += self.move_speed * 0.1 * delta
 	if (Input.is_key_pressed(KEY_KP_SUBTRACT) || Input.is_key_pressed(KEY_MINUS)):
-		self.move_speed = lerpf(self.move_speed, self.move_speed * 0.8, delta * 2)
-		
+		self.offset_speed = maxf(self.offset_speed - self.move_speed * 0.1 * delta, 0.0)
+
 	if (Input.is_key_pressed(KEY_Q)):
 		direction -= movingBasis.y
 	if (Input.is_key_pressed(KEY_E)):
@@ -169,8 +199,14 @@ func update_camera_pos_physical() -> void:
 	self.global_position = self.desired_cam_pos
 
 func adjust_far_and_near() -> void:
-	self.far = 35358652
-	self.near = 9
+	const maxFar := 35358652
+	const minFar := maxFar * 0.1
+	const maxNear := 9
+	if (self.last_hit_distance < 1):
+		self.far = minFar
+		return
+	self.far = clampf(self.last_hit_distance * 4, minFar, maxFar)
+	self.near = maxNear
 
 func update_camera_rotation() -> void:
 	# Store original basis axes before any rotations

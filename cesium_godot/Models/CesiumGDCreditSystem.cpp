@@ -10,6 +10,7 @@
 #include "godot_cpp/classes/scene_tree.hpp"
 #include "godot_cpp/core/error_macros.hpp"
 #include "godot_cpp/core/memory.hpp"
+#include "godot_cpp/variant/vector2.hpp"
 #include "missing_functions.hpp"
 
 CesiumGDCreditSystem* CesiumGDCreditSystem::get_singleton(Node3D* baseNode) {
@@ -49,7 +50,6 @@ void CesiumGDCreditSystem::update_credits() {
   }
 
   this->m_rect->set_html(finalHtml);
-  //printf("%s\n", finalHtml.utf8().get_data());*/
 }
 
   void CesiumGDCreditSystem::add_credit_system(std::shared_ptr<CesiumUtility::CreditSystem> creditSystem) {
@@ -71,9 +71,13 @@ void CesiumGDCreditSystem::_enter_tree() {
       }
   }
 
-  this->set_anchors_preset(Control::LayoutPreset::PRESET_BOTTOM_LEFT);
-  this->set_offset(Side::SIDE_TOP, -150.0f);
+  
+this->set_anchors_preset(Control::LayoutPreset::PRESET_BOTTOM_LEFT);
+this->set_offset(Side::SIDE_TOP, -100.0f);
+this->set_offset(Side::SIDE_LEFT, 0.0f);
+this->set_offset(Side::SIDE_BOTTOM, 0.0f);
   this->m_rect = memnew(HtmlRect);
+  this->m_rect->set_size(Vector2(this->m_rect->get_size().x, 100));
   this->add_child(this->m_rect, false, INTERNAL_MODE_FRONT);
   this->m_rect->set_owner(this->get_parent());
 }
