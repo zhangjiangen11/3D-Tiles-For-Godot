@@ -18,10 +18,8 @@ void CesiumGDConfig::set_access_token(const String& accessToken)
 {
 	// Write to cache
 	String errMsg("Could not write access token to cache path, error: ");
-	Ref<DirAccess> userAccess = DirAccess::open("user://");
-	Error err = userAccess->make_dir_recursive(CACHE_PATH);
+	Error err = this->create_cache_session_file();
 	if (err != Error::OK) {
-		ERR_PRINT(errMsg + REFLECT_ERR_NAME(err));
 		return;
 	}
 	
@@ -43,7 +41,7 @@ const String& CesiumGDConfig::get_access_token() const
 }
 
 void CesiumGDConfig::clear_session() {
-	// We could delete the cache if we need to, but we might be able to get away with just setting it once + no longer 
+	// We could delete the cache if we need to, but we might be able to get away with just setting it once + no longer 	
 }
 
 CesiumGDConfig* CesiumGDConfig::get_singleton(Node* baseNode) {
@@ -55,15 +53,13 @@ CesiumGDConfig* CesiumGDConfig::get_singleton(Node* baseNode) {
 
 	
 	// Write to cache
-	String errMsg("Could not write access token to cache path, error: ");
-	Ref<DirAccess> userAccess = DirAccess::open("user://");
-	Error err = userAccess->make_dir_recursive(CACHE_PATH);
-	if (err != Error::OK) {
-		ERR_PRINT(errMsg + REFLECT_ERR_NAME(err));
-		return s_instance;
-	}	
 	// Try to read the token data
-	Ref<FileAccess> file = open_file_access_with_err(CONFIG_FILE_PATH, FileAccess::ModeFlags::WRITE_READ, &err);
+	Error err = s_instance->create_cache_session_file();
+	if (err != Error::OK){
+		return s_instance;
+	}
+	
+	Ref<FileAccess> file = open_file_access_with_err(CONFIG_FILE_PATH, FileAccess::ModeFlags::READ, &err);
 	
 	if (err != Error::OK) {
 		ERR_PRINT("Error opening cached session file:" + String(REFLECT_ERR_NAME(err)) + ", please try to connect to Cesium ION and reopen the project! ");
@@ -81,6 +77,26 @@ CesiumGDConfig* CesiumGDConfig::get_singleton(Node* baseNode) {
 	return s_instance;
 }
 
+
+Error CesiumGDConfig::create_cache_session_file() {
+	// Create dir recursive	
+	String errMsg("Could not write access token to cache path, error: ");
+	Ref<DirAccess> userAccess = DirAccess::open("user://");
+	Error err = userAccess->make_dir_recursive(CACHE_PATH);
+	if (err != Error::OK) {
+		ERR_PRINT(errMsg + REFLECT_ERR_NAME(err));
+		return err;
+	}
+	// Now check if the file exists
+	if (userAccess->file_exists(CONFIG_FILE_PATH)) {
+		return Error::OK;
+	}
+
+	// Will create the empty file, do not use this when the file already exists since it will truncate it
+	Ref<FileAccess> file = open_file_access_with_err(CONFIG_FILE_PATH, FileAccess::ModeFlags::WRITE_READ, &err);
+	file->close();
+	return err;
+}
 
 void CesiumGDConfig::_enter_tree() {
 }

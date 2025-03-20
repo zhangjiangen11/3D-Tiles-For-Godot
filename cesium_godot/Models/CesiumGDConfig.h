@@ -30,6 +30,8 @@ public:
 	void _enter_tree() override;
 	
 private:
+	Error create_cache_session_file();
+	
 	String m_accessToken = "";
 	static inline CesiumGDConfig* s_instance = nullptr;
 	
