@@ -45,6 +45,17 @@ Otherwise, to get a `compile_commands.json` file to use with an IDE or Text Edit
 **The build binaries will be at `godot3dtiles/bin/Godot3DTiles.windows.template_debug.x86_64.dll`**
 
 
+## Double precision builds
+For applications that require getting extremely close to the ellipsoid's surface we recommend building the extension for double precision, this **requires a custom build of Godot with precision=double enabled**
+
+### Steps to build with doubles
+
+* Add `precision=double` to the build flags on the plugin
+* Download [Godot's source code on github](https://github.com/godotengine/godot)
+* Build Godot with `scons platform=windows arch=x64 precision=double`
+* Modify the `Godot3DTiles.gdextension` file to point to your double precision dll
+
+
 ## Setting Up a Project
 ### Create New Godot Project
 
