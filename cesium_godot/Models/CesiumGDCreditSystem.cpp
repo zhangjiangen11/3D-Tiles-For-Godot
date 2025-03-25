@@ -35,13 +35,12 @@ void CesiumGDCreditSystem::update_credits() {
   ultralight::String finalHtml;
   if (!this->m_creditSystems.empty()) {
     finalHtml = "";
-    //this->m_rect->set_html("");
   }
   
   for (const auto& creditSystem : this->m_creditSystems) {
     const std::vector<CesiumUtility::Credit>& creditsToShow = creditSystem->getCreditsToShowThisFrame();
     for (const CesiumUtility::Credit& credit : creditsToShow) {
-      const std::string& html = creditSystem->getHtml(credit);
+      const std::string& html = creditSystem->getHtml(credit) + "\n";
       finalHtml += html.c_str();
     }
   }
