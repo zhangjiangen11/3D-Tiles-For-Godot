@@ -141,7 +141,7 @@ func create_dynamic_camera():
 
 func add_ion_buttons() -> void:
 	self.ion_button_holder = self.docked_scene.find_child("IonAssetButtonHolder") as Control
-	const url := "https://api.cesium.com/v1/assets";
+	const url := "https://api.cesium.com/v1/defaults";
 	var token : String = CesiumGDConfig.get_singleton(self).accessToken;
 	var headers: PackedStringArray = ["Authorization: Bearer " + token]
 	var error: int = self.request_node.request(url, headers, HTTPClient.Method.METHOD_GET)
@@ -158,13 +158,13 @@ func add_ion_buttons() -> void:
 		push_error("Error connecting to the Cesium API for assets, try signing in manually, server responded with: " + str(status) + "\nBody: " + str(body))
 		return
 	# For each one of the assets, parse and create a button
-	var items := body.get("items") as Array
+	var items := body.get("quickAddAssets") as Array
 	if (items == null):
 		push_error("Failed to parse request, in body expected \"items\", found: " + str(body))
 		return
 	for item in items:
 		item = item as Dictionary
-		var id := int(item.get("id"))
+		var id := int(item.get("assetId"))
 		var name = item.get("name")
 		var type = item.get("type")
 		self.ion_asset_buttons.append(self.create_ion_button(id, name, type))
