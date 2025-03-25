@@ -34,7 +34,11 @@ void CesiumGDCreditSystem::update_credits() {
   if (is_editor_mode()) return;
   ultralight::String finalHtml;
   if (!this->m_creditSystems.empty()) {
-    finalHtml = "";
+    finalHtml = R"(
+      <style>
+        body { color: #FFFFFF; }
+      </style> 
+    )";
   }
   
   for (const auto& creditSystem : this->m_creditSystems) {

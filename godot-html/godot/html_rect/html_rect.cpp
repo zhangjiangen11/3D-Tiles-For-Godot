@@ -39,7 +39,7 @@ void HtmlRect::CreateView()
     RefPtr<View> view = UltralightSingleton::get_singleton()->CreateView((int)size.x, (int)size.y, view_config, nullptr);
 
     if(view)
-    { 
+    {
         SetView(view);
         LoadIndex(view);
     }
