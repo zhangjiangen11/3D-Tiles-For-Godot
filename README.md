@@ -20,7 +20,7 @@ Leverage decades worth of cutting-edge advancements from the 3D Tiles standard t
 ## Prerequisites
 
 - **C++ 20**
-- **CMake 3.1+**
+- **CMake 3.1+ and less than 4.0 due to compatibility issues**
 - **Python 3.8+** (with pip)
 - **SCons** (`pip install scons`)
 - **Visual Studio 2022** with C++ desktop development workload (If you plan on contributing or developing)
