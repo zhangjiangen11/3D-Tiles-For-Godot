@@ -9,17 +9,17 @@
 #include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/classes/resource_loader.hpp"
 #include "godot_cpp/classes/scene_tree.hpp"
-#include "godot_cpp/classes/tile_set.hpp"
+#include "godot_cpp/classes/script.hpp"
 #include "godot_cpp/classes/window.hpp"
 #include "godot_cpp/core/error_macros.hpp"
 #include "godot_cpp/core/memory.hpp"
 #include "godot_cpp/variant/array.hpp"
-#include "magic_enum.hpp"
 #include <cstdint>
 #include <winnt.h>
 
 const char* CESIUM_GLOBE_NAME = "CesiumGeoreference";
 const char* CESIUM_TILESET_NAME = "Cesium3DTileset";
+const char* GEOREF_CAM_SCRIPT = "res://addons/cesium_godot/scripts/georeference_camera_controller.gd";
 
 CesiumGeoreference* Godot3DTiles::AssetManipulation::find_or_create_globe(Node* baseNode) {
   Node* root = get_root_of_edit_scene(baseNode);
@@ -118,7 +118,6 @@ void Godot3DTiles::AssetManipulation::instantiate_tileset(Node* baseNode, int32_
 
 
 void Godot3DTiles::AssetManipulation::instantiate_dynamic_cam(Node* baseNode) {
-	const char* georefCameraScript = "res://addons/cesium_godot/scripts/georeference_camera_controller.gd";
 	const char* trueOriginCameraScript = "res://addons/cesium_godot/scripts/cesium_camera_controller.gd";
 	Node* root = get_root_of_edit_scene(baseNode);
 	CesiumGeoreference* globe = find_or_create_globe(baseNode);
@@ -126,7 +125,7 @@ void Godot3DTiles::AssetManipulation::instantiate_dynamic_cam(Node* baseNode) {
 	root->add_child(camera, true);
 	camera->set_owner(root);
 	auto originType = static_cast<CesiumGeoreference::OriginType>(globe->get_origin_type());
-	Ref<Resource> script = ResourceLoader::get_singleton()->load(georefCameraScript, "Script");
+	Ref<Resource> script = ResourceLoader::get_singleton()->load(GEOREF_CAM_SCRIPT, "Script");
 	camera->set_script(script);
 	camera->set("tilesets", find_all_tilesets(baseNode));
 	camera->set("globe_node", globe);
@@ -140,6 +139,33 @@ Cesium3DTileset* find_first_tileset(Node* baseNode) {
 }
 
 
+Camera3D* Godot3DTiles::AssetManipulation::find_georef_cam(Node* rootNode) {
+	Script* currScript = Object::cast_to<Script>(rootNode->get_script());
+	if (currScript != nullptr) {		
+		String scriptPath =	currScript->get_path();	
+		// Check if the script path matches
+		if (scriptPath == GEOREF_CAM_SCRIPT) {
+			return Object::cast_to<Camera3D>(rootNode);
+		}
+	}
+	
+	int32_t childCount = rootNode->get_child_count();
+	for (int32_t i = 0; i < childCount; i++) {
+		Node* currChild = rootNode->get_child(i);
+		Camera3D* foundCam = find_georef_cam(currChild);
+		if (foundCam != nullptr) {
+			return foundCam;
+		}
+	}
+		
+	return nullptr;
+}
+
+void Godot3DTiles::AssetManipulation::update_camera_tilesets(Camera3D* camera) {
+	Array allTilesets = find_all_tilesets(camera->get_tree()->get_root());
+	camera->set("tilesets", allTilesets);
+}
+
 Array Godot3DTiles::AssetManipulation::find_all_tilesets(Node* baseNode) {
 	// All tilesets will be inside the globe
 	CesiumGeoreference* globeNode = find_or_create_globe(baseNode);
@@ -148,7 +174,7 @@ Array Godot3DTiles::AssetManipulation::find_all_tilesets(Node* baseNode) {
 	for (int32_t i = 0; i < count; i++) {
 		Node* child = globeNode->get_child(i);
 		auto* foundTileset = Object::cast_to<Cesium3DTileset>(child);
-		if (foundTileset == nullptr) continue;
+		if (foundTileset == nullptr || foundTileset->is_queued_for_deletion()) continue;
 		results.append(foundTileset);
 	}
 	return results;

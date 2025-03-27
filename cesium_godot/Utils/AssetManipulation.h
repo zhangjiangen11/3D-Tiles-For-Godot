@@ -3,6 +3,7 @@
 #include "Models/CesiumGDConfig.h"
 #include "Models/CesiumGDCreditSystem.h"
 #include "Models/CesiumGDTileset.h"
+#include "godot_cpp/classes/camera3d.hpp"
 #include "godot_cpp/variant/array.hpp"
 #include "godot_cpp/variant/string.hpp"
 #if defined(CESIUM_GD_EXT)
@@ -39,6 +40,10 @@ namespace Godot3DTiles::AssetManipulation {
   CesiumGDCreditSystem* find_or_create_credit_system(Node* baseNode, bool deferred);
 
   CesiumGDConfig* find_or_create_config_node(Node* baseNode);
+
+  Camera3D* find_georef_cam(Node* rootNode);
+  
+  void update_camera_tilesets(Camera3D* camera);
   
   Array find_all_tilesets(Node* baseNode);
   

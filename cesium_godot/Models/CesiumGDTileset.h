@@ -107,6 +107,8 @@ public:
 
 	void _enter_tree() override;
 
+	void _ready() override;
+
 private:
 
 	void recreate_tileset();

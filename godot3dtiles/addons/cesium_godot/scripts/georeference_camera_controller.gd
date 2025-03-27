@@ -34,8 +34,8 @@ var last_hit_distance: float
 @onready
 var post_process_mesh = preload("res://addons/cesium_godot/visuals/post-process.tscn")
 
-@onready
-var skybox = preload("res://addons/cesium_godot/resources/rosendal_park_sunset_puresky_4k.hdr")
+# @onready
+# var skybox = preload("res://addons/cesium_godot/resources/rosendal_park_sunset_puresky_4k.hdr")
 
 var atmosphere_manager: AtmosphereManager
 
@@ -101,6 +101,7 @@ func _process(delta: float) -> void:
 func update_tilesets() -> void:
 	var camera_xform := self.globe_node.get_tx_engine_to_ecef() * self.global_transform
 	for tileset in self.tilesets:
+		if (tileset == null): continue
 		tileset.update_tileset(camera_xform)
 
 func handle_input(delta: float):
