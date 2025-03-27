@@ -619,6 +619,7 @@ bool Cesium3DTileset::_get(const StringName& p_name, Variant& r_property) const
 
 
 void Cesium3DTileset::_ready() {
+	if (!is_editor_mode()) return;
 	Node* root = this->get_tree()->get_root();
 	Camera3D* foundCamera = Godot3DTiles::AssetManipulation::find_georef_cam(root);
 	if (foundCamera == nullptr) {
