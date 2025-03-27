@@ -25,10 +25,6 @@ public:
 		TrueOrigin
 	};
 
-	CesiumGeoreference() {
-		this->m_initialOriginTransform = this->get_global_transform();
-	};
-
 	Transform3D get_tx_engine_to_ecef() const;
 
 	Transform3D get_tx_ecef_to_engine() const;

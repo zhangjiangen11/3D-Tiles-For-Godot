@@ -199,15 +199,9 @@ func update_camera_pos_physical() -> void:
 	if (!self.is_moving_physical): return
 	self.global_position = self.desired_cam_pos
 
-func adjust_far_and_near() -> void:
-	const maxFar := 35358652
-	const minFar := maxFar * 0.1
-	const maxNear := 9
-	if (self.last_hit_distance < 1):
-		self.far = minFar
-		return
-	self.far = clampf(self.last_hit_distance * 4, minFar, maxFar)
-	self.near = maxNear
+func adjust_far_and_near() -> void:	
+	self.far = 35358652
+	self.near = 9
 
 func update_camera_rotation() -> void:
 	# Store original basis axes before any rotations
