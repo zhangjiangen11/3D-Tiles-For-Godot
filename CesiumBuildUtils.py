@@ -209,7 +209,12 @@ def find_ezvcpkg_path() -> str:
     # Search the C drive
     assumedPath = "%s.ezvcpkg" % (os.path.abspath(os.sep))
     if (not os.path.exists(assumedPath)):
-        print("EZVCPKG not found, run with buildCesium=true to install dependencies")
+        from pathlib import Path
+        assumedPath = (Path.home() / ".ezvcpkg").as_posix()
+        if (not os.path.exists(assumedPath)):
+            print("EZVCPKG not found, please make sure that CesiumNative was compiled and configured properly!");
+            return ""
+        # Assume it is in /home (C:/Users/currUser)
     # Then find the latest version (use the last created folder)
     subDirs = [x for x in next(os.walk(assumedPath))[1]]
     subDirs.sort(reverse=True, key=lambda x: os.stat(
