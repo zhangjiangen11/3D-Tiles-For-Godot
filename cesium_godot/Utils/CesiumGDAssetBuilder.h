@@ -19,7 +19,7 @@ class CesiumGDAssetBuilder : public Node3D {
 public:
 
   void instantiate_tileset(int32_t assetId = 0, const String& assetType = "");
-  
+
   void instantiate_dynamic_cam();
 
   Variant get_georeference_camera_script() const;
