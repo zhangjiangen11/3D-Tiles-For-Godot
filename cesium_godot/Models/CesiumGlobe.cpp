@@ -223,7 +223,7 @@ void CesiumGeoreference::move_origin()
 	enginePos = this->get_tx_ecef_to_engine().xform(enginePos);
 	// Take the current origin and subtract enginePos from that (dest - source)
 	Vector3 currOrigin = this->get_global_position();
-	this->set_global_position(currOrigin - enginePos);
+	// this->set_global_position(currOrigin - enginePos);
 }
 
 void CesiumGeoreference::set_should_update_origin(bool updateOrigin)

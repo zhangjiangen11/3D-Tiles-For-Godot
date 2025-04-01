@@ -1,3 +1,4 @@
+#include "godot_cpp/core/print_string.hpp"
 #define SPDLOG_COMPILED_LIB
 #include "Models/CesiumGlobe.h"
 #define SPDLOG_FMT_EXTERNAL
@@ -482,8 +483,10 @@ void Cesium3DTileset::process_tile_chunk(const std::vector<Cesium3DTilesSelectio
 
 
 void Cesium3DTileset::register_tile(MeshInstance3D *instance, size_t hash) {
+	Vector3 pos = instance->get_position();
 	this->add_child(instance, false);
 	instance->set_owner(this);
+	instance->set_global_position(pos);
 	tileCount++;
 }
 

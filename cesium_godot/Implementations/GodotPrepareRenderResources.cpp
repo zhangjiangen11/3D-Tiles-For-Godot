@@ -72,12 +72,9 @@ CesiumAsync::Future<Cesium3DTilesSelection::TileLoadResultAndRenderResources> Go
 		if (this->m_tileset->get_data_source() == CesiumDataSource::FromCesiumIon && this->m_tileset->get_ion_asset_id() != googleTilesID) {
 			constexpr int32_t translationColumnIndex = 3;
 			position = transformationMat[translationColumnIndex];
-			translation = CesiumMathUtils::from_glm_vec3(position);
-		} else {
+		}
+		else {
 			const std::vector<double> &translationArray = rootNode.translation;
-			translation.x = translationArray.at(0);
-			translation.y = translationArray.at(1);
-			translation.z = translationArray.at(2);
 			position = *reinterpret_cast<const glm::dvec3*>(translationArray.data());
 		}
 
@@ -89,8 +86,18 @@ CesiumAsync::Future<Cesium3DTilesSelection::TileLoadResultAndRenderResources> Go
 			translation *= scaleFactor;
 		}
 
+		if (geoReferenceNode->get_origin_type() == (int32_t)CesiumGeoreference::OriginType::CartographicOrigin) {
+			// We need to substract the globe's position
+			const glm::dvec3& ecefPos = geoReferenceNode->get_ecef_position();
+			glm::dvec3 engineOrigin = CesiumMathUtils::ecef_to_engine(ecefPos);
+			glm::dvec3 localPos = -engineOrigin + position;
+			// Log this
+			position = localPos;
+		}
+
 		Vector3 eulerAngles = rotation.get_euler();
 
+		translation = CesiumMathUtils::from_glm_vec3(position);
 		instance->set_position(translation);
 		instance->set_rotation(eulerAngles);
 		if (this->m_tileset->get_create_physics_meshes()) {
