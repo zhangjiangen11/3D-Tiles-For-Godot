@@ -93,12 +93,11 @@ public:
 	static inline glm::dvec3 ecef_to_engine(const glm::dvec3& vec) {
 		constexpr glm::dmat4 identity = glm::dmat4(1.0); 
 		constexpr glm::dmat4 translation = glm::translate(identity, glm::dvec3(0.0)); 
-		constexpr double angleX = glm::radians(-90.0); 
+		constexpr double angleX = glm::radians(-90.0);
 		glm::dmat4 rotation = glm::rotate(identity, angleX, glm::dvec3(1.0, 0.0, 0.0));
 		glm::dmat4 scale = glm::scale(identity, glm::dvec3(1.0));
 		glm::dmat4 trs = translation * rotation * scale;
 
-		// glm::dmat4 ecefToEngineXform = glm::translate(v)
 		return trs * glm::dvec4(vec, 1.0);
 	}
 	

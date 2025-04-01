@@ -1,6 +1,7 @@
 #include "GodotPrepareRenderResources.h"
 #include "CesiumGltf/ImageAsset.h"
 #include "CesiumGltfReader/ImageDecoder.h"
+#include "Models/Cesium3DTile.h"
 #include "Models/CesiumGlobe.h"
 #include "Utils/CesiumVariantHash.h"
 #include "error_names.hpp"
@@ -38,7 +39,7 @@ CesiumAsync::Future<Cesium3DTilesSelection::TileLoadResultAndRenderResources> Go
 		Error err;
 		Ref<ArrayMesh> meshData = CesiumGDModelLoader::generate_meshes_from_model(*model, &err);
 
-		MeshInstance3D* instance = memnew(MeshInstance3D);
+		Cesium3DTile* instance = memnew(Cesium3DTile);
 		instance->set_mesh(meshData);
 		
 		if (err != Error::OK) {
@@ -87,12 +88,8 @@ CesiumAsync::Future<Cesium3DTilesSelection::TileLoadResultAndRenderResources> Go
 		}
 
 		if (geoReferenceNode->get_origin_type() == (int32_t)CesiumGeoreference::OriginType::CartographicOrigin) {
-			// We need to substract the globe's position
-			const glm::dvec3& ecefPos = geoReferenceNode->get_ecef_position();
-			glm::dvec3 engineOrigin = CesiumMathUtils::ecef_to_engine(ecefPos);
-			glm::dvec3 localPos = -engineOrigin + position;
-			// Log this
-			position = localPos;
+			// Save this for use later
+			instance->set_original_position(position);
 		}
 
 		Vector3 eulerAngles = rotation.get_euler();
@@ -124,7 +121,7 @@ void GodotPrepareRenderResources::free(Tile& tile, void* pLoadThreadResult, void
 {	
 	const auto& tileId = tile.getTileID();
 	size_t hash = std::visit(CesiumVariantHash{}, tileId);
-	auto* instance = static_cast<MeshInstance3D*>(pMainThreadResult);
+	auto* instance = static_cast<Cesium3DTile*>(pMainThreadResult);
 	this->m_tileset->call_deferred("free_tile", instance, hash);
 }
 
@@ -132,7 +129,7 @@ void GodotPrepareRenderResources::attachRasterInMainThread(const Tile& tile, int
 {
 	const Cesium3DTilesSelection::TileContent& content = tile.getContent();
 	void* rawRenderResources = content.getRenderContent()->getRenderResources();
-	auto* meshInstance = static_cast<MeshInstance3D*>(rawRenderResources);
+	auto* meshInstance = static_cast<Cesium3DTile*>(rawRenderResources);
 	if (meshInstance == nullptr) return;
 
 	Ref<ImageTexture> godotTexture = static_cast<ImageTexture*>(pMainThreadRendererResources);

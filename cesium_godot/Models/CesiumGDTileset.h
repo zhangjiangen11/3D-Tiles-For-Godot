@@ -1,6 +1,7 @@
 #ifndef CESIUM_GD_TILESET_H
 #define CESIUM_GD_TILESET_H
 
+#include "Models/Cesium3DTile.h"
 #if defined(CESIUM_GD_MODULE)
 #include "scene/3d/node_3d.h"
 #elif defined(CESIUM_GD_EXT)
@@ -12,7 +13,6 @@ using namespace godot;
 
 #include "CesiumDataSource.h"
 #include "../Utils/BRThreadPool.h"
-#include "CesiumGDConfig.h"
 #include "CesiumHTTPRequestNode.h"
 
 namespace Cesium3DTilesSelection {
@@ -30,7 +30,7 @@ class CesiumGeoreference;
 
 #if defined(CESIUM_GD_EXT)
 #elif defined(CESIUM_GD_MODULE)
-class MeshInstance3D;
+class Cesium3DTile;
 #endif
 
 class Cesium3DTileset : public Node3D
@@ -101,9 +101,11 @@ public:
 
 	void add_overlay(CesiumIonRasterOverlay* overlay);
 
-	void free_tile(MeshInstance3D* tileInstance, size_t tileHash);
+	void free_tile(Cesium3DTile* tileInstance, size_t tileHash);
 	
 	bool is_georeferenced(CesiumGeoreference** outRef) const;
+
+	void move_origin(const double enginePos[3]);
 
 	void _enter_tree() override;
 
@@ -123,11 +125,11 @@ private:
 
 	void despawn_tile_deferred(const Cesium3DTilesSelection::Tile& tile);
 
-	bool try_get_tile_from_instance_id(const ObjectID& objectId, MeshInstance3D** outNode);
+	bool try_get_tile_from_instance_id(const ObjectID& objectId, Cesium3DTile** outNode);
 
 	void process_tile_chunk(const std::vector<Cesium3DTilesSelection::Tile*>& tilesView, int32_t offset, int32_t size);
 
-	void register_tile(MeshInstance3D *instance, size_t hash);
+	void register_tile(Cesium3DTile *instance, size_t hash);
 
 	uint32_t update_property_usage_flags(const PropertyInfo& property) const;
 	
