@@ -1,6 +1,9 @@
 #include "CesiumGlobe.h"
+#include "Models/CesiumGDTileset.h"
 #include "Utils/AssetManipulation.h"
+#include "glm/ext/vector_double3.hpp"
 #include "godot_cpp/core/math.hpp"
+#include "godot_cpp/core/print_string.hpp"
 #include "godot_cpp/variant/vector3.hpp"
 #include "missing_functions.hpp"
 #include <cstdint>
@@ -98,8 +101,9 @@ double CesiumGeoreference::get_ecef_x() const
 
 void CesiumGeoreference::set_ecef_x(double x)
 {
+	glm::dvec3 prevPos = this->m_ecefPosition;
 	this->m_ecefPosition.x = x;
-	this->move_origin();
+	this->move_origin(prevPos);
 }
 
 double CesiumGeoreference::get_ecef_y() const
@@ -109,8 +113,9 @@ double CesiumGeoreference::get_ecef_y() const
 
 void CesiumGeoreference::set_ecef_y(double y)
 {
+	glm::dvec3 prevPos = this->m_ecefPosition;
 	this->m_ecefPosition.y = y;
-	this->move_origin();
+	this->move_origin(prevPos);
 }
 
 double CesiumGeoreference::get_ecef_z() const
@@ -120,8 +125,9 @@ double CesiumGeoreference::get_ecef_z() const
 
 void CesiumGeoreference::set_ecef_z(double z)
 {
+	glm::dvec3 prevPos = this->m_ecefPosition;
 	this->m_ecefPosition.z = z;
-	this->move_origin();
+	this->move_origin(prevPos);
 }
 
 real_t CesiumGeoreference::get_scale_factor() const
@@ -194,6 +200,10 @@ glm::dvec3 CesiumGeoreference::get_lla() const {
 }
 
 
+void CesiumGeoreference::register_tileset_to_move_origin(Cesium3DTileset* tileset) {
+	this->m_trackedTilesets.emplace_back(tileset);
+}
+
 /// @brief Approximation solution from Apple's pARk
 /// https://developer.apple.com/library/archive/samplecode/pARk/Introduction/Intro.html
 void CesiumGeoreference::update_ecef_with_lla(glm::dvec3 lla) {
@@ -214,16 +224,16 @@ void CesiumGeoreference::update_ecef_with_lla(glm::dvec3 lla) {
 }
 
 
-void CesiumGeoreference::move_origin()
+void CesiumGeoreference::move_origin(glm::dvec3 previousPosition)
 {
-	if (!this->m_shouldUpdateOrigin || this->m_originType == OriginType::TrueOrigin) return;
-	// Translate the node by the ecef position...
-	// Get the engine pos of the ecef position
-	Vector3 enginePos = CesiumMathUtils::from_glm_vec3(this->m_ecefPosition);
-	enginePos = this->get_tx_ecef_to_engine().xform(enginePos);
-	// Take the current origin and subtract enginePos from that (dest - source)
-	Vector3 currOrigin = this->get_global_position();
-	this->set_global_position(currOrigin - enginePos);
+	// Move all the tilesets
+	// const glm::dvec3 prevEnginePos = CesiumMathUtils::ecef_to_engine(previousPosition);
+	const glm::dvec3 currEnginePos = CesiumMathUtils::ecef_to_engine(this->m_ecefPosition);
+	const double* dArrPos = reinterpret_cast<const double*>(&currEnginePos);
+	for (Cesium3DTileset* tileset : this->m_trackedTilesets) {
+		// Now we can recalculate the same positions
+		tileset->move_origin(dArrPos);
+	}
 }
 
 void CesiumGeoreference::set_should_update_origin(bool updateOrigin)
@@ -234,6 +244,11 @@ void CesiumGeoreference::set_should_update_origin(bool updateOrigin)
 bool CesiumGeoreference::get_should_update_origin() const
 {
 	return this->m_shouldUpdateOrigin;
+}
+
+
+const glm::dvec3& CesiumGeoreference::get_original_origin_ecef() const {
+	return this->m_originalEcefPosition;
 }
 
 Vector3 CesiumGeoreference::ray_to_surface(const Vector3& origin, const Vector3& direction) const
@@ -336,10 +351,7 @@ void CesiumGeoreference::_bind_methods()
 
 void CesiumGeoreference::_enter_tree() {	
 		this->m_initialOriginTransform = this->get_global_transform();
-		if (!is_editor_mode()) {
-				return;
-		} 
-		
+		this->m_originalEcefPosition = this->m_ecefPosition;
 		this->set_rotation_degrees(Vector3(-90.0, 0.0, 0.0));
 }
 	

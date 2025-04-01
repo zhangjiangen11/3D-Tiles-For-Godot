@@ -1,6 +1,10 @@
 #ifndef VECTOR_UTILS_H
 #define VECTOR_UTILS_H
 
+#include "glm/ext/matrix_double4x4.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/ext/vector_double3.hpp"
+#include "glm/trigonometric.hpp"
 #if defined(CESIUM_GD_EXT)
 #include <godot_cpp/core/math.hpp>
 #include <godot_cpp/variant/vector3.hpp>
@@ -24,6 +28,7 @@ using namespace godot;
  */
 class CesiumMathUtils {
 public:
+	
 	static inline Vector3 from_glm_vec3(const glm::vec3& vec) {
 		return Vector3(vec.x, vec.y, vec.z);
 	}
@@ -85,6 +90,17 @@ public:
 		return glm::dvec3();
 	}
 
+	static inline glm::dvec3 ecef_to_engine(const glm::dvec3& vec) {
+		constexpr glm::dmat4 identity = glm::dmat4(1.0); 
+		constexpr glm::dmat4 translation = glm::translate(identity, glm::dvec3(0.0)); 
+		constexpr double angleX = glm::radians(-90.0);
+		glm::dmat4 rotation = glm::rotate(identity, angleX, glm::dvec3(1.0, 0.0, 0.0));
+		glm::dmat4 scale = glm::scale(identity, glm::dvec3(1.0));
+		glm::dmat4 trs = translation * rotation * scale;
+
+		return trs * glm::dvec4(vec, 1.0);
+	}
+	
 	static inline glm::dmat4 array_to_dmat4(const std::vector<double>& vec) {
 		if (vec.size() != 16) {
 			ERR_PRINT("Array must have exactly 16 elements to convert it to a matrix, # of elements found : " + itos(vec.size()));

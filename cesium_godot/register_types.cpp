@@ -43,6 +43,7 @@ void initialize_cesium_godot_module(ModuleInitializationLevel p_level) {
 	ClassDB::register_class<CesiumGDConfig>();
 	ClassDB::register_class<CesiumGDAssetBuilder>();
 	ClassDB::register_class<TokenTroubleshooting>();
+	ClassDB::register_class<Cesium3DTile>();
 	
 	GDREGISTER_CLASS(UltralightSingleton);
   ultralight_singleton = memnew(UltralightSingleton); // memnew is super important.

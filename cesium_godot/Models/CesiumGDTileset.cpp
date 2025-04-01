@@ -1,3 +1,6 @@
+#include "Models/Cesium3DTile.h"
+#include "glm/ext/vector_double3.hpp"
+#include <cstdint>
 #define SPDLOG_COMPILED_LIB
 #include "Models/CesiumGlobe.h"
 #define SPDLOG_FMT_EXTERNAL
@@ -228,7 +231,7 @@ void Cesium3DTileset::update_tileset(const Transform3D& cameraTransform)
 	if (this->m_activeTileset == nullptr) {
 		if (isGeoreferenced) {
 			this->m_georeference->set_should_update_origin(true);
-			this->m_georeference->move_origin();
+			this->m_georeference->register_tileset_to_move_origin(this);
 		}
 		
 		this->load_tileset();
@@ -311,7 +314,7 @@ void Cesium3DTileset::add_overlay(CesiumIonRasterOverlay* overlay)
 	this->m_activeTileset->getOverlays().add(overlay->get_overlay_instance());
 }
 
-void Cesium3DTileset::free_tile(MeshInstance3D* tileInstance, size_t tileHash) {
+void Cesium3DTileset::free_tile(Cesium3DTile* tileInstance, size_t tileHash) {
 	if (tileInstance == nullptr) {
 		return;
 	}
@@ -329,6 +332,20 @@ bool Cesium3DTileset::is_georeferenced(CesiumGeoreference** outRef) const
 	Node3D* parent = this->get_parent_node_3d();
 	*outRef = Object::cast_to<CesiumGeoreference>(parent);
 	return (*outRef)->get_origin_type() == static_cast<int32_t>(CesiumGeoreference::OriginType::CartographicOrigin);
+}
+
+
+void Cesium3DTileset::move_origin(const double enginePosRaw[3]) {
+	const glm::dvec3& enginePos = *reinterpret_cast<const glm::dvec3*>(enginePosRaw);
+	// Get all tiles
+	int32_t childCount = this->get_child_count();
+	for(int32_t i = 0; i < childCount; i++) {
+		Cesium3DTile* currTile = Object::cast_to<Cesium3DTile>(this->get_child(i));
+		[[unlikely]] if (currTile == nullptr) {
+			continue;
+		}
+		currTile->apply_position_on_globe(enginePos);
+	}
 }
 
 void Cesium3DTileset::recreate_tileset()
@@ -419,7 +436,7 @@ void Cesium3DTileset::render_tile_as_node(const Cesium3DTilesSelection::Tile& ti
 	if (renderContent == nullptr) {
 		return;
 	}
-	MeshInstance3D* foundNode = static_cast<MeshInstance3D*>(renderContent->getRenderResources());
+	Cesium3DTile* foundNode = static_cast<Cesium3DTile*>(renderContent->getRenderResources());
 	if (foundNode == nullptr) return;
 	
 	if (this->m_createPhysicsMeshes) {
@@ -446,7 +463,7 @@ void Cesium3DTileset::despawn_tile(const Cesium3DTilesSelection::Tile& tile)
 	}
 	const Cesium3DTilesSelection::TileRenderContent* renderContent = tile.getContent().getRenderContent();
 	if (renderContent == nullptr) return;
-	MeshInstance3D* foundNode = static_cast<MeshInstance3D*>(renderContent->getRenderResources());
+	Cesium3DTile* foundNode = static_cast<Cesium3DTile*>(renderContent->getRenderResources());
 	if (!foundNode->is_inside_tree()) return;
 	foundNode->hide();
 	// Deactivate the collisions
@@ -464,9 +481,9 @@ void Cesium3DTileset::despawn_tile_deferred(const Cesium3DTilesSelection::Tile& 
 {
 }
 
-bool Cesium3DTileset::try_get_tile_from_instance_id(const ObjectID& objectId, MeshInstance3D** outNode)
+bool Cesium3DTileset::try_get_tile_from_instance_id(const ObjectID& objectId, Cesium3DTile** outNode)
 {
-	*outNode = Object::cast_to<MeshInstance3D>(ObjectDB::get_instance(objectId));
+	*outNode = Object::cast_to<Cesium3DTile>(ObjectDB::get_instance(objectId));
 	return *outNode != nullptr;
 }
 
@@ -481,9 +498,12 @@ void Cesium3DTileset::process_tile_chunk(const std::vector<Cesium3DTilesSelectio
 }
 
 
-void Cesium3DTileset::register_tile(MeshInstance3D *instance, size_t hash) {
+void Cesium3DTileset::register_tile(Cesium3DTile *instance, size_t hash) {
 	this->add_child(instance, false);
 	instance->set_owner(this);
+	const glm::dvec3& ecefOrigin = this->m_georeference->get_ecef_position();
+	const glm::dvec3 engineOrigin = CesiumMathUtils::ecef_to_engine(ecefOrigin);
+	instance->apply_position_on_globe(engineOrigin);
 	tileCount++;
 }
 

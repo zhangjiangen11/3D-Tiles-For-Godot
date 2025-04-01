@@ -1,6 +1,8 @@
 #ifndef CESIUM_GLOBE_H
 #define CESIUM_GLOBE_H
 
+#include "Models/CesiumGDTileset.h"
+#include <vector>
 #if defined(CESIUM_GD_EXT)
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/node3d.hpp>
@@ -82,14 +84,18 @@ public:
 	double get_altitude() const;
 	
 	glm::dvec3 get_lla() const;
+
+	void register_tileset_to_move_origin(Cesium3DTileset* tileset);
 	
 	void update_ecef_with_lla(glm::dvec3 lla);
 
-	void move_origin();
+	void move_origin(glm::dvec3 previousPosition);
 
 	void set_should_update_origin(bool updateOrigin);
 
 	bool get_should_update_origin() const;
+
+	const glm::dvec3& get_original_origin_ecef() const;
 	
 	void _enter_tree() override;
 	
@@ -99,10 +105,14 @@ private:
 	Transform3D m_initialOriginTransform{};
 	
 	glm::dvec3 m_ecefPosition{ -1292940.0, -4740030.0, 4056960.0 };
+	
+	glm::dvec3 m_originalEcefPosition;
 
 	real_t m_scaleFactor = 1.0;
 
 	bool m_shouldUpdateOrigin = false;
+	
+	std::vector<Cesium3DTileset*> m_trackedTilesets;
 	
 	OriginType m_originType = OriginType::CartographicOrigin;
 	
