@@ -141,6 +141,9 @@ func create_dynamic_camera():
 
 func add_ion_buttons() -> void:
 	self.ion_button_holder = self.docked_scene.find_child("IonAssetButtonHolder") as Control
+	for child in self.ion_button_holder.get_children():
+		self.ion_button_holder.remove_child(child)
+	
 	const url := "https://api.cesium.com/v1/defaults";
 	var token : String = CesiumGDConfig.get_singleton(self).accessToken;
 	var headers: PackedStringArray = ["Authorization: Bearer " + token]
@@ -168,8 +171,7 @@ func add_ion_buttons() -> void:
 		var name = item.get("name")
 		var type = item.get("type")
 		self.ion_asset_buttons.append(self.create_ion_button(id, name, type))
-
-
+		
 func is_http_request_busy(http_request: HTTPRequest) -> bool:
 	return http_request.get_http_client_status() in [
 		HTTPClient.STATUS_CONNECTING,
@@ -186,6 +188,7 @@ func create_ion_button(assetId: int, name: String, type: String) -> Button:
 	var label := Label.new()
 	var button := Button.new()
 	button.text = "Add"
+	button.set_meta("ion_name", name)
 	button.custom_minimum_size.x = 60
 	label.text = name
 	
