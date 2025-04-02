@@ -167,9 +167,21 @@ func add_ion_buttons() -> void:
 		var id := int(item.get("assetId"))
 		var name = item.get("name")
 		var type = item.get("type")
+		
+		var contains: bool = self.contains_ion_button(name)
+		if contains:
+			continue
 		self.ion_asset_buttons.append(self.create_ion_button(id, name, type))
 
 
+func contains_ion_button(current_name: String) -> bool:
+	for button in self.ion_asset_buttons:
+		var metadata: String = button.get_meta("ion_name")
+		if metadata != null && metadata == current_name:
+			# Enable the button
+			return true
+	return false
+		
 func is_http_request_busy(http_request: HTTPRequest) -> bool:
 	return http_request.get_http_client_status() in [
 		HTTPClient.STATUS_CONNECTING,
@@ -186,6 +198,7 @@ func create_ion_button(assetId: int, name: String, type: String) -> Button:
 	var label := Label.new()
 	var button := Button.new()
 	button.text = "Add"
+	button.set_meta("ion_name", name)
 	button.custom_minimum_size.x = 60
 	label.text = name
 	
