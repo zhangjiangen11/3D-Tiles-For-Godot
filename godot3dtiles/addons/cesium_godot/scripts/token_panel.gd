@@ -13,6 +13,7 @@ var specific_token_name: TextEdit
 var asset_list_group: BoxContainer
 var asset_list_items: OptionButton
 var asset_list_id: TextEdit
+var new_token_name: TextEdit
 
 var last_existing_tokens: Dictionary
 
@@ -41,6 +42,8 @@ func initialize_fields(token_panel: Popup) -> void:
 	# Then add the ResourcePicker
 	var configuration_container = token_panel.find_child("ConfigurationContainer")
 
+	self.new_token_name = token_panel.find_child("TokenName") as TextEdit
+	
 	self.specific_token_name = self.find_sibling(self.specific_token_check, "TokenName") as TextEdit
 	self.specific_token_name.text = self.default_config.accessToken
 	
@@ -127,8 +130,50 @@ func apply_or_create_token() -> void:
 		var tkName = self.existing_tokens_list.get_item_text(self.existing_tokens_list.selected)
 		var currToken: String = self.last_existing_tokens.get(tkName)
 		self.default_config.accessToken = currToken
+	if (usage == TokenUsageType.New):
+		var createdToken: String = await self.create_new_token()
+		if (createdToken == ""):
+			OS.alert("Error creating the new token, please try to sign in manually to Cesium Ion", "Error!")
+			return
+		self.default_config.accessToken = createdToken
 	OS.alert("Token changed in configuration, you can now close this window...", "Changes applied!")
 
+
+func create_new_token() -> String:
+	const url := "https://api.cesium.com/v2/tokens"
+	# Make a POST and add the name, we'll default to all assets
+	var token : String = self.default_config.accessToken;
+	var headers: PackedStringArray = ["Authorization: Bearer " + token, "Content-Type: application/json"]
+
+	var scopes := [
+	    "assets:list",
+	    "assets:read",
+	    "geocode",
+	    "tokens:read",
+	]
+	var reqBody: Dictionary = { "name": self.new_token_name.text, "scopes": scopes }
+	var reqBodyStr: String = JSON.stringify(reqBody)
+	var err : int = self.request_node.request(url, headers, HTTPClient.METHOD_POST, reqBodyStr)
+	const errMsg := "Error creating a Cesium Ion token, try connecting manually!"
+	if (err != OK):
+		push_error(errMsg)
+		return ""
+	
+	var response = await self.request_node.request_completed
+	var status = response[1]
+
+	var bodyBytes := response[3] as PackedByteArray
+	var body := JSON.parse_string(bodyBytes.get_string_from_utf8()) as Dictionary
+
+	if (status >= HTTPClient.ResponseCode.RESPONSE_BAD_REQUEST):		
+		push_error(errMsg + "\nResponse body: " + str(body))
+		return ""
+	
+	var resultToken: String = body.get("token")
+	if (resultToken == null):
+		push_error(errMsg + "\nResponse body: " + str(body))
+		return ""
+	return resultToken
 
 # Finds a sibling node by name or predicate function.
 # Returns `null` if no matching sibling is found.
