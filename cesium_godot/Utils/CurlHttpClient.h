@@ -1,6 +1,8 @@
 #ifndef CURL_HTTP_CLIENT
 #define CURL_HTTP_CLIENT
 
+#include "godot_cpp/classes/os.hpp"
+#include <sstream>
 #if defined(CESIUM_GD_EXT)
 
 #ifdef _WIN32
@@ -111,7 +113,12 @@ public:
 	}
 
 	void init_client(size_t maxThreads) {
-		this->m_threadPool.init(maxThreads);		
+		this->m_threadPool.init(maxThreads);
+		std::string systemInfo = OS::get_singleton()->get_name().utf8().get_data();
+		auto architecture = OS::get_singleton()->get_processor_name().utf8().get_data();
+		std::stringstream stream;
+		stream << "Godot3DTiles/1.0 (" << systemInfo << "; " << architecture << ")";	
+		this->add_default_header({"User-Agent", stream.str()});
 	}
 
 	void send_get(const char* url, const HighLevelResponseCallback_t& callback, const std::vector<CesiumHeader_t>& headers) {
@@ -154,6 +161,9 @@ public:
 		handle.available = true;
 	}
 
+	void add_default_header(const CesiumHeader_t& header) {
+		this->m_defaultHeaders.emplace_back(header);
+	}
 
 private:
 	static inline uint16_t s_activeInstances = 0;
@@ -174,6 +184,14 @@ private:
 			strHeader += h.second;
 			curlHeaders = curl_slist_append(curlHeaders, strHeader.c_str());
 		}
+
+		for (const CesiumHeader_t& h : headers) {
+			std::string strHeader = h.first + ": ";
+			strHeader += h.second;
+			curlHeaders = curl_slist_append(curlHeaders, strHeader.c_str());
+		}
+		
+		// Then add default headers
 
 		curl_easy_setopt(handle, CURLOPT_HTTPHEADER, curlHeaders);
 
@@ -218,6 +236,7 @@ private:
 
 	//Have a thread pool for some batches of requests
 	BRThreadPool m_threadPool;
+	std::vector<CesiumHeader_t> m_defaultHeaders;
 	std::vector<RequestHandle_t> m_activeHandles;
 };
 

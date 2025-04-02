@@ -2,13 +2,10 @@
 #include "../Models/LocalAssetResponse.h"
 #include "../Models/LocalAssetRequest.h"
 #include "CesiumAsync/AsyncSystem.h"
-#include "CesiumUtility/Uri.h"
-#include "../Models/CesiumGDTileset.h"
+#include "godot_cpp/classes/engine.hpp"
 #include "godot_cpp/templates/vector.hpp"
 #include <cstdint>
-#include <fstream>
 #include <memory>
-#include <thread>
 
 #if defined (CESIUM_GD_EXT)
 #include <godot_cpp/classes/http_client.hpp>
@@ -29,6 +26,11 @@ NetworkAssetAccessor::NetworkAssetAccessor()
 {
 	constexpr size_t maxThreadsPerClient = 16;
 	this->m_curlClient.init_client(maxThreadsPerClient);
+	// Set all the default headers
+	this->m_curlClient.add_default_header({"x-cesium-client", "3D Tiles For Godot"});
+	this->m_curlClient.add_default_header({"x-cesium-client-version", "1.0"});
+	String godotBuildInfo = Engine::get_singleton()->get_version_info().get("string", "");
+	this->m_curlClient.add_default_header({"x-cesium-client-engine", godotBuildInfo.utf8().get_data()});
 }
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>> NetworkAssetAccessor::get(const CesiumAsync::AsyncSystem& asyncSystem, const std::string& url, const std::vector<THeader>& headers /*= {}*/)
