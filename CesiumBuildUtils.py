@@ -61,7 +61,7 @@ def clone_native_repo_if_needed():
     # Go to the native repo and then reset to the accepted commit
     prevDir: str = os.getcwd()
     os.chdir(repoDirectory)
-    acceptedCommitSHA: str = "5ec42ed417db11061e6a82229eb588326d60edc9"
+    acceptedCommitSHA: str = "ae62bd8c6a7fbce08a541eecd86a313bfb906e15"
     subprocess.run(["git", "reset", "--hard", acceptedCommitSHA])
     os.chdir(prevDir)
 
