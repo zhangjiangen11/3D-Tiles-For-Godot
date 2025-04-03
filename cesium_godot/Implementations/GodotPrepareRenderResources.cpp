@@ -25,9 +25,6 @@ using namespace godot;
 #include "CesiumGltf/Node.h"
 #include <glm/gtc/quaternion.hpp>
 #include "../Models/CesiumGDTileset.h"
-#include "missing_functions.hpp"
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/string_cast.hpp>
 
 using namespace CesiumAsync;
 using namespace Cesium3DTilesSelection;
