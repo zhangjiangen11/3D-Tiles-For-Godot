@@ -5,6 +5,8 @@
 #include "Models/CesiumGlobe.h"
 #include "Utils/CesiumVariantHash.h"
 #include "error_names.hpp"
+#include "glm/ext/vector_double3.hpp"
+#include "glm/fwd.hpp"
 
 #if defined(CESIUM_GD_EXT)
 #include <godot_cpp/classes/mesh_instance3d.hpp>
@@ -23,6 +25,9 @@ using namespace godot;
 #include "CesiumGltf/Node.h"
 #include <glm/gtc/quaternion.hpp>
 #include "../Models/CesiumGDTileset.h"
+#include "missing_functions.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>
 
 using namespace CesiumAsync;
 using namespace Cesium3DTilesSelection;
@@ -53,9 +58,9 @@ CesiumAsync::Future<Cesium3DTilesSelection::TileLoadResultAndRenderResources> Go
 		const std::vector<double> &rotationArray = rootNode.rotation;
 		const std::vector<double> &scaleArray = rootNode.scale;
 
-		Transform3D transform = Transform3D(Basis(), Vector3());
-		transform.scale(Vector3(1, 1, 1));
-		instance->set_transform(transform);
+		Transform3D gdTransform = Transform3D(Basis(), Vector3());
+		gdTransform.scale(Vector3(1, 1, 1));
+		instance->set_transform(gdTransform);
 
 		Vector3 scale;
 		scale.x = scaleArray.at(0);
@@ -63,22 +68,28 @@ CesiumAsync::Future<Cesium3DTilesSelection::TileLoadResultAndRenderResources> Go
 		scale.z = scaleArray.at(2);
 
 		const glm::dmat4 transformationMat = CesiumMathUtils::array_to_dmat4(rootNode.matrix);
-		const glm::dquat glmRot = glm::quat_cast(transformationMat);
-		Quaternion rotation = CesiumMathUtils::from_glm_quat(glmRot);
 
-		Vector3 translation;
-		glm::dvec3 position;
-		// Applies for every tileset EXCEPT I guess Google Photorealistic tiles (which is 2275207)
-		constexpr int32_t googleTilesID = 2275207;
-		if (this->m_tileset->get_data_source() == CesiumDataSource::FromCesiumIon && this->m_tileset->get_ion_asset_id() != googleTilesID) {
+		glm::dvec3 glmPos;
+		glm::dquat glmRot;
+		// Applies for tilesets that 
+		constexpr int32_t worldTerrainId = 1;
+		constexpr int32_t osmBuildingsId = 96188;
+		// Applies for osmBuildings and world terrain
+		int32_t currAssetId = this->m_tileset->get_ion_asset_id();
+		if (this->m_tileset->get_data_source() == CesiumDataSource::FromCesiumIon && (currAssetId == worldTerrainId || currAssetId == osmBuildingsId)) {
 			constexpr int32_t translationColumnIndex = 3;
-			position = transformationMat[translationColumnIndex];
+			glmPos = transformationMat[translationColumnIndex];
+			glmRot = glm::quat_cast(transformationMat);
 		}
 		else {
 			const std::vector<double> &translationArray = rootNode.translation;
-			position = *reinterpret_cast<const glm::dvec3*>(translationArray.data());
+			const std::vector<double> &rotationArray = rootNode.rotation;
+			glmPos = *reinterpret_cast<const glm::dvec3*>(translationArray.data());
+			glmRot = *reinterpret_cast<const glm::dquat*>(rotationArray.data());
 		}
 
+		Vector3 translation;
+		Quaternion rotation = CesiumMathUtils::from_glm_quat(glmRot);
 		CesiumGeoreference* geoReferenceNode = nullptr;
 
 		if (this->m_tileset->is_georeferenced(&geoReferenceNode)) {
@@ -89,12 +100,12 @@ CesiumAsync::Future<Cesium3DTilesSelection::TileLoadResultAndRenderResources> Go
 
 		if (geoReferenceNode->get_origin_type() == (int32_t)CesiumGeoreference::OriginType::CartographicOrigin) {
 			// Save this for use later
-			instance->set_original_position(position);
+			instance->set_original_position(glmPos);
 		}
 
 		Vector3 eulerAngles = rotation.get_euler();
 
-		translation = CesiumMathUtils::from_glm_vec3(position);
+		translation = CesiumMathUtils::from_glm_vec3(glmPos);
 		instance->set_position(translation);
 		instance->set_rotation(eulerAngles);
 		if (this->m_tileset->get_create_physics_meshes()) {
@@ -114,6 +125,23 @@ CesiumAsync::Future<Cesium3DTilesSelection::TileLoadResultAndRenderResources> Go
 
 void* GodotPrepareRenderResources::prepareInMainThread(Tile& tile, void* pLoadThreadResult)
 {
+	const Cesium3DTilesSelection::TileContent& content = tile.getContent();
+	const Cesium3DTilesSelection::TileRenderContent* pRenderContent = content.getRenderContent();
+	
+	if (pRenderContent == nullptr) {
+		return pLoadThreadResult;
+	}
+	
+	const CesiumGltf::Model& model = pRenderContent->getModel();
+	// Apply the transform if any
+	Cesium3DTile* instance = reinterpret_cast<Cesium3DTile*>(pLoadThreadResult);
+	// glm::dmat4 instanceXform = CesiumMathUtils::to_glm_mat4(instance->get_transform());
+	glm::dmat4 tileTransform = tile.getTransform();
+	tileTransform = CesiumGDModelLoader::apply_rtc_center(model, tileTransform);
+	tileTransform = CesiumGDModelLoader::apply_gltf_up_axis_transform(model, tileTransform);
+	// Then apply the z up
+	glm::dvec3 position = glm::dvec3(CesiumMathUtils::ecef_to_engine(tileTransform[3]));
+	instance->set_original_position(instance->get_original_position() + position);
 	return pLoadThreadResult;
 }
 

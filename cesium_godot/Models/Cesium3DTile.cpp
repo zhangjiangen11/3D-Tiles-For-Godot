@@ -1,5 +1,4 @@
 #include "Cesium3DTile.h"
-#include "CesiumGlobe.h"
 #include "Utils/CesiumMathUtils.h"
 #include "glm/ext/vector_double3.hpp"
 

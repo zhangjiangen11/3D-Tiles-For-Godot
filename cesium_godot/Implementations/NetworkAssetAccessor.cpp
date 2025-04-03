@@ -120,6 +120,9 @@ CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>> NetworkAssetAcc
 				std::string contentType = "application/octet-stream";
 				CesiumAsync::HttpHeaders headers = { { "content-type", contentType } };
 
+				// const char *strPtr = reinterpret_cast<const char *>(body.ptr());
+				// printf("%s\n", strPtr);
+				
 				//Convert the body to a Cesium readable format
 				auto assetResponse = std::make_unique<LocalAssetResponse>(
 						responseCode,

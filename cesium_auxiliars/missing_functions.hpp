@@ -13,4 +13,6 @@ Ref<FileAccess> open_file_access_with_err(const String &p_path, FileAccess::Mode
 
 bool is_editor_mode();
 
+#define PRINT_VEC3(v) printf("(%.2f, %.2f, %.2f)\n", v.x, v.y, v.z)
+
 #endif

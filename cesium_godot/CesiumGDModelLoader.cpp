@@ -1,4 +1,5 @@
 #include "CesiumGDModelLoader.h"
+#include "CesiumGltf/BufferView.h"
 #include "error_names.hpp"
 #include "missing_functions.hpp"
 
@@ -23,6 +24,8 @@ using namespace godot;
 
 #include <CesiumGltfReader/GltfReader.h>
 #include "Utils/CesiumGDTextureLoader.h"
+#include "CesiumGltf/ExtensionCesiumRTC.h"
+#include "CesiumGeometry/Transforms.h"
 
 #undef OPAQUE
 
@@ -181,6 +184,48 @@ constexpr Mesh::PrimitiveType CesiumGDModelLoader::cesium_to_godot_primitive_mod
 	default:
 		return Mesh::PrimitiveType::PRIMITIVE_TRIANGLES;
 	}
+}
+
+glm::dmat4x4 CesiumGDModelLoader::apply_rtc_center(const CesiumGltf::Model& gltf, const glm::dmat4x4& rootTransform) {
+	const CesiumGltf::ExtensionCesiumRTC* cesiumRTC = gltf.getExtension<CesiumGltf::ExtensionCesiumRTC>();
+	if (cesiumRTC == nullptr) {
+		return rootTransform;
+	}
+	const std::vector<double>& rtcCenter = cesiumRTC->center;
+	if (rtcCenter.size() != 3) {
+		return rootTransform;
+	}
+	const double x = rtcCenter[0];
+	const double y = rtcCenter[1];
+	const double z = rtcCenter[2];
+	const glm::dmat4x4 rtcTransform(
+		glm::dvec4(1.0, 0.0, 0.0, 0.0),
+		glm::dvec4(0.0, 1.0, 0.0, 0.0),
+		glm::dvec4(0.0, 0.0, 1.0, 0.0),
+		glm::dvec4(x, y, z, 1.0)
+	);
+	return rootTransform * rtcTransform;
+}
+
+
+glm::dmat4x4 CesiumGDModelLoader::apply_gltf_up_axis_transform(const CesiumGltf::Model& model, const glm::dmat4x4& rootTransform) {
+	auto gltfUpAxisIt = model.extras.find("gltfUpAxis");
+	if (gltfUpAxisIt == model.extras.end()) {
+	// The default up-axis of glTF is the Y-axis, and no other
+	// up-axis was specified. Transform the Y-axis to the Z-axis,
+	// to match the 3D Tiles specification
+	return rootTransform * CesiumGeometry::Transforms::Y_UP_TO_Z_UP;
+	}
+	const CesiumUtility::JsonValue& gltfUpAxis = gltfUpAxisIt->second;
+	int gltfUpAxisValue = static_cast<int>(gltfUpAxis.getSafeNumberOrDefault(1));
+	if (gltfUpAxisValue == static_cast<int>(CesiumGeometry::Axis::X)) {
+		return rootTransform * CesiumGeometry::Transforms::X_UP_TO_Z_UP;
+	} else if (gltfUpAxisValue == static_cast<int>(CesiumGeometry::Axis::Y)) {
+		return rootTransform * CesiumGeometry::Transforms::Y_UP_TO_Z_UP;
+	} else if (gltfUpAxisValue == static_cast<int>(CesiumGeometry::Axis::Z)) {
+		// No transform required
+	}
+	return rootTransform;
 }
 
 Vector<int32_t> CesiumGDModelLoader::get_index_buffer_from_primitive(const CesiumGltf::MeshPrimitive& primitive, const CesiumGltf::Model& model, Error* error)

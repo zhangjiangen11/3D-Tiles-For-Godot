@@ -5,6 +5,7 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/vector_double3.hpp"
 #include "glm/trigonometric.hpp"
+#include "godot_cpp/variant/transform3d.hpp"
 #if defined(CESIUM_GD_EXT)
 #include <godot_cpp/core/math.hpp>
 #include <godot_cpp/variant/vector3.hpp>
@@ -90,6 +91,53 @@ public:
 		return glm::dvec3();
 	}
 
+	static inline glm::dmat4 to_glm_mat4(const Transform3D& t) {
+		glm::dmat4 result;
+	    result[0][0] = t.basis.rows[0].x;
+	    result[1][0] = t.basis.rows[1].x;
+	    result[2][0] = t.basis.rows[2].x;
+	    result[3][0] = t.origin.x;
+
+	    result[0][1] = t.basis.rows[0].y;
+	    result[1][1] = t.basis.rows[1].y;
+	    result[2][1] = t.basis.rows[2].y;
+	    result[3][1] = t.origin.y;
+
+	    result[0][2] = t.basis.rows[0].z;
+	    result[1][2] = t.basis.rows[1].z;
+	    result[2][2] = t.basis.rows[2].z;
+	    result[3][2] = t.origin.z;
+
+	    result[0][3] = 0.0;
+	    result[1][3] = 0.0;
+	    result[2][3] = 0.0;
+	    result[3][3] = 1.0;
+		return result;
+	}
+
+
+	static inline Transform3D from_glm_mat4(const glm::dmat4& m) {
+	    Transform3D t;
+	    
+	    t.basis.rows[0].x = m[0][0];
+	    t.basis.rows[0].y = m[0][1];
+	    t.basis.rows[0].z = m[0][2];
+
+	    t.basis.rows[1].x = m[1][0];
+	    t.basis.rows[1].y = m[1][1];
+	    t.basis.rows[1].z = m[1][2];
+
+	    t.basis.rows[2].x = m[2][0];
+	    t.basis.rows[2].y = m[2][1];
+	    t.basis.rows[2].z = m[2][2];
+
+	    t.origin.x = m[3][0];
+	    t.origin.y = m[3][1];
+	    t.origin.z = m[3][2];
+
+	    return t;
+	}
+	
 	static inline glm::dvec3 ecef_to_engine(const glm::dvec3& vec) {
 		constexpr glm::dmat4 identity = glm::dmat4(1.0); 
 		constexpr glm::dmat4 translation = glm::translate(identity, glm::dvec3(0.0)); 
@@ -128,6 +176,10 @@ public:
 
 	static inline Quaternion from_glm_quat(const glm::dquat& q) {
 		return Quaternion(q.x, q.y, q.z, q.w);
+	}
+	
+	static inline glm::dquat to_glm_dquat(const Quaternion& q) {
+		return glm::dquat(q.x, q.y, q.z, q.w);
 	}
 
 };
