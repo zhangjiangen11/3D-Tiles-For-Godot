@@ -293,7 +293,7 @@ func adjusted_speed() -> float:
 	# The speed has to go through the curve
 	_get_surface_distance_raycast()
 	#Always move by x% of the total distance
-	var nextMoveSpeed: float = clampf(self.last_hit_distance * 0.01, 1, RADII * 3)
+	var nextMoveSpeed: float = clampf(self.last_hit_distance * 0.02, 1, RADII * 3)
 	var diff : float = nextMoveSpeed - self.move_speed
 	if (diff > self.move_speed * 2):
 		return self.move_speed * 2
