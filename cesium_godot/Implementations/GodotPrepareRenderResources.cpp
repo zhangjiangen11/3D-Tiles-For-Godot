@@ -106,7 +106,7 @@ CesiumAsync::Future<Cesium3DTilesSelection::TileLoadResultAndRenderResources> Go
 		instance->set_position(translation);
 		instance->set_rotation(eulerAngles);
 		if (this->m_tileset->get_create_physics_meshes()) {
-			instance->call_deferred("create_convex_collision");
+			instance->call_deferred("generate_tile_collision");
 		}
 
 

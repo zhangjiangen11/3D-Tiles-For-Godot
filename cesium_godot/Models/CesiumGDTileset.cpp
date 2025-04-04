@@ -243,9 +243,6 @@ void Cesium3DTileset::update_tileset(const Transform3D& cameraTransform)
 
 	glm::dvec3 camPos;
 	if (isGeoreferenced) {
-		// Possible optimization opportunity by calculating the transformation using strictly GLM
-		// OR even skipping all transformations, and instead just get the "equivalent" up and direction vectors for the cam
-		// I like the second idea more 
 		camPos = this->m_georeference->get_ecef_position();
 	}
 	else {
@@ -267,7 +264,7 @@ void Cesium3DTileset::update_tileset(const Transform3D& cameraTransform)
 	Vector2 aspectRatioV = viewportSize;
 	real_t aspectRatioF = aspectRatioV.x / aspectRatioV.y;
 
-	double verticalFOV = Math::deg_to_rad(cam->get_fov()); //TODO: Probably load 1.2x of the FOV for other tiles?
+	double verticalFOV = Math::deg_to_rad(cam->get_fov());
 	double horizontalFOV = 2 * Math::atan(aspectRatioF * Math::tan(verticalFOV * 0.5));
 
 	Cesium3DTilesSelection::ViewState currentViewState = Cesium3DTilesSelection::ViewState::create(
@@ -290,22 +287,10 @@ void Cesium3DTileset::update_tileset(const Transform3D& cameraTransform)
 	}
 }
 
-CesiumHTTPRequestNode* Cesium3DTileset::get_available_request_node() noexcept
-{
-	//TODO: Remove this func
-	return nullptr;
-}
 
 bool Cesium3DTileset::is_initial_loading_finished() const
 {
 	return this->m_initialLoadingFinished;
-}
-
-Vector3 Cesium3DTileset::get_earth_origin() const
-{
-	//The origin (for now at least) will be definined by
-	//the zero vector - the Z component (in Cesium Y is depth, this is equivalent to Godot's Z) of the radius, scaled down
-	return Vector3(0.0, 0.0, -CesiumGeospatial::Ellipsoid::WGS84.getRadii().y);
 }
 
 void Cesium3DTileset::add_overlay(CesiumIonRasterOverlay* overlay)
@@ -350,6 +335,7 @@ void Cesium3DTileset::move_origin(const double enginePosRaw[3]) {
 
 void Cesium3DTileset::recreate_tileset()
 {
+	// NYI: Implementation of editor level rendering is pending
 }
 
 void Cesium3DTileset::load_tileset()
@@ -577,7 +563,6 @@ void Cesium3DTileset::_bind_methods()
 #pragma region Public methods
 	ClassDB::bind_method(D_METHOD("is_initial_loading_finished"), &Cesium3DTileset::is_initial_loading_finished);
 	ClassDB::bind_method(D_METHOD("update_tileset", "camera_transform"), &Cesium3DTileset::update_tileset);
-	ClassDB::bind_method(D_METHOD("get_earth_origin"), &Cesium3DTileset::get_earth_origin);
 	ClassDB::bind_method(D_METHOD("free_tile"), &Cesium3DTileset::free_tile);
 #pragma endregion
 }

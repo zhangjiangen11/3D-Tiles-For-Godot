@@ -2,6 +2,7 @@
 #define CESIUM_GD_MODEL_LOADER_H
 
 #include "glm/ext/matrix_double4x4.hpp"
+#include <cstdint>
 #if defined(CESIUM_GD_EXT)
 #include <godot_cpp/classes/mesh.hpp>
 #include <godot_cpp/classes/array_mesh.hpp>
@@ -92,7 +93,6 @@ private:
 	#if defined(CESIUM_GD_EXT)
 	static Array generate_array_mesh_ext(const Vector<Vector3>& vertices, const Vector<int32_t>& indices, const Vector<Vector3>& normals, const Vector<Vector2>& textureCoords, const Vector<Vector2>& textureCoords2);
 	#endif
-
 	
 	template<class T>
 	static inline T copy_to_buffer_type(const std::byte* data, size_t attributeSize) {
