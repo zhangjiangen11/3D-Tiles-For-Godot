@@ -1,6 +1,8 @@
 #ifndef CESIUM_GD_MODEL_LOADER_H
 #define CESIUM_GD_MODEL_LOADER_H
 
+#include "glm/ext/matrix_double4x4.hpp"
+#include <cstdint>
 #if defined(CESIUM_GD_EXT)
 #include <godot_cpp/classes/mesh.hpp>
 #include <godot_cpp/classes/array_mesh.hpp>
@@ -25,6 +27,10 @@ class MeshInstance3D;
 class CesiumGDModelLoader {
 public:
 	static Ref<ArrayMesh> generate_meshes_from_model(const CesiumGltf::Model& readerResult, Error* error);
+
+	static glm::dmat4 apply_rtc_center(const CesiumGltf::Model& gltf, const glm::dmat4x4& rootTransform);
+
+	static glm::dmat4 apply_gltf_up_axis_transform(const CesiumGltf::Model& model, const glm::dmat4x4& rootTransform);	
 
 	static Error parse_gltf(const String& assetPath, CesiumGltfReader::GltfReaderResult* out);
 
@@ -87,7 +93,6 @@ private:
 	#if defined(CESIUM_GD_EXT)
 	static Array generate_array_mesh_ext(const Vector<Vector3>& vertices, const Vector<int32_t>& indices, const Vector<Vector3>& normals, const Vector<Vector2>& textureCoords, const Vector<Vector2>& textureCoords2);
 	#endif
-
 	
 	template<class T>
 	static inline T copy_to_buffer_type(const std::byte* data, size_t attributeSize) {

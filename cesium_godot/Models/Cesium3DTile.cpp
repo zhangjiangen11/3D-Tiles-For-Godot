@@ -1,7 +1,14 @@
 #include "Cesium3DTile.h"
-#include "CesiumGlobe.h"
 #include "Utils/CesiumMathUtils.h"
 #include "glm/ext/vector_double3.hpp"
+#include "godot_cpp/classes/collision_shape3d.hpp"
+#include "godot_cpp/classes/concave_polygon_shape3d.hpp"
+#include "godot_cpp/classes/static_body3d.hpp"
+#include "godot_cpp/core/error_macros.hpp"
+#include "godot_cpp/variant/packed_vector3_array.hpp"
+#include "godot_cpp/variant/vector3.hpp"
+#include "godot_cpp/core/math.hpp"
+
 
 const glm::dvec3& Cesium3DTile::get_original_position() {
 	return this->m_originalPosition;
@@ -17,6 +24,59 @@ void Cesium3DTile::apply_position_on_globe(const glm::dvec3& engineOrigin) {
 	this->set_global_position(CesiumMathUtils::from_glm_vec3(globalPos));
 }
 
+
+void Cesium3DTile::generate_tile_collision() {
+	// Get our static body and add it as a child of the mesh
+	StaticBody3D* staticBody = Object::cast_to<StaticBody3D>(this->create_collision_node_custom_trimesh());
+	ERR_FAIL_NULL_MSG(staticBody, "Unable to generate tile collision, failed to create the tile's shape");
+	staticBody->set_name(String(this->get_name()) + "_col");
+
+	this->add_child(staticBody, true);
+	// Set all the owners
+	Node* owner = this->get_owner();
+	if (owner == nullptr) return;
+	
+	CollisionShape3D* collisionShape = Object::cast_to<CollisionShape3D>(staticBody->get_child(0));
+	staticBody->set_owner(owner);
+	collisionShape->set_owner(owner);
+}
+
+Ref<ConcavePolygonShape3D> Cesium3DTile::create_trimesh_shape_inverse_winding()  {
+	const auto& faces = this->get_mesh()->get_faces();
+	if (faces.size() == 0) {
+		return Ref<ConcavePolygonShape3D>();
+	}
+
+	PackedVector3Array facePoints;
+	facePoints.resize(faces.size());
+
+	for (int i = 0; i < facePoints.size(); i += 3) {
+		// Let's reverse it
+		facePoints.set(i, faces.get(i + 2));
+		facePoints.set(i + 1, faces.get(i + 1));
+		facePoints.set(i + 2, faces.get(i));
+	}
+
+	Ref<ConcavePolygonShape3D> shape = memnew(ConcavePolygonShape3D);
+	shape->set_faces(facePoints);
+	return shape;
+}
+
+
+Node* Cesium3DTile::create_collision_node_custom_trimesh() {
+	Ref<ConcavePolygonShape3D> shape = this->create_trimesh_shape_inverse_winding();
+	if (shape.is_null()) {
+		return nullptr;
+	}
+	
+	StaticBody3D* staticBody = memnew(StaticBody3D);
+	CollisionShape3D* collisionShape = memnew(CollisionShape3D);
+
+	collisionShape->set_shape(shape);
+	staticBody->add_child(collisionShape, true);
+	return staticBody;
+}
+
 void Cesium3DTile::_bind_methods() {
-	// We do not want to bind anything, but we need to register the class
+    ClassDB::bind_method(D_METHOD("generate_tile_collision"), &Cesium3DTile::generate_tile_collision);
 }

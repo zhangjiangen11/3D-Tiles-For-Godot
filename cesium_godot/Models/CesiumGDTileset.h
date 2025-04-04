@@ -93,11 +93,7 @@ public:
 
 	void update_tileset(const Transform3D& cameraTransform);
 
-	CesiumHTTPRequestNode* get_available_request_node() noexcept;
-
 	bool is_initial_loading_finished() const;
-
-	Vector3 get_earth_origin() const;
 
 	void add_overlay(CesiumIonRasterOverlay* overlay);
 

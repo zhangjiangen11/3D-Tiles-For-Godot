@@ -1,6 +1,8 @@
 #include "CesiumGDModelLoader.h"
+#include "CesiumGltf/BufferView.h"
 #include "error_names.hpp"
 #include "missing_functions.hpp"
+#include <cstdint>
 
 #if defined(CESIUM_GD_EXT)
 #include <godot_cpp/classes/image_texture.hpp>
@@ -23,6 +25,8 @@ using namespace godot;
 
 #include <CesiumGltfReader/GltfReader.h>
 #include "Utils/CesiumGDTextureLoader.h"
+#include "CesiumGltf/ExtensionCesiumRTC.h"
+#include "CesiumGeometry/Transforms.h"
 
 #undef OPAQUE
 
@@ -44,12 +48,12 @@ Ref<ArrayMesh> CesiumGDModelLoader::generate_meshes_from_model(const CesiumGltf:
 
 			const CesiumGltf::Model* modelReference = &model;
 
-			//Create the material for the gltf
+			// Create the material for the gltf
 			Ref<StandardMaterial3D> godotMaterial = memnew(StandardMaterial3D);
 			const CesiumGltf::Material& mat = modelReference->materials.at(primitive.material);
 			copy_material_properties(mat, godotMaterial, *modelReference);
 
-			//Then copy all the other properties defined in the file
+			// Then copy all the other properties defined in the file
 			Vector<Vector3> vertices = get_attribute_from_primitive<Vector3>(primitive, model, "POSITION");
 
 			if (vertices.is_empty()) {
@@ -58,9 +62,9 @@ Ref<ArrayMesh> CesiumGDModelLoader::generate_meshes_from_model(const CesiumGltf:
 			}
 
 			Vector<Vector3> normals = get_attribute_from_primitive<Vector3>(primitive, model, "NORMAL", [&](Vector3& normal) {
-				//We will Invert all normal IF the cull mode is front
+				// We will Invert all normal IF the cull mode is front
 				if (mat.doubleSided) {
-					normal *= -1.0f;
+					normal *= -1.0;
 				}
 			});
 
@@ -69,7 +73,7 @@ Ref<ArrayMesh> CesiumGDModelLoader::generate_meshes_from_model(const CesiumGltf:
 			});
 			Vector<Vector2> textureCoords1 = get_attribute_from_primitive<Vector2>(primitive, model, "TEXCOORD_1");
 
-			//Try to get Cesium Overlays if the texcoords are not updated
+			// Try to get Cesium Overlays if the texcoords are not updated
 			if (textureCoords.is_empty()) {
 				textureCoords = get_attribute_from_primitive<Vector2>(primitive, model, "_CESIUMOVERLAY_0", [](Vector2& uv) {
 	        uv = uv.clamp(Vector2(0, 0), Vector2(1, 1));
@@ -82,16 +86,16 @@ Ref<ArrayMesh> CesiumGDModelLoader::generate_meshes_from_model(const CesiumGltf:
 
 			Vector<int32_t> indexBuffer = get_index_buffer_from_primitive(primitive, model, error);
 
-			//Default index buffer if it is empty
+			// Default index buffer if it is empty
 			if (indexBuffer.is_empty()) {
 				for (int32_t i = 0; i < vertices.size(); i++) {
 					indexBuffer.push_back(i);
 				}
 			}
 
-			//Required mesh data
+			// Required mesh data
 			Array arrays;
-			//We need to do some extra stuff if we're on the extension
+			// We need to do some extra stuff if we're on the extension
 			#if defined(CESIUM_GD_EXT)
 			arrays = generate_array_mesh_ext(vertices, indexBuffer, normals, textureCoords, textureCoords1);
 
@@ -183,6 +187,48 @@ constexpr Mesh::PrimitiveType CesiumGDModelLoader::cesium_to_godot_primitive_mod
 	}
 }
 
+glm::dmat4x4 CesiumGDModelLoader::apply_rtc_center(const CesiumGltf::Model& gltf, const glm::dmat4x4& rootTransform) {
+	const CesiumGltf::ExtensionCesiumRTC* cesiumRTC = gltf.getExtension<CesiumGltf::ExtensionCesiumRTC>();
+	if (cesiumRTC == nullptr) {
+		return rootTransform;
+	}
+	const std::vector<double>& rtcCenter = cesiumRTC->center;
+	if (rtcCenter.size() != 3) {
+		return rootTransform;
+	}
+	const double x = rtcCenter[0];
+	const double y = rtcCenter[1];
+	const double z = rtcCenter[2];
+	const glm::dmat4x4 rtcTransform(
+		glm::dvec4(1.0, 0.0, 0.0, 0.0),
+		glm::dvec4(0.0, 1.0, 0.0, 0.0),
+		glm::dvec4(0.0, 0.0, 1.0, 0.0),
+		glm::dvec4(x, y, z, 1.0)
+	);
+	return rootTransform * rtcTransform;
+}
+
+
+glm::dmat4x4 CesiumGDModelLoader::apply_gltf_up_axis_transform(const CesiumGltf::Model& model, const glm::dmat4x4& rootTransform) {
+	auto gltfUpAxisIt = model.extras.find("gltfUpAxis");
+	if (gltfUpAxisIt == model.extras.end()) {
+	// The default up-axis of glTF is the Y-axis, and no other
+	// up-axis was specified. Transform the Y-axis to the Z-axis,
+	// to match the 3D Tiles specification
+	return rootTransform * CesiumGeometry::Transforms::Y_UP_TO_Z_UP;
+	}
+	const CesiumUtility::JsonValue& gltfUpAxis = gltfUpAxisIt->second;
+	int gltfUpAxisValue = static_cast<int>(gltfUpAxis.getSafeNumberOrDefault(1));
+	if (gltfUpAxisValue == static_cast<int>(CesiumGeometry::Axis::X)) {
+		return rootTransform * CesiumGeometry::Transforms::X_UP_TO_Z_UP;
+	} else if (gltfUpAxisValue == static_cast<int>(CesiumGeometry::Axis::Y)) {
+		return rootTransform * CesiumGeometry::Transforms::Y_UP_TO_Z_UP;
+	} else if (gltfUpAxisValue == static_cast<int>(CesiumGeometry::Axis::Z)) {
+		// No transform required
+	}
+	return rootTransform;
+}
+
 Vector<int32_t> CesiumGDModelLoader::get_index_buffer_from_primitive(const CesiumGltf::MeshPrimitive& primitive, const CesiumGltf::Model& model, Error* error)
 {
 	Vector<int32_t> indices;
@@ -208,7 +254,7 @@ Vector<int32_t> CesiumGDModelLoader::get_index_buffer_from_primitive(const Cesiu
 		indices.push_back(index);
 	}
 
-	//Lastly, correct indices too
+	// Lastly, correct indices too
 	while (indices.size() % 3 != 0) {
 		indices.push_back(indices.get(indices.size() - 1)); // Duplicate the last index
 	}
@@ -220,7 +266,7 @@ Vector<int32_t> CesiumGDModelLoader::get_index_buffer_from_primitive(const Cesiu
 #if defined(CESIUM_GD_EXT)
 
 Array CesiumGDModelLoader::generate_array_mesh_ext(const Vector<Vector3>& vertices, const Vector<int32_t>& indices, const Vector<Vector3>& normals, const Vector<Vector2>& textureCoords, const Vector<Vector2>& textureCoords2) {
-	//Define them as packed arrays (TODO: make this switch at creation time to avoid copying data)
+	// Define them as packed arrays (TODO: make this switch at creation time to avoid copying data)
 	PackedVector3Array packedVert;
 	packedVert.resize(vertices.size());
 	for (uint32_t i = 0; i < packedVert.size(); i++) {
@@ -317,24 +363,24 @@ void CesiumGDModelLoader::set_colors_and_texture(const CesiumGltf::Material& ces
 	const std::vector<double>& baseColorFactor = cesiumMaterial.pbrMetallicRoughness->baseColorFactor;
 
 	if (baseColorFactor.size() >= RGBA_CHANNEL_COUNT) {
-		//RGBA constructor
+		// RGBA constructor
 		Color baseColor(baseColorFactor.at(0), baseColorFactor.at(1), baseColorFactor.at(2), baseColorFactor.at(3));
-		//GLTF uses linear space, Godot uses sRGB when presenting it to the screen
+		// GLTF uses linear space, Godot uses sRGB when presenting it to the screen
 		baseColor = baseColor.linear_to_srgb();
 		godotMaterial->set_albedo(baseColor);
 	}
 
-	//TODO: Check if specular or metallic here
+	// TODO: Check if specular or metallic here
 	godotMaterial->set_specular(cesiumMaterial.pbrMetallicRoughness->metallicFactor);
-	//godotMaterial->set_metallic(cesiumMaterial.pbrMetallicRoughness->metallicFactor);
+	// godotMaterial->set_metallic(cesiumMaterial.pbrMetallicRoughness->metallicFactor);
 	godotMaterial->set_roughness(cesiumMaterial.pbrMetallicRoughness->roughnessFactor);
 
-	//TODO: Texture
+	// TODO: Texture
 	const std::optional<CesiumGltf::TextureInfo>& baseTexture = cesiumMaterial.pbrMetallicRoughness->baseColorTexture;
 	if (!baseTexture.has_value()) {
 		return;
 	}
-	//Something to get the texture
+	// Something to get the texture
 
 	const int32_t imageIndex = modelReference.textures.at(baseTexture->index).source;
 	const CesiumGltf::Image& image = modelReference.images.at(imageIndex);
@@ -383,7 +429,7 @@ Error CesiumGDModelLoader::generate_normals(Vector<Vector3>* normalBuffer, const
 
 Error CesiumGDModelLoader::parse_gltf(const String& assetPath, CesiumGltfReader::GltfReaderResult* out)
 {
-	//Get the GLTF mesh
+	// Get the GLTF mesh
 	Error err;
 	Ref<FileAccess> assetRef = open_file_access_with_err(assetPath, FileAccess::READ, &err);
 
@@ -392,7 +438,7 @@ Error CesiumGDModelLoader::parse_gltf(const String& assetPath, CesiumGltfReader:
 		return err;
 	}
 
-	//Get the raw data as a gsl span to pass it onto the GLTF reader for Cesium
+	// Get the raw data as a gsl span to pass it onto the GLTF reader for Cesium
 	PackedByteArray rawData = assetRef->get_buffer(assetRef->get_length());
 	std::byte* dataPtr = reinterpret_cast<std::byte*>(rawData.ptrw());
 	std::span<const std::byte> dataSpan(dataPtr, rawData.size());
@@ -401,7 +447,7 @@ Error CesiumGDModelLoader::parse_gltf(const String& assetPath, CesiumGltfReader:
 	CesiumGltfReader::GltfReaderOptions options = {};
 	options.applyTextureTransform = true;
 	options.decodeDraco = true;
-	//options.decodeDraco = true;
+	// options.decodeDraco = true;
 	*out = reader.readGltf(dataSpan, options);
 	ERR_FAIL_COND_V_MSG(!out->errors.empty(), Error::ERR_FILE_CORRUPT, "Cannot read 3D tile!");
 
