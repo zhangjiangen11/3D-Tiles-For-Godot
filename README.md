@@ -58,7 +58,7 @@ Otherwise, to get a `compile_commands.json` file to use with an IDE or Text Edit
 
 
 ## Double precision builds
-For applications that require getting extremely close to the ellipsoid's surface we recommend building the extension for double precision, this **requires a custom build of Godot with precision=double enabled**
+The plugin supports double precision mode for more accurate true origin navigation.
 
 ### Steps to build with doubles
 
