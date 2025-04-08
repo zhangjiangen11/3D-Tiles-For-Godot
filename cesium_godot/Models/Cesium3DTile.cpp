@@ -3,12 +3,12 @@
 #include "glm/ext/vector_double3.hpp"
 #include "godot_cpp/classes/collision_shape3d.hpp"
 #include "godot_cpp/classes/concave_polygon_shape3d.hpp"
+#include "godot_cpp/classes/mesh.hpp"
 #include "godot_cpp/classes/static_body3d.hpp"
 #include "godot_cpp/core/error_macros.hpp"
 #include "godot_cpp/variant/packed_vector3_array.hpp"
 #include "godot_cpp/variant/vector3.hpp"
-#include "godot_cpp/core/math.hpp"
-
+#include "godot_cpp/classes/mesh.hpp"
 
 const glm::dvec3& Cesium3DTile::get_original_position() {
 	return this->m_originalPosition;
