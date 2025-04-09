@@ -75,6 +75,12 @@ def clone_bindings_repo_if_needed():
     subprocess.run(["git", "clone", "-b", branchTag,
                    repoUrl, "--recursive", repoDirectory])
 
+    prevDir: str = os.getcwd()
+    os.chdir(repoDirectory)
+    acceptedCommitSHA: str = "6388e26dd8a42071f65f764a3ef3d9523dda3d6e"
+    subprocess.run(["git", "reset", "--hard", acceptedCommitSHA])
+    os.chdir(prevDir)
+
 
 # Configure with CMake
 def configure_native(argumentsDict):
