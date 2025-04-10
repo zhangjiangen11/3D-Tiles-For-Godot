@@ -637,6 +637,9 @@ void Cesium3DTileset::_ready() {
 void Cesium3DTileset::_enter_tree() {
 	if (!is_editor_mode()) return;
 	CesiumGeoreference* globe = Godot3DTiles::AssetManipulation::find_or_create_globe(this);
+	if (globe == nullptr) {
+		return;
+	}
 	//Parent to the globe
 	this->reparent(globe, true);
 	this->set_rotation_degrees(Vector3(90.0, 0.0, 0.0));

@@ -21,8 +21,11 @@ const char* CESIUM_GLOBE_NAME = "CesiumGeoreference";
 const char* CESIUM_TILESET_NAME = "Cesium3DTileset";
 const char* GEOREF_CAM_SCRIPT = "res://addons/cesium_godot/scripts/georeference_camera_controller.gd";
 
+const char* NO_ROOT_MSG = "No root node found in scene, add a Node3D to your scene in order to add Cesium Assets";
+
 CesiumGeoreference* Godot3DTiles::AssetManipulation::find_or_create_globe(Node* baseNode) {
-  Node* root = get_root_of_edit_scene(baseNode);
+	Node* root = get_root_of_edit_scene(baseNode);
+	ERR_FAIL_COND_V_MSG(root == nullptr, nullptr, NO_ROOT_MSG);
 	CesiumGeoreference* globe = nullptr;
 	int32_t count = root->get_child_count();
 	for (int32_t i = 0; i < count; i++) {
@@ -44,6 +47,7 @@ CesiumGeoreference* Godot3DTiles::AssetManipulation::find_or_create_globe(Node* 
 
 CesiumGDConfig* Godot3DTiles::AssetManipulation::find_or_create_config_node(Node* baseNode) {
 	Node* root = baseNode->get_tree()->get_root();
+	ERR_FAIL_COND_V_MSG(root == nullptr, nullptr, NO_ROOT_MSG);
 	CesiumGDConfig* result = find_node_in_scene<CesiumGDConfig>(root);
 	if (result != nullptr) {
 		return result;
@@ -57,6 +61,7 @@ CesiumGDConfig* Godot3DTiles::AssetManipulation::find_or_create_config_node(Node
 CesiumGDCreditSystem* Godot3DTiles::AssetManipulation::find_or_create_credit_system(Node* baseNode, bool deferred) {
 	// HACK: assume we will always have this root as a node 3d on the child of the window
 	Node* root = baseNode->get_tree()->get_root();
+	ERR_FAIL_COND_V_MSG(root == nullptr, nullptr, NO_ROOT_MSG);
 	CesiumGDCreditSystem* result = find_node_in_scene<CesiumGDCreditSystem>(root);
 	if (result != nullptr) {
 		return result;
@@ -84,6 +89,7 @@ Node* Godot3DTiles::AssetManipulation::get_root_of_edit_scene(Node* baseNode) {
 
 void Godot3DTiles::AssetManipulation::instantiate_tileset(Node* baseNode, int32_t assetId, const String& assetType) {
 	Node* root = get_root_of_edit_scene(baseNode);
+	ERR_FAIL_COND_MSG(root == nullptr, NO_ROOT_MSG);
 	Cesium3DTileset* tileset = memnew(Cesium3DTileset);
 	root->add_child(tileset, true);
 	
@@ -120,6 +126,7 @@ void Godot3DTiles::AssetManipulation::instantiate_tileset(Node* baseNode, int32_
 void Godot3DTiles::AssetManipulation::instantiate_dynamic_cam(Node* baseNode) {
 	const char* trueOriginCameraScript = "res://addons/cesium_godot/scripts/cesium_camera_controller.gd";
 	Node* root = get_root_of_edit_scene(baseNode);
+	ERR_FAIL_COND_MSG(root == nullptr, NO_ROOT_MSG);
 	CesiumGeoreference* globe = find_or_create_globe(baseNode);
 	Camera3D* camera = memnew(Camera3D);
 	root->add_child(camera, true);
