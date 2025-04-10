@@ -30,6 +30,7 @@ def is_extension_target(argsDict) -> bool:
     return get_compile_target_definition(argsDict) == CESIUM_EXT_DEF
 
 def generate_precision_symbols(argsDict, env):
+    print("Generating double precision compile symbols")
     desiredPrecision = argsDict.get("precision")
     if (desiredPrecision == "double"):
         env.Append(CPPDEFINES=["REAL_T_IS_DOUBLE"])
@@ -52,6 +53,7 @@ def get_compile_target_definition(argsDict) -> str:
 
 
 def clone_native_repo_if_needed():
+    print("Cloning Cesium Native repo")
     repoDirectory = _scons_to_abs_path(ROOT_DIR_EXT + "/native")
     if (os.path.exists(repoDirectory)):
         print("Cesium Native repo already exists, skipping clone phase")
@@ -67,6 +69,7 @@ def clone_native_repo_if_needed():
 
 
 def clone_bindings_repo_if_needed():
+    print("Cloning bindings repo")
     repoDirectory = _scons_to_abs_path(BINDINGS_DIR)
     if (os.path.exists(repoDirectory)):
         return
@@ -84,6 +87,7 @@ def clone_bindings_repo_if_needed():
 
 # Configure with CMake
 def configure_native(argumentsDict):
+    print("Configuring Cesium Native")
     isExt = is_extension_target(argumentsDict)
     repoDirectory = CESIUM_NATIVE_DIR_EXT if isExt else CESIUM_NATIVE_DIR_MODULE
     repoDirectory = _scons_to_abs_path(repoDirectory)
@@ -140,6 +144,7 @@ def clean_cesium_definitions():
     definitions that conflict with the engine's
     """
     # Get the conflicting file (Material.h in our case)
+    print("Cleaning native definitions")
 
     conflictFilePath: str = "%s/%s" % (CESIUM_NATIVE_DIR_EXT,
                                        "/CesiumGltf/generated/include/CesiumGltf")
@@ -157,9 +162,11 @@ def clean_cesium_definitions():
     # Write the file out again
     with open(conflictFilePath, 'w') as file:
         file.write(fileData)
+    print("Finished cleaning native definitions")
 
 
 def install_additional_libs():
+    print("Installing additional libraries")
     vcpkgPath = find_ezvcpkg_path()
     executable = "%s/%s" % (vcpkgPath, "vcpkg.exe")
     subprocess.run([executable, "install", "curl:%s" % (STATIC_TRIPLET)])
@@ -214,9 +221,11 @@ def find_in_dir_recursive(path: str, pattern: str) -> (bool, str):
 def find_ezvcpkg_path() -> str:
     # Search the C drive
     assumedPath = "%s.ezvcpkg" % (os.path.abspath(os.sep))
+    print(f"Searching vcpkg at: {assumedPath}")
     if (not os.path.exists(assumedPath)):
         from pathlib import Path
         assumedPath = (Path.home() / ".ezvcpkg").as_posix()
+        print(f"Searching vcpkg at: {assumedPath}")
         if (not os.path.exists(assumedPath)):
             print("EZVCPKG not found, please make sure that CesiumNative was compiled and configured properly!");
             return ""
@@ -227,6 +236,7 @@ def find_ezvcpkg_path() -> str:
         "%s/%s" % (assumedPath, x)).st_ctime)
     latestDir = subDirs[0]
     assumedPath = "%s/%s" % (assumedPath, latestDir)
+    print(f"Found ezvcpkg at {assumedPath}")
     return assumedPath
 
 
