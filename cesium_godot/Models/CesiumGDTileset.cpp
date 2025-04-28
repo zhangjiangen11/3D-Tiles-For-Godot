@@ -1,4 +1,3 @@
-#include "Models/Cesium3DTile.h"
 #include "glm/ext/vector_double3.hpp"
 #include <cstdint>
 #define SPDLOG_COMPILED_LIB
@@ -37,6 +36,7 @@ using namespace godot;
 #endif
 
 
+#include "Models/Cesium3DTile.h"
 #include "Utils/AssetManipulation.h"
 #include "Cesium3DTilesSelection/Tileset.h"
 #include "Cesium3DTilesSelection/TilesetExternals.h"
@@ -49,6 +49,7 @@ using namespace godot;
 #include "../Utils/CesiumVariantHash.h"
 #include <glm/gtc/quaternion.hpp>
 #include "CesiumGDRasterOverlay.h"
+#include "CesiumAsync/GunzipAssetAccessor.h"
 #include <CesiumAsync/CachingAssetAccessor.h>
 #include "CesiumAsync/SqliteCache.h"
 
@@ -326,7 +327,7 @@ void Cesium3DTileset::move_origin(const double enginePosRaw[3]) {
 	int32_t childCount = this->get_child_count();
 	for(int32_t i = 0; i < childCount; i++) {
 		Cesium3DTile* currTile = Object::cast_to<Cesium3DTile>(this->get_child(i));
-		[[unlikely]] if (currTile == nullptr) {
+		if (currTile == nullptr) {
 			continue;
 		}
 		currTile->apply_position_on_globe(enginePos);
@@ -383,11 +384,14 @@ Cesium3DTilesSelection::TilesetExternals Cesium3DTileset::create_tileset_externa
 	}
 	String globalCachePath = ProjectSettings::get_singleton()->globalize_path(cachePath) + "/cesium-request-cache.sqlite";
 	constexpr int32_t requestsPerCachePrune = 10000;
-	constexpr uint64_t maxItems = 4096;
+	constexpr uint64_t maxItems = 4096 * 5;
 
 	auto cache = std::make_shared<CesiumAsync::SqliteCache>(spdlog::default_logger(), globalCachePath.utf8().get_data(), maxItems);
 	auto simpleAccessor = std::make_shared<NetworkAssetAccessor>();
 	auto cachedAccessor = std::make_shared<CesiumAsync::CachingAssetAccessor>(spdlog::default_logger(), simpleAccessor, cache, requestsPerCachePrune);
+	auto gunzipAccessor = std::make_shared<CesiumAsync::GunzipAssetAccessor>(
+		cachedAccessor
+	);
 	
 	auto taskProcessor = std::make_shared<SimpleTaskProcessor>();
 	CesiumAsync::AsyncSystem asyncSystem(taskProcessor);
@@ -396,7 +400,7 @@ Cesium3DTilesSelection::TilesetExternals Cesium3DTileset::create_tileset_externa
 	CesiumGDCreditSystem::get_singleton(this)->add_credit_system(creditSystem);
 	
 	Cesium3DTilesSelection::TilesetExternals result {
-		cachedAccessor,
+		gunzipAccessor,
 		renderResourcesProvider,
 		asyncSystem,
 		creditSystem

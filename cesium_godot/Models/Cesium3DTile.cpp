@@ -1,4 +1,7 @@
 #include "Cesium3DTile.h"
+#include "CesiumGltf/Model.h"
+#include "CesiumGltf/PropertyTable.h"
+#include "Models/TileMetadata.h"
 #include "Utils/CesiumMathUtils.h"
 #include "glm/ext/vector_double3.hpp"
 #include "godot_cpp/classes/collision_shape3d.hpp"
@@ -9,6 +12,9 @@
 #include "godot_cpp/variant/packed_vector3_array.hpp"
 #include "godot_cpp/variant/vector3.hpp"
 #include "godot_cpp/classes/mesh.hpp"
+#include "CesiumGltf/PropertyTableView.h"
+#include "CesiumGltf/Model.h"
+#include <vector>
 
 const glm::dvec3& Cesium3DTile::get_original_position() {
 	return this->m_originalPosition;
@@ -39,6 +45,27 @@ void Cesium3DTile::generate_tile_collision() {
 	CollisionShape3D* collisionShape = Object::cast_to<CollisionShape3D>(staticBody->get_child(0));
 	staticBody->set_owner(owner);
 	collisionShape->set_owner(owner);
+}
+
+
+void Cesium3DTile::add_metadata(const CesiumGltf::Model* model, const CesiumGltf::ExtensionModelExtStructuralMetadata* metadata) {
+	if (metadata == nullptr) return;
+	const std::vector<CesiumGltf::PropertyTable>& tables = metadata->propertyTables;
+
+	// Reserve our own copy of the data tables
+	this->m_metadata.init(tables.size());	
+
+	for (size_t i = 0; i < tables.size(); i++) {
+		const CesiumGltf::PropertyTable& table = tables[i];	
+		CesiumGltf::PropertyTableView view(*model, table);
+		if (view.status() != CesiumGltf::PropertyTableViewStatus::Valid) {
+			// TODO: Save it but mark it as failed to load
+			continue;
+		}
+		// Initialize the dictionary
+		this->m_metadata.add_table(view);
+		
+	}
 }
 
 Ref<ConcavePolygonShape3D> Cesium3DTile::create_trimesh_shape_inverse_winding()  {

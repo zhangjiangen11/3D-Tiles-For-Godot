@@ -26,6 +26,7 @@ sources = [
     cesium_build_utils.get_root_dir() + "/register_types.cpp",
     cesium_build_utils.get_root_dir() + "/Models/CesiumGDTileset.cpp",
     cesium_build_utils.get_root_dir() + "/Models/Cesium3DTile.cpp",
+    cesium_build_utils.get_root_dir() + "/Models/TileMetadata.cpp",
     cesium_build_utils.get_root_dir() + "/Models/CesiumGDPanel.cpp",
     cesium_build_utils.get_root_dir() + "/Models/CesiumGDRasterOverlay.cpp",
     cesium_build_utils.get_root_dir() + "/Models/CesiumGlobe.cpp",
@@ -213,6 +214,7 @@ env.Append(
         "libwebpdecoder",
         "zstd",
         "zlib",
+        "zlibstatic-ng",
         "libssl",
         "meshoptimizer",
         "ada"
@@ -222,7 +224,8 @@ env.Append(
         ) + "/CesiumGltfReader/%s" % (cesium_build_utils.RELEASE_CONFIG),
         cesium_build_utils.get_root_dir_native(
         ) + "/CesiumGeospatial/%s" % (cesium_build_utils.RELEASE_CONFIG),
-        cesium_build_utils.get_root_dir_native() + "/CesiumGltf/%s" % (cesium_build_utils.RELEASE_CONFIG),
+        cesium_build_utils.get_root_dir_native(
+        ) + "/CesiumGltf/%s" % (cesium_build_utils.RELEASE_CONFIG),
         cesium_build_utils.get_root_dir_native(
         ) + "/CesiumJsonReader/%s" % (cesium_build_utils.RELEASE_CONFIG),
         cesium_build_utils.get_root_dir_native(
