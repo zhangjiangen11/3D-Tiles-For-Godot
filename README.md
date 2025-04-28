@@ -37,10 +37,14 @@ cd 3D-Tiles-For-Godot
 ```
 
 If you would like to build the binaries and you don't plan on modifying the underlying C++ code with any editor use the following command
-`scons platform=windows arch=x64 compileTarget=extension`
+```
+scons platform=windows arch=x64 compileTarget=extension target=template_release production=yes
+```
 
 Otherwise, to get a `compile_commands.json` file to use with an IDE or Text Editor, run
-`scons platform=windows compiledb=true arch=x64 compileTarget=extension debug_symbols=true`
+```
+scons platform=windows compiledb=true arch=x64 compileTarget=extension debug_symbols=true
+```
 
 #### Build Flags Explained:
 
