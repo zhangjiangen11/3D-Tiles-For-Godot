@@ -24,7 +24,7 @@ OS_WIN = "nt"
 
 STATIC_TRIPLET = "x64-windows-static"
 
-RELEASE_CONFIG = "RelWithDebInfo"
+RELEASE_CONFIG = "Release"
 
 def is_extension_target(argsDict) -> bool:
     return get_compile_target_definition(argsDict) == CESIUM_EXT_DEF

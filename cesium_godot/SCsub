@@ -214,6 +214,7 @@ env.Append(
         "libwebpdecoder",
         "zstd",
         "zlib",
+        "zlibstatic-ng",
         "libssl",
         "meshoptimizer",
         "ada"
