@@ -41,10 +41,6 @@ var atmosphere_manager: AtmosphereManager
 
 const RADII := 6378137.0
 
-@export
-var info_labels_ui : InfoLabelsUI
-
-
 func find_directional_light(node: Node) -> DirectionalLight3D:
 	if node is DirectionalLight3D:
 		return node
@@ -93,10 +89,6 @@ func _process(delta: float) -> void:
 	self.adjust_far_and_near()
 	if (self.loaded):
 		self.update_tilesets()
-
-	if (self.info_labels_ui != null):
-		self.info_labels_ui.update_move_speed(self.move_speed)
-
 
 func update_tilesets() -> void:
 	var camera_xform := self.globe_node.get_tx_engine_to_ecef() * self.global_transform
