@@ -1,4 +1,3 @@
-#include "Models/Cesium3DTile.h"
 #include "glm/ext/vector_double3.hpp"
 #include <cstdint>
 #define SPDLOG_COMPILED_LIB
@@ -37,6 +36,7 @@ using namespace godot;
 #endif
 
 
+#include "Models/Cesium3DTile.h"
 #include "Utils/AssetManipulation.h"
 #include "Cesium3DTilesSelection/Tileset.h"
 #include "Cesium3DTilesSelection/TilesetExternals.h"
@@ -326,7 +326,7 @@ void Cesium3DTileset::move_origin(const double enginePosRaw[3]) {
 	int32_t childCount = this->get_child_count();
 	for(int32_t i = 0; i < childCount; i++) {
 		Cesium3DTile* currTile = Object::cast_to<Cesium3DTile>(this->get_child(i));
-		[[unlikely]] if (currTile == nullptr) {
+		if (currTile == nullptr || !currTile->is_visible()) {
 			continue;
 		}
 		currTile->apply_position_on_globe(enginePos);

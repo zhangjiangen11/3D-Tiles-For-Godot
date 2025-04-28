@@ -12,8 +12,6 @@ def load_cesium_module(p_includePaths: list[str], moduleName: str, loadSources=F
         rootDir = cesium_build_utils.get_root_dir_native()
     base_include = "%s/%s/include" % (rootDir, moduleName)
     generated_include = "%s/%s/generated/include" % (rootDir, moduleName)
-    print(f"Loading Cesium module: {moduleName}, includes: {
-          base_include}, generated includes: {generated_include}")
     p_includePaths.append(base_include)
     p_includePaths.append(generated_include)
 
@@ -28,6 +26,7 @@ sources = [
     cesium_build_utils.get_root_dir() + "/register_types.cpp",
     cesium_build_utils.get_root_dir() + "/Models/CesiumGDTileset.cpp",
     cesium_build_utils.get_root_dir() + "/Models/Cesium3DTile.cpp",
+    cesium_build_utils.get_root_dir() + "/Models/TileMetadata.cpp",
     cesium_build_utils.get_root_dir() + "/Models/CesiumGDPanel.cpp",
     cesium_build_utils.get_root_dir() + "/Models/CesiumGDRasterOverlay.cpp",
     cesium_build_utils.get_root_dir() + "/Models/CesiumGlobe.cpp",

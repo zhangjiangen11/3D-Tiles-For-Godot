@@ -23,6 +23,7 @@ using namespace godot;
 #include "CesiumRasterOverlays/RasterOverlay.h"
 #include "../Utils/CesiumMathUtils.h"
 #include "CesiumGltf/Node.h"
+#include "CesiumGltf/ExtensionModelExtStructuralMetadata.h"
 #include <glm/gtc/quaternion.hpp>
 #include "../Models/CesiumGDTileset.h"
 
@@ -106,9 +107,13 @@ CesiumAsync::Future<Cesium3DTilesSelection::TileLoadResultAndRenderResources> Go
 		instance->set_position(translation);
 		instance->set_rotation(eulerAngles);
 		if (this->m_tileset->get_create_physics_meshes()) {
-			instance->call_deferred("generate_tile_collision");
+			// instance->call_deferred("generate_tile_collision");
+			instance->generate_tile_collision();
 		}
 
+		// Metadata extraction
+		const CesiumGltf::ExtensionModelExtStructuralMetadata* modelMetadata = model->getExtension<CesiumGltf::ExtensionModelExtStructuralMetadata>();
+		instance->add_metadata(model, modelMetadata);
 
 		TileLoadResultAndRenderResources result{
 			std::move(tileLoadResult),
