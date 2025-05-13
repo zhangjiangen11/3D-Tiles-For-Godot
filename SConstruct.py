@@ -16,10 +16,12 @@ def add_source_files(self, p_sources):
     sources.extend(p_sources)
 
 
+# Clone all the needed projects
 if (cesium_build_utils.is_extension_target(ARGUMENTS)):
     cesium_build_utils.clone_bindings_repo_if_needed()
 
 cesium_build_utils.clone_native_repo_if_needed()
+cesium_build_utils.clone_lite_html_if_needed()
 
 cesium_build_utils.compile_native(ARGUMENTS)
 env = SConscript("godot-cpp/SConstruct")

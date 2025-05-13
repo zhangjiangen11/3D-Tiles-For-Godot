@@ -34,6 +34,7 @@ sources = [
     cesium_build_utils.get_root_dir() + "/Models/CesiumHTTPRequestNode.cpp",
     cesium_build_utils.get_root_dir() + "/Models/CesiumGDCreditSystem.cpp",
     cesium_build_utils.get_root_dir() + "/Implementations/NetworkAssetAccessor.cpp",
+    cesium_build_utils.get_root_dir() + "/Implementations/DocumentContainer.cpp",
     cesium_build_utils.get_root_dir() + "/Implementations/GodotPrepareRenderResources.cpp",
     cesium_build_utils.get_root_dir() + "/CesiumGDModelLoader.cpp",
     cesium_build_utils.get_root_dir() + "/Utils/CesiumGDTextureLoader.cpp",
@@ -77,6 +78,8 @@ load_cesium_module(includePaths, "extern/misc")
 load_cesium_module(includePaths, "extern/nonstd")
 load_cesium_module(includePaths, "extern/s2")
 load_cesium_module(includePaths, "curl",
+                   rootDir=cesium_build_utils.get_root_dir() + "/third_party")
+load_cesium_module(includePaths, "litehtml",
                    rootDir=cesium_build_utils.get_root_dir() + "/third_party")
 
 if (cesium_build_utils.is_extension_target(ARGUMENTS)):
@@ -217,7 +220,8 @@ env.Append(
         "zlibstatic-ng",
         "libssl",
         "meshoptimizer",
-        "ada"
+        "ada",
+        "litehtml"
     ],
     LIBPATH=[
         cesium_build_utils.get_root_dir_native(
@@ -249,7 +253,7 @@ env.Append(
         cesium_build_utils.get_root_dir_native() + "/libs",
         cesium_build_utils.get_root_dir_native(
         ) + "/CesiumAsync/%s" % (cesium_build_utils.RELEASE_CONFIG),
-        cesium_build_utils.get_root_dir() + "/third_party",
+        cesium_build_utils.get_root_dir() + "/third_party/litehtml",
         cesium_build_utils.find_ezvcpkg_path(
         ) + "/installed/%s/lib" % (cesium_build_utils.STATIC_TRIPLET)
     ],

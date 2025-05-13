@@ -4,7 +4,11 @@
 #include "CesiumGltf/PropertyTableView.h"
 #include "CesiumGltf/PropertyTypeTraits.h"
 #include "glm/detail/qualifier.hpp"
+#include "godot_cpp/classes/object.hpp"
+#include "godot_cpp/classes/ref_counted.hpp"
+#include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/variant/array.hpp"
+#include "godot_cpp/variant/dictionary.hpp"
 #include "godot_cpp/variant/string.hpp"
 #include "godot_cpp/variant/variant.hpp"
 #include "godot_cpp/variant/vector2.hpp"
@@ -51,14 +55,17 @@ enum class EComponentType : int64_t
     Float64
 };
 
-struct CesiumPropertyInfo {
+class CesiumPropertyInfo : public RefCounted {
+	GDCLASS(CesiumPropertyInfo, RefCounted)
+public:
 	EPropertyType propertyType;
 	EComponentType componentType;
 	bool isArray;
 	Variant data;
 };
 
-using CesiumPropertyTable_t = std::unordered_map<std::string, CesiumPropertyInfo>;
+// using CesiumPropertyTable_t = std::unordered_map<std::string, CesiumPropertyInfo>;
+using CesiumPropertyTable_t = Dictionary;
 
 class TileMetadata  {
 
@@ -67,6 +74,10 @@ public:
 	void init(size_t tableCount);
 
 	void add_table(const CesiumGltf::PropertyTableView& tableView);
+
+	const Dictionary& get_table(int32_t index) const;
+
+	int32_t get_table_count() const;
 
 private:
 
@@ -185,7 +196,7 @@ private:
 	}
 
 	template<class T>
-	CesiumPropertyInfo make_metadata_value(const T& nativeValue) {
+	Ref<CesiumPropertyInfo> make_metadata_value(const T& nativeValue) {
 		CesiumPropertyInfo result;
 		if constexpr (CesiumGltf::IsMetadataArray<T>::value) {
 			// TODO: Make an array here
@@ -206,10 +217,12 @@ private:
 			result.data = nativeValue;
 		}
 		
-		return result;
+		return &result;
 	}
 	
 	std::vector<CesiumPropertyTable_t> m_tables;
+
+	Dictionary m_accesibleRepresentation;
 	
 };
 

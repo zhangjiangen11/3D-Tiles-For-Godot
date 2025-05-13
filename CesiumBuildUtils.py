@@ -26,14 +26,17 @@ STATIC_TRIPLET = "x64-windows-static"
 
 RELEASE_CONFIG = "Release"
 
+
 def is_extension_target(argsDict) -> bool:
     return get_compile_target_definition(argsDict) == CESIUM_EXT_DEF
+
 
 def generate_precision_symbols(argsDict, env):
     print("Generating double precision compile symbols")
     desiredPrecision = argsDict.get("precision")
     if (desiredPrecision == "double"):
         env.Append(CPPDEFINES=["REAL_T_IS_DOUBLE"])
+
 
 def get_compile_target_definition(argsDict) -> str:
     # Get the format (default is extension)
@@ -53,34 +56,31 @@ def get_compile_target_definition(argsDict) -> str:
 
 
 def clone_native_repo_if_needed():
-    print("Cloning Cesium Native repo")
-    repoDirectory = _scons_to_abs_path(ROOT_DIR_EXT + "/native")
-    if (os.path.exists(repoDirectory)):
-        print("Cesium Native repo already exists, skipping clone phase")
-        return
-    repoUrl = "https://github.com/CesiumGS/cesium-native.git"
-    subprocess.run(["git", "clone", repoUrl, "--recursive", repoDirectory])
-    # Go to the native repo and then reset to the accepted commit
-    prevDir: str = os.getcwd()
-    os.chdir(repoDirectory)
-    acceptedCommitSHA: str = "ae62bd8c6a7fbce08a541eecd86a313bfb906e15"
-    subprocess.run(["git", "reset", "--hard", acceptedCommitSHA])
-    os.chdir(prevDir)
+    clone_repo_if_needed(ROOT_DIR_EXT + "/native", "Cesium Native",
+                         "https://github.com/CesiumGS/cesium-native.git", "v0.46.0", "ae62bd8c6a7fbce08a541eecd86a313bfb906e15")
 
 
 def clone_bindings_repo_if_needed():
-    print("Cloning bindings repo")
-    repoDirectory = _scons_to_abs_path(BINDINGS_DIR)
+    clone_repo_if_needed(BINDINGS_DIR, "Godot CPP Bindings", "https://github.com/godotengine/godot-cpp",
+                         "4.1", "6388e26dd8a42071f65f764a3ef3d9523dda3d6e")
+
+
+def clone_lite_html_if_needed():
+    # clone_repo_if_needed(ROOT_DIR_EXT + "/third_party/lite-html", "Lite HTML",
+    #                      "https://github.com/litehtml/litehtml.git", "v0.9", "6ca1ab0419e770e6d35a1ef690238773a1dafcee")
+    pass
+
+
+def clone_repo_if_needed(targetDir: str, name: str, repoUrl: str, branch: str, acceptedCommitSHA: str):
+    print(f"Cloning {name} repo")
+    repoDirectory = _scons_to_abs_path(targetDir)
     if (os.path.exists(repoDirectory)):
         return
-    repoUrl = "https://github.com/godotengine/godot-cpp"
-    branchTag = "4.1"
-    subprocess.run(["git", "clone", "-b", branchTag,
+    subprocess.run(["git", "clone", "-b", branch,
                    repoUrl, "--recursive", repoDirectory])
 
     prevDir: str = os.getcwd()
     os.chdir(repoDirectory)
-    acceptedCommitSHA: str = "6388e26dd8a42071f65f764a3ef3d9523dda3d6e"
     subprocess.run(["git", "reset", "--hard", acceptedCommitSHA])
     os.chdir(prevDir)
 
@@ -227,7 +227,8 @@ def find_ezvcpkg_path() -> str:
         assumedPath = (Path.home() / ".ezvcpkg").as_posix()
         print(f"Searching vcpkg at: {assumedPath}")
         if (not os.path.exists(assumedPath)):
-            print("EZVCPKG not found, please make sure that CesiumNative was compiled and configured properly!");
+            print(
+                "EZVCPKG not found, please make sure that CesiumNative was compiled and configured properly!")
             return ""
         # Assume it is in /home (C:/Users/currUser)
     # Then find the latest version (use the last created folder)
