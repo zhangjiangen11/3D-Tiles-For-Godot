@@ -58,7 +58,7 @@ private:
 	std::unordered_map<uint32_t, Ref<ImageTexture>> m_imageCache;
 	CurlHttpClient<2> m_httpClient;
 	// I know this is "backwards" if you think abt this in OOP terms, but I beg you to think of this class as just functional implementations
-	litehtml::document::ptr m_document;
+	litehtml::document::ptr m_document = nullptr;
 
 protected:
 	static void _bind_methods();

@@ -17,7 +17,7 @@ void TileMetadata::add_table(const CesiumGltf::PropertyTableView& tableView) {
 	CesiumPropertyTable_t table{};
 	// table.reserve(tableView.size());
 	tableView.forEachProperty([this, table](const std::string& propertyId, auto propertyValue) mutable {
-		table.get_or_add(propertyId.c_str(), this->make_metadata_value(propertyValue));
+		// table.get_or_add(propertyId.c_str(), this->make_metadata_value(propertyValue));
 	});
 }
 

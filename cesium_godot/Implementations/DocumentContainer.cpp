@@ -64,6 +64,7 @@ void DocumentContainer::set_html(const String& html) {
 }
 
 void DocumentContainer::_draw() {
+	if (this->m_document == nullptr) return;
 	litehtml::position origin(
 		0,
 		0,
@@ -171,10 +172,9 @@ void DocumentContainer::load_image(const char* src, const char* baseurl, bool re
 
 
 void DocumentContainer::draw_text(litehtml::uint_ptr hdc, const char* text, litehtml::uint_ptr hFont, litehtml::web_color color, const litehtml::position& pos) {
-	// Ref<TextLine> textLine = memnew(TextLine);
 	// Let's try the stack alloc approach
 	FontHandle* fontHandle = reinterpret_cast<FontHandle*>(hFont);
-	TextLine textLine;
+	// Ref<TextLine> textLine = memnew(TextLine);
 	this->draw_string(fontHandle->font, Vector2(pos.x, pos.y + fontHandle->ascent), text);
 }
 
