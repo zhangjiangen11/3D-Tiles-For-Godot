@@ -3,18 +3,26 @@
 
 
 #include "Utils/CurlHttpClient.h"
-#include "godot/view_rect/view_rect.hpp"
+#include "godot_cpp/classes/control.hpp"
 #include "godot_cpp/classes/image_texture.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 #include "litehtml.h"
+#include "litehtml/document.h"
 #include <cstdint>
 #include <unordered_map>
 
 using namespace godot;
 
-class DocumentContainer : public ViewRect, public litehtml::document_container {
-	GDCLASS(DocumentContainer, ViewRect)
+class DocumentContainer final : public Control, public litehtml::document_container {
+	GDCLASS(DocumentContainer, Control)
 public:
+
+	void _draw() override;
+	
+	void set_html(const String& html);
+	
+	void set_html_stl(const std::string_view& html);
+	
 	litehtml::uint_ptr create_font(const char* faceName, int size, int weight, litehtml::font_style italic, unsigned int decoration, litehtml::font_metrics* fm) override;
 	void delete_font(litehtml::uint_ptr hFont) override;
 	int	text_width(const char* text, litehtml::uint_ptr hFont) override;
@@ -44,10 +52,16 @@ public:
 	void get_language(litehtml::string& language, litehtml::string& culture) const override;
 	litehtml::string resolve_color(const litehtml::string& /*color*/) const override { return litehtml::string(); }
 	void split_text(const char* text, const std::function<void(const char*)>& on_word, const std::function<void(const char*)>& on_space) override;	
-
+	
 private:
+	// We use a hash here bc we do not want to keep a copy of the string
 	std::unordered_map<uint32_t, Ref<ImageTexture>> m_imageCache;
 	CurlHttpClient<2> m_httpClient;
+	// I know this is "backwards" if you think abt this in OOP terms, but I beg you to think of this class as just functional implementations
+	litehtml::document::ptr m_document;
+
+protected:
+	static void _bind_methods();
 	
 };
 

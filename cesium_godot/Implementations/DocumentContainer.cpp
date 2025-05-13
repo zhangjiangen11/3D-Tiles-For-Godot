@@ -8,7 +8,9 @@
 #include "godot_cpp/variant/packed_byte_array.hpp"
 #include "godot_cpp/variant/rect2.hpp"
 #include "litehtml/background.h"
+#include "litehtml/document.h"
 #include "litehtml/os_types.h"
+#include "litehtml/types.h"
 #include <cstdint>
 #include <cstdio>
 
@@ -42,6 +44,42 @@ struct FontHandle {
 	float descent;
 	float height;
 };
+
+
+const char*	DocumentContainer::get_default_font_name() const {
+	return Control::get_theme_default_font()->get_font_name().utf8().get_data();
+}
+
+
+void DocumentContainer::set_html_stl(const std::string_view& html) {
+	this->m_document = litehtml::document::createFromString(html.data(), this);
+	this->m_document->render(this->get_size().width);
+	this->queue_redraw();
+}
+
+void DocumentContainer::set_html(const String& html) {
+	this->m_document = litehtml::document::createFromString(html.utf8().get_data(), this);
+	this->m_document->render(this->get_size().width);
+	this->queue_redraw();
+}
+
+void DocumentContainer::_draw() {
+	litehtml::position origin(
+		0,
+		0,
+		this->get_size().width,
+		this->get_size().height
+	);
+	this->m_document->draw(0, 0, 0, &origin);
+}
+
+void DocumentContainer::get_client_rect(litehtml::position& client) const {
+	Rect2 rect = this->get_global_rect();
+	client.x = rect.position.x;
+	client.y = rect.position.y;
+	client.width = rect.size.width;
+	client.height = rect.size.height;
+}
 
 litehtml::uint_ptr DocumentContainer::create_font(const char* faceName, int size, int weight, litehtml::font_style italic, unsigned int decoration, litehtml::font_metrics* fm) {
 	FontHandle* handle = new FontHandle();
@@ -79,7 +117,6 @@ int DocumentContainer::pt_to_px(int pt) const {
 int DocumentContainer::get_default_font_size() const {
 	return 16;
 }
-
 
 void DocumentContainer::draw_background(litehtml::uint_ptr hdc, const std::vector<litehtml::background_paint>& bg) {
 	for (const litehtml::background_paint& backgroundItem : bg) {
@@ -140,4 +177,78 @@ void DocumentContainer::draw_text(litehtml::uint_ptr hdc, const char* text, lite
 	TextLine textLine;
 	this->draw_string(fontHandle->font, Vector2(pos.x, pos.y + fontHandle->ascent), text);
 }
+
+
+void DocumentContainer::get_image_size(const char* src, const char* baseurl, litehtml::size& sz) {
+	
+}
+
+void DocumentContainer::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& borders, const litehtml::position& draw_pos, bool root) {
+	
+}
+
+void DocumentContainer::set_caption(const char* caption) {
+	
+}
+
+void DocumentContainer::set_base_url(const char* base_url) {
+	
+}
+
+void DocumentContainer::link(const std::shared_ptr<litehtml::document>& doc, const litehtml::element::ptr& el) {
+	
+}
+
+void DocumentContainer::on_anchor_click(const char* url, const litehtml::element::ptr& el) {
+	
+}
+
+void DocumentContainer::set_cursor(const char* cursor) {
+	
+}
+
+void DocumentContainer::transform_text(litehtml::string& text, litehtml::text_transform tt) {
+	
+}
+
+void DocumentContainer::import_css(litehtml::string& text, const litehtml::string& url, litehtml::string& baseurl) {
+	
+}
+
+void DocumentContainer::set_clip(const litehtml::position& pos, const litehtml::border_radiuses& bdr_radius) {
+	
+}
+
+void DocumentContainer::del_clip() {
+	
+}
+
+void DocumentContainer::get_media_features(litehtml::media_features& media) const {
+	
+}
+
+void DocumentContainer::get_language(litehtml::string& language, litehtml::string& culture) const {
+	
+}
+
+void DocumentContainer::split_text(const char* text, const std::function<void(const char*)>& on_word, const std::function<void(const char*)>& on_space) {
+	
+}
+
+
+void DocumentContainer::draw_list_marker(litehtml::uint_ptr hdc, const litehtml::list_marker& marker) {
+
+}
+
+
+litehtml::element::ptr	DocumentContainer::create_element( const char* tag_name,
+													const litehtml::string_map& attributes,
+													const std::shared_ptr<litehtml::document>& doc) {
+	return nullptr;
+}
+
+void DocumentContainer::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("set_html", "html"), &DocumentContainer::set_html);
+}
+
 

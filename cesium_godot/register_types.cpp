@@ -1,6 +1,7 @@
 #include "register_types.h"
 
 
+#include "Implementations/DocumentContainer.h"
 #include "Models/CesiumGDCreditSystem.h"
 #include "Models/CesiumGDTileset.h"
 #include "Models/CesiumHTTPRequestNode.h"
@@ -41,6 +42,7 @@ void initialize_cesium_godot_module(ModuleInitializationLevel p_level) {
 	ClassDB::register_class<CesiumGDPanel>();
 	ClassDB::register_class<CesiumIonRasterOverlay>();
 	ClassDB::register_class<CesiumGDConfig>();
+	ClassDB::register_class<DocumentContainer>();
 	ClassDB::register_class<CesiumGDAssetBuilder>();
 	ClassDB::register_class<TokenTroubleshooting>();
 	ClassDB::register_class<Cesium3DTile>();

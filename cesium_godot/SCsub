@@ -221,6 +221,7 @@ env.Append(
         "libssl",
         "meshoptimizer",
         "ada",
+        "gumbo",
         "litehtml"
     ],
     LIBPATH=[
