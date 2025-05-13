@@ -4,6 +4,7 @@
 #include "CesiumAsync/AsyncSystem.h"
 #include "godot_cpp/classes/engine.hpp"
 #include "godot_cpp/templates/vector.hpp"
+#include "godot_cpp/variant/packed_byte_array.hpp"
 #include <cstdint>
 #include <memory>
 
@@ -103,7 +104,7 @@ CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>> NetworkAssetAcc
 	this->m_curlClient.send_request(
 			url.c_str(),
 			method,
-			[url, p_promise = std::move(p_promise)](int32_t responseCode, const Vector<uint8_t> &body) {
+			[url, p_promise = std::move(p_promise)](int32_t responseCode, const PackedByteArray &body) {
 				if (responseCode >= HTTPClient::ResponseCode::RESPONSE_BAD_REQUEST || responseCode == 0 /* Invalid request will yield 0 */) {
 					const String errorMessage = String("The underlying request failed with code: ") + itos(responseCode);
 					const char *strPtr = reinterpret_cast<const char *>(body.ptr());

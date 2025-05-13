@@ -1,12 +1,21 @@
 #ifndef DOCUMENT_CONTAINER_H
 #define DOCUMENT_CONTAINER_H
 
-#include "litehtml.h"
 
-class DocumentContainer : public litehtml::document_container {
+#include "Utils/CurlHttpClient.h"
+#include "godot/view_rect/view_rect.hpp"
+#include "godot_cpp/classes/image_texture.hpp"
+#include "godot_cpp/classes/wrapped.hpp"
+#include "litehtml.h"
+#include <cstdint>
+#include <unordered_map>
+
+using namespace godot;
+
+class DocumentContainer : public ViewRect, public litehtml::document_container {
+	GDCLASS(DocumentContainer, ViewRect)
 public:
-	
-	litehtml::uint_ptr	create_font(const char* faceName, int size, int weight, litehtml::font_style italic, unsigned int decoration, litehtml::font_metrics* fm) override;
+	litehtml::uint_ptr create_font(const char* faceName, int size, int weight, litehtml::font_style italic, unsigned int decoration, litehtml::font_metrics* fm) override;
 	void delete_font(litehtml::uint_ptr hFont) override;
 	int	text_width(const char* text, litehtml::uint_ptr hFont) override;
 	void draw_text(litehtml::uint_ptr hdc, const char* text, litehtml::uint_ptr hFont, litehtml::web_color color, const litehtml::position& pos) override;
@@ -28,11 +37,18 @@ public:
 	void set_clip(const litehtml::position& pos, const litehtml::border_radiuses& bdr_radius) override;
 	void del_clip() override;
 	void get_client_rect(litehtml::position& client) const override;
-	litehtml::element::ptr create_element( const char* tag_name,
+	litehtml::element::ptr	create_element( const char* tag_name,
+													const litehtml::string_map& attributes,
+													const std::shared_ptr<litehtml::document>& doc) override;
 	void get_media_features(litehtml::media_features& media) const override;
 	void get_language(litehtml::string& language, litehtml::string& culture) const override;
-	// litehtml::string resolve_color(const litehtml::string& /*color*/) const { return litehtml::string(); }
-	void split_text(const char* text, const std::function<void(const char*)>& on_word, const std::function<void(const char*)>& on_space);	
+	litehtml::string resolve_color(const litehtml::string& /*color*/) const override { return litehtml::string(); }
+	void split_text(const char* text, const std::function<void(const char*)>& on_word, const std::function<void(const char*)>& on_space) override;	
+
+private:
+	std::unordered_map<uint32_t, Ref<ImageTexture>> m_imageCache;
+	CurlHttpClient<2> m_httpClient;
+	
 };
 
 #endif
