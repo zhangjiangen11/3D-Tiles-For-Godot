@@ -2,9 +2,7 @@
 
 #include "CesiumUtility/CreditSystem.h"
 #include "Implementations/DocumentContainer.h"
-#include "Ultralight/String.h"
 #include "Utils/AssetManipulation.h"
-#include "godot/html_rect/html_rect.hpp"
 #include "godot_cpp/classes/control.hpp"
 #include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/classes/object.hpp"

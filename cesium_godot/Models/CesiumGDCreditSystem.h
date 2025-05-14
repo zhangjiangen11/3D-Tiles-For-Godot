@@ -2,7 +2,6 @@
 #define CESIUM_GD_CREDIT_SYSTEM
 
 #include "Implementations/DocumentContainer.h"
-#include "godot/html_rect/html_rect.hpp"
 #include "godot_cpp/classes/box_container.hpp"
 #include "godot_cpp/classes/node3d.hpp"
 #include <memory>
