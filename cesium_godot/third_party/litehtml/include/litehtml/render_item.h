@@ -2,13 +2,14 @@
 #define LH_RENDER_ITEM_H
 
 #include <memory>
-#include <utility>
 #include <list>
 #include <tuple>
+#include "html.h"
 #include "types.h"
 #include "line_box.h"
 #include "table.h"
 #include "formatting_context.h"
+#include "element.h"
 
 namespace litehtml
 {
@@ -29,7 +30,7 @@ namespace litehtml
 
 		containing_block_context calculate_containing_block_context(const containing_block_context& cb_context);
 		void calc_cb_length(const css_length& len, int percent_base, containing_block_context::typed_int& out_value) const;
-		virtual int _render(int x, int y, const containing_block_context& containing_block_size, formatting_context* fmt_ctx, bool second_pass = false)
+		virtual int _render(int /*x*/, int /*y*/, const containing_block_context& /*containing_block_size*/, formatting_context* /*fmt_ctx*/, bool /*second_pass = false*/)
 		{
 			return 0;
 		}
@@ -222,6 +223,52 @@ namespace litehtml
             return content_offset_top() + content_offset_bottom();
         }
 
+		int render_offset_left() const
+		{
+			if(css().get_box_sizing() == box_sizing_content_box)
+			{
+				return m_margins.left + m_borders.left + m_padding.left;
+			}
+			return m_margins.left;
+		}
+
+		int render_offset_right() const
+		{
+			if(css().get_box_sizing() == box_sizing_content_box)
+			{
+				return m_margins.right + m_borders.right + m_padding.right;
+			}
+			return m_margins.right;
+		}
+
+		int render_offset_width() const
+		{
+			return render_offset_left() + render_offset_right();
+		}
+
+		int render_offset_top() const
+		{
+			if(css().get_box_sizing() == box_sizing_content_box)
+			{
+				return m_margins.top + m_borders.top + m_padding.top;
+			}
+			return m_margins.top;
+		}
+
+		int render_offset_bottom() const
+		{
+			if(css().get_box_sizing() == box_sizing_content_box)
+			{
+				return m_margins.bottom + m_borders.bottom + m_padding.bottom;
+			}
+			return m_margins.bottom;
+		}
+
+		int render_offset_height() const
+		{
+			return render_offset_top() + render_offset_bottom();
+		}
+
 		int box_sizing_left() const
 		{
 			if(css().get_box_sizing() == box_sizing_border_box)
@@ -302,7 +349,8 @@ namespace litehtml
                    m_element->css().get_float() == float_none &&
                    m_margins.top >= 0 &&
 				   !is_flex_item() &&
-                   !is_root();
+                   !is_root() &&
+                   !is_one_of(css().get_overflow(), overflow_hidden, overflow_scroll, overflow_auto);
         }
 
         bool collapse_bottom_margin() const
@@ -312,7 +360,8 @@ namespace litehtml
                    m_element->in_normal_flow() &&
                    m_element->css().get_float() == float_none &&
                    m_margins.bottom >= 0 &&
-                   !is_root();
+                   !is_root() &&
+                   !is_one_of(css().get_overflow(), overflow_hidden, overflow_scroll, overflow_auto);
         }
 
         bool is_visible() const
@@ -358,13 +407,15 @@ namespace litehtml
                 std::shared_ptr<litehtml::render_item>
                 > split_inlines();
         bool fetch_positioned();
-        void render_positioned(render_type rt = render_all);
+        void render_positioned(render_type width = render_all);
+		// returns element offset related to the containing block
+		std::tuple<int, int> element_static_offset(const std::shared_ptr<litehtml::render_item> &el);
         void add_positioned(const std::shared_ptr<litehtml::render_item> &el);
         void get_redraw_box(litehtml::position& pos, int x = 0, int y = 0);
         void calc_document_size( litehtml::size& sz, litehtml::size& content_size, int x = 0, int y = 0 );
-		virtual void get_inline_boxes( position::vector& boxes ) const {};
-		virtual void set_inline_boxes( position::vector& boxes ) {};
-		virtual void add_inline_box( const position& box ) {};
+		virtual void get_inline_boxes( position::vector& /*boxes*/ ) const {};
+		virtual void set_inline_boxes( position::vector& /*boxes*/ ) {};
+		virtual void add_inline_box( const position& /*box*/ ) {};
 		virtual void clear_inline_boxes() {};
         void draw_stacking_context( uint_ptr hdc, int x, int y, const position* clip, bool with_positioned );
         virtual void draw_children( uint_ptr hdc, int x, int y, const position* clip, draw_flag flag, int zindex );

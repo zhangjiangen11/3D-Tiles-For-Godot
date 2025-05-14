@@ -35,6 +35,7 @@ godot3dtiles/**
 godot3dtiles/bin/*Godot3DTiles*.dll
 
 !godot-html/ultralight/lib/*.lib
+!cesium_godot/third_party/litehtml/*.lib
 
 # Ignore large files
 *.ipch

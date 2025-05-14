@@ -1,7 +1,7 @@
 #ifndef LH_EL_COMMENT_H
 #define LH_EL_COMMENT_H
 
-#include "html_tag.h"
+#include "element.h"
 
 namespace litehtml
 {
@@ -14,11 +14,11 @@ namespace litehtml
 		bool is_comment() const override;
 		void get_text(string& text) override;
 		void set_data(const char* data) override;
-        std::shared_ptr<render_item> create_render_item(const std::shared_ptr<render_item>& parent_ri) override
-        {
-            // Comments are not rendered
-            return nullptr;
-        }
+		std::shared_ptr<render_item> create_render_item(const std::shared_ptr<render_item>& /*parent_ri*/) override
+		{
+			// Comments are not rendered
+			return nullptr;
+		}
 	};
 }
 

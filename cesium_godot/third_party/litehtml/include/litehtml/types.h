@@ -1,29 +1,97 @@
 #ifndef LH_TYPES_H
 #define LH_TYPES_H
 
-#include <cstdlib>
+#include <cstdint>
 #include <memory>
-#include <map>
+#include <string>
 #include <vector>
+#include <map>
 #include <list>
+#include <variant>
+#include <optional>
+#include <algorithm>
 
 namespace litehtml
 {
+	using uint_ptr = std::uintptr_t;
+	using std::string;
+	using std::vector;
+	using std::shared_ptr;
+	using std::make_shared;
+	using std::optional;
+	using std::min;
+	using std::max;
+	using std::swap;
+	using std::abs;
+
 	class document;
 	class element;
 
-	typedef std::map<string, string>					string_map;
-	typedef std::list< std::shared_ptr<element> >		elements_list;
-	typedef std::vector<int>							int_vector;
-	typedef std::vector<string>							string_vector;
+	using string_map = std::map<string, string>;
+	using elements_list = std::list<std::shared_ptr<element>>;
+	using int_vector = std::vector<int>;
+	using string_vector = std::vector<string>;
 
-	const unsigned int font_decoration_none			= 0x00;
-	const unsigned int font_decoration_underline	= 0x01;
-	const unsigned int font_decoration_linethrough	= 0x02;
-	const unsigned int font_decoration_overline		= 0x04;
+	template <class... Types>
+	struct variant : std::variant<Types...>
+	{
+		using base = variant<Types...>; // for derived class ctors
+		using std::variant<Types...>::variant; // inherit ctors
+		template<class T> bool is() const { return std::holds_alternative<T>(*this); }
+		template<class T> const T& get() const { return std::get<T>(*this); }
+		template<class T> T& get() { return std::get<T>(*this); }
+	};
 
-	typedef unsigned char	byte;
-	typedef unsigned int	ucode_t;
+	enum document_mode
+	{
+		no_quirks_mode,
+		quirks_mode,
+		limited_quirks_mode
+	};
+
+	#define  style_text_decoration_line_strings		"none;underline;overline;line-through"
+
+	enum text_decoration_line
+	{
+		text_decoration_line_none			= 0x00,
+		text_decoration_line_underline		= 0x01,
+		text_decoration_line_overline		= 0x02,
+		text_decoration_line_line_through	= 0x04,
+	};
+
+	#define  style_text_decoration_style_strings	"solid;double;dotted;dashed;wavy"
+
+	enum text_decoration_style
+	{
+		text_decoration_style_solid,
+		text_decoration_style_double,
+		text_decoration_style_dotted,
+		text_decoration_style_dashed,
+		text_decoration_style_wavy,
+		text_decoration_style_max,
+	};
+
+	#define  style_text_decoration_thickness_strings	"auto;from-font"
+
+	enum text_decoration_thickness
+	{
+		text_decoration_thickness_auto,
+		text_decoration_thickness_from_font,
+	};
+
+	#define  style_text_emphasis_position_strings	"over;under;left;right"
+
+	enum text_emphasis_position
+	{
+		text_emphasis_position_over		= 0x00,
+		text_emphasis_position_under	= 0x01,
+		text_emphasis_position_left		= 0x02,
+		text_emphasis_position_right	= 0x04,
+	};
+
+
+	using byte = unsigned char;
+	using ucode_t = unsigned int;
 
 	struct margins
 	{
@@ -37,8 +105,19 @@ namespace litehtml
 			left = right = top = bottom = 0;
 		}
 
-		int width()		const	{ return left + right; } 
-		int height()	const	{ return top + bottom; } 
+		int width()		const	{ return left + right; }
+		int height()	const	{ return top + bottom; }
+	};
+
+	struct pointF
+	{
+		float x;
+		float y;
+
+		pointF() : x(0), y(0) {}
+		pointF(float _x, float _y) : x(_x), y(_y) {}
+
+		void set(float _x, float _y) { x = _x; y = _y; }
 	};
 
 	struct size
@@ -57,25 +136,21 @@ namespace litehtml
 
 	struct position
 	{
-		typedef std::vector<position>	vector;
+		using vector = std::vector<position>;
 
-		int	x;
-		int	y;
-		int	width;
-		int	height;
+		int	x = 0;
+		int	y = 0;
+		int	width = 0;
+		int	height = 0;
 
-		position()
-		{
-			x = y = width = height = 0;
-		}
+		position() = default;
 
-		position(int x, int y, int width, int height)
-		{
-			this->x			= x;
-			this->y			= y;
-			this->width		= width;
-			this->height	= height;
-		}
+		position(int _x, int _y, int _width, int _height) :
+			x(_x),
+			y(_y),
+			width(_width),
+			height(_height)
+		{}
 
 		int right()		const		{ return x + width;		}
 		int bottom()	const		{ return y + height;	}
@@ -108,63 +183,84 @@ namespace litehtml
 			height	= sz.height;
 		}
 
-		void move_to(int x, int y)
+		bool operator==(const position& val)
 		{
-			this->x = x;
-			this->y = y;
+			return x == val.x && y == val.y && width == val.width && height == val.height;
 		}
 
+		void move_to(int _x, int _y)
+		{
+			x = _x;
+			y = _y;
+		}
+
+		[[nodiscard]]
 		bool does_intersect(const position* val) const
 		{
 			if(!val) return true;
 
 			return (
-				left()			<= val->right()		&& 
-				right()			>= val->left()		&& 
-				bottom()		>= val->top()		&& 
+				left()			<= val->right()		&&
+				right()			>= val->left()		&&
+				bottom()		>= val->top()		&&
 				top()			<= val->bottom()	)
 				|| (
-				val->left()		<= right()			&& 
-				val->right()	>= left()			&& 
-				val->bottom()	>= top()			&& 
+				val->left()		<= right()			&&
+				val->right()	>= left()			&&
+				val->bottom()	>= top()			&&
 				val->top()		<= bottom()			);
 		}
 
-		bool empty() const
+		[[nodiscard]]
+		position intersect(const position& src) const
 		{
-			if(!width && !height)
+			position dest;
+			int dest_x = std::max(src.x, x);
+			int dest_y = std::max(src.y, y);
+			int dest_x2 = std::min(src.right(), right());
+			int dest_y2 = std::min(src.bottom(), bottom());
+
+			if (dest_x2 > dest_x && dest_y2 > dest_y)
 			{
-				return true;
+				dest.x = dest_x;
+				dest.y = dest_y;
+				dest.width = dest_x2 - dest_x;
+				dest.height = dest_y2 - dest_y;
 			}
-			return false;
+			else
+			{
+				dest.width = 0;
+				dest.height = 0;
+			}
+
+			return dest;
 		}
 
-		bool is_point_inside(int x, int y) const
+		[[nodiscard]]
+		bool empty() const
 		{
-			if(x >= left() && x <= right() && y >= top() && y <= bottom())
-			{
-				return true;
-			}
-			return false;
+			return !width && !height;
+		}
+
+		[[nodiscard]]
+		bool is_point_inside(int _x, int _y) const
+		{
+			return (_x >= left() && _x < right() && _y >= top() && _y < bottom());
 		}
 	};
 
 	struct font_metrics
 	{
-		int		height;
-		int		ascent;
-		int		descent;
-		int		x_height;
-		bool	draw_spaces;
+		int 	font_size = 0;		// Font size in pixels. The same as size argument of the create_font function
+		int		height = 0;			// Font height in pixels.
+		int		ascent = 0;			// The distance from the baseline to the top of a line of text.
+		int		descent = 0;		// The distance from the baseline to the bottom of a line of text.
+		int		x_height = 0;		// Height of the symbol x
+		int 	ch_width = 0;		// Height of the symbol 0
+		bool	draw_spaces = true;	// True to call draw text function for spaces. If False, just use space width without draw.
+		int		sub_shift = 0;		// The baseline shift for subscripts.
+		int		super_shift = 0;	// The baseline shift for superscripts.
 
-		font_metrics()
-		{
-			height			= 0;
-			ascent			= 0;
-			descent			= 0;
-			x_height		= 0;
-			draw_spaces		= true;
-		}
 		int base_line() const	{ return descent; }
 	};
 
@@ -174,7 +270,7 @@ namespace litehtml
 		font_metrics	metrics;
 	};
 
-	typedef std::map<string, font_item> fonts_map;
+	using fonts_map = std::map<string, font_item>;
 
 	enum draw_flag
 	{
@@ -208,6 +304,8 @@ namespace litehtml
 			int 			value;
 			cbc_value_type	type;
 
+			typed_int(const typed_int& v) = default;
+
 			typed_int(int val, cbc_value_type tp)
 			{
 				value = val;
@@ -225,12 +323,7 @@ namespace litehtml
 				return *this;
 			}
 
-			typed_int& operator=(const typed_int& v)
-			{
-				value = v.value;
-				type = v.type;
-				return *this;
-			}
+			typed_int& operator=(const typed_int& v) = default;
 		};
 
 		typed_int width;						// width of the containing block
@@ -331,6 +424,8 @@ namespace litehtml
 		font_style_italic
 	};
 
+#define  font_system_family_name_strings		"caption;icon;menu;message-box;small-caption;status-bar"
+
 #define  font_variant_strings		"normal;small-caps"
 
 	enum font_variant
@@ -339,7 +434,7 @@ namespace litehtml
 		font_variant_small_caps
 	};
 
-#define  font_weight_strings	"normal;bold;bolder;lighter;100;200;300;400;500;600;700;800;900"
+#define  font_weight_strings	"normal;bold;bolder;lighter"
 
 	enum font_weight
 	{
@@ -347,15 +442,6 @@ namespace litehtml
 		font_weight_bold,
 		font_weight_bolder,
 		font_weight_lighter,
-		font_weight_100,
-		font_weight_200,
-		font_weight_300,
-		font_weight_400,
-		font_weight_500,
-		font_weight_600,
-		font_weight_700,
-		font_weight_800,
-		font_weight_900
 	};
 
 #define  list_style_type_strings	"none;circle;disc;square;armenian;cjk-ideographic;decimal;decimal-leading-zero;georgian;hebrew;hiragana;hiragana-iroha;katakana;katakana-iroha;lower-alpha;lower-greek;lower-latin;lower-roman;upper-alpha;upper-latin;upper-roman"
@@ -456,9 +542,9 @@ namespace litehtml
 		clear_both
 	};
 
-#define  css_units_strings	"none;%;in;cm;mm;em;ex;pt;pc;px;dpi;dpcm;vw;vh;vmin;vmax;rem"
+#define  css_units_strings	"none;%;in;cm;mm;em;ex;pt;pc;px;vw;vh;vmin;vmax;rem;ch"
 
-	enum css_units : byte
+	enum css_units : byte // see css_length
 	{
 		css_units_none,
 		css_units_percentage,
@@ -470,13 +556,12 @@ namespace litehtml
 		css_units_pt,
 		css_units_pc,
 		css_units_px,
-		css_units_dpi,
-		css_units_dpcm,
 		css_units_vw,
 		css_units_vh,
 		css_units_vmin,
 		css_units_vmax,
 		css_units_rem,
+		css_units_ch,
 	};
 
 #define  background_attachment_strings	"scroll;fixed"
@@ -497,6 +582,7 @@ namespace litehtml
 		background_repeat_no_repeat
 	};
 
+// https://drafts.csswg.org/css-box-4/#typedef-visual-box
 #define  background_box_strings	"border-box;padding-box;content-box"
 
 	enum background_box
@@ -506,14 +592,15 @@ namespace litehtml
 		background_box_content
 	};
 
-#define  background_position_strings	"top;bottom;left;right;center"
+#define  background_position_strings				"left;right;top;bottom;center"
+	const float background_position_percentages[] =	 {0,   100,  0,  100,    50};
 
 	enum background_position
 	{
-		background_position_top,
-		background_position_bottom,
 		background_position_left,
 		background_position_right,
+		background_position_top,
+		background_position_bottom,
 		background_position_center,
 	};
 
@@ -574,7 +661,7 @@ namespace litehtml
 
 	enum background_size
 	{
-		background_size_auto,
+		background_size_auto,	// must be first, see parse_bg_size
 		background_size_cover,
 		background_size_contain,
 	};
@@ -629,16 +716,9 @@ namespace litehtml
 			context = val.context;
 			min_width = val.min_width;
 		}
-		floated_box& operator=(const floated_box& val)
-		{
-			pos = val.pos;
-			float_side = val.float_side;
-			clear_floats = val.clear_floats;
-			el = val.el;
-			context = val.context;
-			min_width = val.min_width;
-			return *this;
-		}
+
+		floated_box& operator=(const floated_box& val) = default;
+
 		floated_box(floated_box&& val)
 		{
 			pos = val.pos;
@@ -706,6 +786,11 @@ namespace litehtml
 			m_is_default	= true;
 			m_val			= def_val;
 		}
+		def_value(const def_value<T>& val)
+		{
+			m_is_default	= val.m_is_default;
+			m_val			= val.m_val;
+		}
 		void reset(T def_val)
 		{
 			m_is_default	= true;
@@ -720,6 +805,12 @@ namespace litehtml
 			m_val			= new_val;
 			m_is_default	= false;
 			return m_val;
+		}
+		def_value<T>& operator=(const def_value<T>& val)
+		{
+			m_is_default	= val.m_is_default;
+			m_val			= val.m_val;
+			return *this;
 		}
 		operator T() const
 		{
@@ -787,62 +878,26 @@ namespace litehtml
 		_baseline_type m_type;
 	};
 
+#define appearance_strings      "none;auto;menulist-button;textfield;button;checkbox;listbox;menulist;meter;progress-bar;push-button;radio;searchfield;slider-horizontal;square-button;textarea"
 
-#define media_orientation_strings		"portrait;landscape"
-
-	enum media_orientation
+	enum appearance
 	{
-		media_orientation_portrait,
-		media_orientation_landscape,
-	};
-
-#define media_feature_strings		"none;width;min-width;max-width;height;min-height;max-height;device-width;min-device-width;max-device-width;device-height;min-device-height;max-device-height;orientation;aspect-ratio;min-aspect-ratio;max-aspect-ratio;device-aspect-ratio;min-device-aspect-ratio;max-device-aspect-ratio;color;min-color;max-color;color-index;min-color-index;max-color-index;monochrome;min-monochrome;max-monochrome;resolution;min-resolution;max-resolution"
-
-	enum media_feature
-	{
-		media_feature_none,
-
-		media_feature_width,
-		media_feature_min_width,
-		media_feature_max_width,
-
-		media_feature_height,
-		media_feature_min_height,
-		media_feature_max_height,
-
-		media_feature_device_width,
-		media_feature_min_device_width,
-		media_feature_max_device_width,
-
-		media_feature_device_height,
-		media_feature_min_device_height,
-		media_feature_max_device_height,
-
-		media_feature_orientation,
-
-		media_feature_aspect_ratio,
-		media_feature_min_aspect_ratio,
-		media_feature_max_aspect_ratio,
-
-		media_feature_device_aspect_ratio,
-		media_feature_min_device_aspect_ratio,
-		media_feature_max_device_aspect_ratio,
-
-		media_feature_color,
-		media_feature_min_color,
-		media_feature_max_color,
-
-		media_feature_color_index,
-		media_feature_min_color_index,
-		media_feature_max_color_index,
-
-		media_feature_monochrome,
-		media_feature_min_monochrome,
-		media_feature_max_monochrome,
-
-		media_feature_resolution,
-		media_feature_min_resolution,
-		media_feature_max_resolution,
+		appearance_none,
+		appearance_auto,
+		appearance_menulist_button,
+		appearance_textfield,
+		appearance_button,
+		appearance_checkbox,
+		appearance_listbox,
+		appearance_menulist,
+		appearance_meter,
+		appearance_progress_bar,
+		appearance_push_button,
+		appearance_radio,
+		appearance_searchfield,
+		appearance_slider_horizontal,
+		appearance_square_button,
+		appearance_textarea,
 	};
 
 #define box_sizing_strings		"content-box;border-box"
@@ -853,22 +908,18 @@ namespace litehtml
 		box_sizing_border_box,
 	};
 
-
-#define media_type_strings		"none;all;screen;print;braille;embossed;handheld;projection;speech;tty;tv"
+// https://drafts.csswg.org/mediaqueries/#media-types
+// User agents must recognize the following media types as valid, but must make them match nothing.
+#define deprecated_media_type_strings	"tty;tv;projection;handheld;braille;embossed;aural;speech"
+#define media_type_strings				"all;print;screen;" deprecated_media_type_strings
 
 	enum media_type
 	{
-		media_type_none,
+		media_type_unknown,
 		media_type_all,
-		media_type_screen,
 		media_type_print,
-		media_type_braille,
-		media_type_embossed,
-		media_type_handheld,
-		media_type_projection,
-		media_type_speech,
-		media_type_tty,
-		media_type_tv,
+		media_type_screen,
+		media_type_first_deprecated
 	};
 
 	struct media_features
@@ -885,8 +936,8 @@ namespace litehtml
 
 		media_features()
 		{
-			type = media_type::media_type_none,
-			width =0;
+			type = media_type_unknown;
+			width = 0;
 			height = 0;
 			device_width = 0;
 			device_height = 0;
@@ -903,6 +954,8 @@ namespace litehtml
 		render_no_fixed,
 		render_fixed_only,
 	};
+
+	const char* const split_delims_spaces = " \t\r\n\f\v";
 
 	// List of the Void Elements (can't have any contents)
 	const char* const void_elements = "area;base;br;col;command;embed;hr;img;input;keygen;link;meta;param;source;track;wbr";
@@ -944,19 +997,24 @@ namespace litehtml
 		flex_justify_content_stretch,
 	};
 
-#define flex_align_items_strings		"normal;flex-start;flex-end;center;start;end;baseline;stretch;auto"
+#define self_position_strings		"center;start;end;self-start;self-end;flex-start;flex-end"
+#define flex_align_items_strings	"auto;normal;stretch;baseline;" self_position_strings
 
 	enum flex_align_items
 	{
-		flex_align_items_flex_normal,
-		flex_align_items_flex_start,
-		flex_align_items_flex_end,
+		flex_align_items_auto, // used for align-self property only
+		flex_align_items_normal,
+		flex_align_items_stretch,
+		flex_align_items_baseline,
+
 		flex_align_items_center,
 		flex_align_items_start,
 		flex_align_items_end,
-		flex_align_items_baseline,
-		flex_align_items_stretch,
-		flex_align_items_auto, // used for align-self property only
+		flex_align_items_self_start,
+		flex_align_items_self_end,
+		flex_align_items_flex_start,
+		flex_align_items_flex_end,
+
 		flex_align_items_first = 0x100,
 		flex_align_items_last = 0x200,
 		flex_align_items_unsafe = 0x400,

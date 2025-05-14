@@ -30,9 +30,7 @@
 #ifndef LITEHTML_URL_PATH_H__
 #define LITEHTML_URL_PATH_H__
 
-#include <ostream>
-
-#include "os_types.h"
+#include "types.h"
 
 namespace litehtml {
 

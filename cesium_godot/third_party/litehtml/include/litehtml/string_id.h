@@ -1,6 +1,8 @@
 #ifndef LH_STRING_ID_H
 #define LH_STRING_ID_H
 
+#include <string>
+
 namespace litehtml
 {
 
@@ -153,6 +155,7 @@ STRING_ID(
 	_nth_of_type_,
 	_nth_last_child_,
 	_nth_last_of_type_,
+	_is_,
 	_not_,
 	_lang_,
 
@@ -160,6 +163,9 @@ STRING_ID(
 	_hover_,
 
 	// CSS property names
+	// Side properties must go in this order: top, right, bottom, left (clockwise starting from the top).
+	// Corner properties must go in this order: top-left, top-right, bottom-right, bottom-left (clockwise starting from the top-left).
+	// This is used in style::add_four_properties() for margin-*, padding-*, border-*-{width,style,color} and border-*-*-radius{,-x,-y}.
 	_background_,
 	_background_color_,
 	_background_image_,
@@ -172,6 +178,7 @@ STRING_ID(
 	_background_position_,
 	_background_position_x_,
 	_background_position_y_,
+	_background_gradient_,
 
 	_border_,
 	_border_width_,
@@ -182,45 +189,44 @@ STRING_ID(
 	__litehtml_border_spacing_x_,
 	__litehtml_border_spacing_y_,
 
-	_border_left_,
-	_border_right_,
 	_border_top_,
+	_border_right_,
 	_border_bottom_,
+	_border_left_,
 
-	_border_left_style_,
-	_border_right_style_,
 	_border_top_style_,
+	_border_right_style_,
 	_border_bottom_style_,
+	_border_left_style_,
 
-	_border_left_width_,
-	_border_right_width_,
 	_border_top_width_,
+	_border_right_width_,
 	_border_bottom_width_,
+	_border_left_width_,
 
-	_border_left_color_,
-	_border_right_color_,
 	_border_top_color_,
+	_border_right_color_,
 	_border_bottom_color_,
+	_border_left_color_,
 
 	_border_radius_,
 	_border_radius_x_,
 	_border_radius_y_,
 
-	_border_bottom_left_radius_,
-	_border_bottom_left_radius_x_,
-	_border_bottom_left_radius_y_,
-
-	_border_bottom_right_radius_,
-	_border_bottom_right_radius_x_,
-	_border_bottom_right_radius_y_,
-
 	_border_top_left_radius_,
-	_border_top_left_radius_x_,
-	_border_top_left_radius_y_,
-
 	_border_top_right_radius_,
+	_border_bottom_right_radius_,
+	_border_bottom_left_radius_,
+
+	_border_top_left_radius_x_,
 	_border_top_right_radius_x_,
+	_border_bottom_right_radius_x_,
+	_border_bottom_left_radius_x_,
+
+	_border_top_left_radius_y_,
 	_border_top_right_radius_y_,
+	_border_bottom_right_radius_y_,
+	_border_bottom_left_radius_y_,
 
 	_list_style_,
 	_list_style_type_,
@@ -229,15 +235,16 @@ STRING_ID(
 	_list_style_image_baseurl_,
 
 	_margin_,
-	_margin_left_,
-	_margin_right_,
 	_margin_top_,
+	_margin_right_,
 	_margin_bottom_,
+	_margin_left_,
+
 	_padding_,
-	_padding_left_,
-	_padding_right_,
 	_padding_top_,
+	_padding_right_,
 	_padding_bottom_,
+	_padding_left_,
 
 	_font_,
 	_font_family_,
@@ -247,6 +254,14 @@ STRING_ID(
 	_font_size_,
 	_line_height_,
 	_text_decoration_,
+	_text_decoration_style_,
+	_text_decoration_line_,
+	_text_decoration_color_,
+	_text_decoration_thickness_,
+	_text_emphasis_,
+	_text_emphasis_style_,
+	_text_emphasis_color_,
+	_text_emphasis_position_,
 
 	_white_space_,
 	_text_align_,
@@ -262,15 +277,16 @@ STRING_ID(
 	_overflow_,
 	_display_,
 	_visibility_,
+	_appearance_,
 	_box_sizing_,
 	_z_index_,
 	_float_,
 	_clear_,
 	_text_indent_,
-	_left_,
-	_right_,
 	_top_,
+	_right_,
 	_bottom_,
+	_left_,
 	_cursor_,
 	_content_,
 	_border_collapse_,
@@ -291,15 +307,58 @@ STRING_ID(
 	_caption_side_,
 	_order_,
 
-  _counter_reset_,
+	_counter_reset_,
 	_counter_increment_,
-);
+
+	// some CSS dimensions
+	_deg_,
+	_grad_,
+	_rad_,
+	_turn_,
+
+	// some CSS property values
+	_initial_,
+	_auto_,
+	_none_,
+	_linear_gradient_,
+	_repeating_linear_gradient_,
+	_radial_gradient_,
+	_repeating_radial_gradient_,
+	_conic_gradient_,
+	_repeating_conic_gradient_,
+
+	// at-rules and their components
+	_charset_,
+	_layer_,
+	_import_,
+	_media_,
+	_and_,
+	_or_,
+	_boolean_,
+	_plain_,
+	_range_,
+	_discrete_,
+	_integer_,
+	_length_,
+	_resolution_,
+	_ratio_,
+	_keyword_,
+	_orientation_,
+	_portrait_,
+	_landscape_,
+	_device_width_,
+	_device_height_,
+	_aspect_ratio_,
+	_device_aspect_ratio_,
+	_color_index_,
+	_monochrome_,
+)
 #undef STRING_ID
 extern const string_id empty_id; // _id("")
 extern const string_id star_id; // _id("*")
 
-string_id _id(const string& str);
-const string& _s(string_id id);
+string_id			   _id(const std::string& str);
+const std::string&	   _s(string_id id);
 
 } // namespace litehtml
 

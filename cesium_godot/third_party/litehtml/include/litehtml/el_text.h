@@ -1,7 +1,8 @@
 #ifndef LH_EL_TEXT_H
 #define LH_EL_TEXT_H
 
-#include "html_tag.h"
+#include "element.h"
+#include "document.h"
 
 namespace litehtml
 {
@@ -18,11 +19,11 @@ namespace litehtml
 
 		void				get_text(string& text) override;
 		void				compute_styles(bool recursive) override;
-        bool				is_text() const override { return true; }
+		bool				is_text() const override { return true; }
 
-        void draw(uint_ptr hdc, int x, int y, const position *clip, const std::shared_ptr<render_item> &ri) override;
-        string             dump_get_name() override;
-        std::vector<std::tuple<string, string>> dump_get_attrs() override;
+		void draw(uint_ptr hdc, int x, int y, const position *clip, const std::shared_ptr<render_item> &ri) override;
+		string				dump_get_name() override;
+		std::vector<std::tuple<string, string>> dump_get_attrs() override;
 	protected:
 		void				get_content_size(size& sz, int max_width) override;
 	};
