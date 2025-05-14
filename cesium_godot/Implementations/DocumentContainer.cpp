@@ -2,6 +2,7 @@
 #include "godot_cpp/classes/control.hpp"
 #include "godot_cpp/classes/font.hpp"
 #include "godot_cpp/classes/global_constants.hpp"
+#include "godot_cpp/classes/hashing_context.hpp"
 #include "godot_cpp/classes/image.hpp"
 #include "godot_cpp/classes/image_texture.hpp"
 #include "godot_cpp/classes/text_line.hpp"
@@ -179,7 +180,12 @@ void DocumentContainer::draw_text(litehtml::uint_ptr hdc, const char* text, lite
 
 
 void DocumentContainer::get_image_size(const char* src, const char* baseurl, litehtml::size& sz) {
-	
+	if (this->m_imageCache.find(HashFnv1a(src)) == this->m_imageCache.end()) {
+		return;
+	}
+	const Ref<ImageTexture>& image = this->m_imageCache.at(HashFnv1a(src));
+	sz.width = image->get_size().width;
+	sz.height = image->get_size().height;
 }
 
 void DocumentContainer::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& borders, const litehtml::position& draw_pos, bool root) {
