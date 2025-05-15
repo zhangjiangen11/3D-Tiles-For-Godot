@@ -72,7 +72,7 @@ void CesiumGDCreditSystem::_enter_tree() {
 
   
   this->set_anchors_preset(Control::LayoutPreset::PRESET_BOTTOM_LEFT);
-  this->set_offset(Side::SIDE_TOP, -100.0f);
+  this->set_offset(Side::SIDE_TOP, -150.0f);
   this->set_offset(Side::SIDE_LEFT, 0.0f);
   this->set_offset(Side::SIDE_BOTTOM, 0.0f);
   this->m_rect = memnew(DocumentContainer);

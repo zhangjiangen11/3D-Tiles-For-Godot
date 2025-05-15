@@ -2,7 +2,6 @@
 #include "godot_cpp/classes/control.hpp"
 #include "godot_cpp/classes/font.hpp"
 #include "godot_cpp/classes/global_constants.hpp"
-#include "godot_cpp/classes/hashing_context.hpp"
 #include "godot_cpp/classes/image.hpp"
 #include "godot_cpp/classes/image_texture.hpp"
 #include "godot_cpp/classes/text_line.hpp"
