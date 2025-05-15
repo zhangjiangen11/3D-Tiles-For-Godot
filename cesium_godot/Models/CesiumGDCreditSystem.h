@@ -1,7 +1,7 @@
 #ifndef CESIUM_GD_CREDIT_SYSTEM
 #define CESIUM_GD_CREDIT_SYSTEM
 
-#include "godot/html_rect/html_rect.hpp"
+#include "Implementations/DocumentContainer.h"
 #include "godot_cpp/classes/box_container.hpp"
 #include "godot_cpp/classes/node3d.hpp"
 #include <memory>
@@ -33,7 +33,9 @@ class CesiumGDCreditSystem : public BoxContainer {
     void _enter_tree() override;
     
   private:
-    HtmlRect* m_rect;
+    // HtmlRect* m_rect;
+    DocumentContainer* m_rect;
+    std::string m_lastHtml;
     std::vector<std::shared_ptr<CesiumUtility::CreditSystem>> m_creditSystems;
     static inline CesiumGDCreditSystem*  s_instance = nullptr;
      

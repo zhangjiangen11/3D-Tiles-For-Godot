@@ -17,7 +17,7 @@ public:
 		uint16_t statusCode,
 		const std::string& contentType,
 		const CesiumAsync::HttpHeaders& headers,
-		const Vector<uint8_t>& data)
+		const PackedByteArray& data)
 		: m_statusCode{ statusCode },
 		m_contentType{ contentType },
 		m_headers{ headers },
@@ -56,7 +56,7 @@ private:
 	uint16_t m_statusCode;
 	std::string m_contentType;
 	CesiumAsync::HttpHeaders m_headers;
-	Vector<uint8_t> m_data;
+	PackedByteArray m_data;
 };
 
 #endif // !LOCAL_ASSET_RESPONSE_H

@@ -1,9 +1,8 @@
 #include "CesiumGDCreditSystem.h"
 
 #include "CesiumUtility/CreditSystem.h"
-#include "Ultralight/String.h"
+#include "Implementations/DocumentContainer.h"
 #include "Utils/AssetManipulation.h"
-#include "godot/html_rect/html_rect.hpp"
 #include "godot_cpp/classes/control.hpp"
 #include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/classes/object.hpp"
@@ -32,13 +31,9 @@ void CesiumGDCreditSystem::_process(double p_delta) {
 
 void CesiumGDCreditSystem::update_credits() {
   if (is_editor_mode()) return;
-  ultralight::String finalHtml;
+  std::string finalHtml;
   if (!this->m_creditSystems.empty()) {
-    finalHtml = R"(
-      <style>
-        body { color: #FFFFFF; }
-      </style> 
-    )";
+    finalHtml = "";
   }
   
   for (const auto& creditSystem : this->m_creditSystems) {
@@ -48,11 +43,12 @@ void CesiumGDCreditSystem::update_credits() {
       finalHtml += html.c_str();
     }
   }
-  if (std::strncmp(this->m_rect->get_html().utf8().data(), finalHtml.utf8().data(), finalHtml.utf8().size()) == 0) {
+  if (finalHtml == this->m_lastHtml) {
     return;
   }
 
-  this->m_rect->set_html(finalHtml);
+  this->m_lastHtml = finalHtml;
+  this->m_rect->set_html_stl(finalHtml);
 }
 
   void CesiumGDCreditSystem::add_credit_system(std::shared_ptr<CesiumUtility::CreditSystem> creditSystem) {
@@ -68,19 +64,19 @@ void CesiumGDCreditSystem::_enter_tree() {
   
   this->m_creditSystems.reserve(3);
   if (this->get_child_count() > 0) {
-      this->m_rect = Object::cast_to<HtmlRect>(this->get_child(0));
+      this->m_rect = Object::cast_to<DocumentContainer>(this->get_child(0));
       if (this->m_rect != nullptr) {
         return;
       }
   }
 
   
-this->set_anchors_preset(Control::LayoutPreset::PRESET_BOTTOM_LEFT);
-this->set_offset(Side::SIDE_TOP, -100.0f);
-this->set_offset(Side::SIDE_LEFT, 0.0f);
-this->set_offset(Side::SIDE_BOTTOM, 0.0f);
-  this->m_rect = memnew(HtmlRect);
-  this->m_rect->set_size(Vector2(this->m_rect->get_size().x, 100));
+  this->set_anchors_preset(Control::LayoutPreset::PRESET_BOTTOM_LEFT);
+  this->set_offset(Side::SIDE_TOP, -150.0f);
+  this->set_offset(Side::SIDE_LEFT, 0.0f);
+  this->set_offset(Side::SIDE_BOTTOM, 0.0f);
+  this->m_rect = memnew(DocumentContainer);
+  this->m_rect->set_size(Vector2(500, 100));
   this->add_child(this->m_rect, false, INTERNAL_MODE_FRONT);
   this->m_rect->set_owner(this->get_parent());
 }

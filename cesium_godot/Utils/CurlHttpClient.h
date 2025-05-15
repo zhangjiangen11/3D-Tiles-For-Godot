@@ -26,7 +26,7 @@ using namespace godot;
 #include <vector>
 #include <string>
 
-using HighLevelResponseCallback_t = std::function<void(int32_t, const Vector<uint8_t>&)>;
+using HighLevelResponseCallback_t = std::function<void(int32_t, const PackedByteArray&)>;
 using CesiumHeader_t = std::pair<std::string, std::string>;
 
 struct RequestHandle_t {
@@ -140,7 +140,7 @@ public:
 			RequestHandle_t& handle = this->m_activeHandles[handleIdx];
 			handle.configure_http_method(method);
 			long responseCode;
-			Vector<uint8_t> packedData = pull_url(urlCopy.c_str(), handle.curlHandle, &responseCode, headers);
+			PackedByteArray packedData = pull_url(urlCopy.c_str(), handle.curlHandle, &responseCode, headers);
 			//And call the callback methods here
 			callback(responseCode, packedData);
 			handle.available = true;
@@ -155,7 +155,7 @@ public:
 		RequestHandle_t &handle = this->m_activeHandles[handleIdx];
 		handle.configure_http_method(method);
 		long responseCode;
-		Vector<uint8_t> packedData = pull_url(url, handle.curlHandle, &responseCode, headers);
+		PackedByteArray packedData = pull_url(url, handle.curlHandle, &responseCode, headers);
 		//And call the callback methods here
 		callback(responseCode, packedData);
 		handle.available = true;
@@ -168,8 +168,8 @@ public:
 private:
 	static inline uint16_t s_activeInstances = 0;
 
-	Vector<uint8_t> pull_url(const char *url, CURL *handle, long*outStatus , const std::vector<CesiumHeader_t> &headers) {
-		Vector<uint8_t> buffer;
+	PackedByteArray pull_url(const char *url, CURL *handle, long*outStatus , const std::vector<CesiumHeader_t> &headers) {
+		PackedByteArray buffer;
 		//Options stuff
 		curl_easy_setopt(handle, CURLOPT_URL, url);
 		curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, &CurlHttpClient::write_callback);
@@ -200,7 +200,7 @@ private:
 		//Then from the result we can do error handling
 		if (code != CURLcode::CURLE_OK) {
 			ERR_PRINT(String("Could not make request to: ") + url + String(" error: ") + itos(code));
-			return Vector<uint8_t>();
+			return PackedByteArray();
 		}
 
 		curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, outStatus);
@@ -209,7 +209,7 @@ private:
 	}
 
 	static size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
-		auto *vectorBuffer = reinterpret_cast<Vector<uint8_t>*>(userp);
+		auto *vectorBuffer = reinterpret_cast<PackedByteArray*>(userp);
 		char *contentCStr = reinterpret_cast<char *>(contents);
 		size_t realSize = size * nmemb;
 

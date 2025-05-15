@@ -1,6 +1,7 @@
 #include "register_types.h"
 
 
+#include "Implementations/DocumentContainer.h"
 #include "Models/CesiumGDCreditSystem.h"
 #include "Models/CesiumGDTileset.h"
 #include "Models/CesiumHTTPRequestNode.h"
@@ -10,10 +11,7 @@
 #include "Models/CesiumGDPanel.h"
 #include "Models/CesiumGDConfig.h"
 #include "Utils/CesiumGDAssetBuilder.h"
-#include "Utils/TokenTroubleShooting.h"
-#include "app_example.hpp"
-#include "godot/inspector_rect/inspector_rect.hpp"
-#include "godot/ultralight_singleton/ultralight_singleton.hpp"
+#include "Utils/TokenTroubleShooting.h"		
 #include "godot_cpp/classes/engine.hpp"
 #include <cstdio>
 
@@ -26,7 +24,6 @@ using namespace godot;
 #include <core/object/class_db.h>
 #endif
 
-static UltralightSingleton* ultralight_singleton = nullptr;
 
 void initialize_cesium_godot_module(ModuleInitializationLevel p_level) {
 	//We will probably have to switch the module initialization level to the editor
@@ -41,18 +38,11 @@ void initialize_cesium_godot_module(ModuleInitializationLevel p_level) {
 	ClassDB::register_class<CesiumGDPanel>();
 	ClassDB::register_class<CesiumIonRasterOverlay>();
 	ClassDB::register_class<CesiumGDConfig>();
+	ClassDB::register_class<DocumentContainer>();
 	ClassDB::register_class<CesiumGDAssetBuilder>();
 	ClassDB::register_class<TokenTroubleshooting>();
 	ClassDB::register_class<Cesium3DTile>();
 	
-	GDREGISTER_CLASS(UltralightSingleton);
-  ultralight_singleton = memnew(UltralightSingleton); // memnew is super important.
-  Engine::get_singleton()->register_singleton("UltralightSingleton", ultralight_singleton);
-
-  GDREGISTER_ABSTRACT_CLASS(ViewRect);
-  GDREGISTER_CLASS(HtmlRect);
-  GDREGISTER_CLASS(InspectorRect);
-  GDREGISTER_CLASS(AppExample);
 	ClassDB::register_class<CesiumGDCreditSystem>(true);
 	ClassDB::bind_integer_constant("CesiumGeoreference", "OriginType", "CartographicOrigin", (int32_t)CesiumGeoreference::OriginType::CartographicOrigin);
 	ClassDB::bind_integer_constant("CesiumGeoreference", "OriginType", "TrueOrigin", (int32_t)CesiumGeoreference::OriginType::TrueOrigin);
@@ -60,8 +50,6 @@ void initialize_cesium_godot_module(ModuleInitializationLevel p_level) {
 
 void uninitialize_cesium_godot_module(ModuleInitializationLevel p_level) {
 	//Hey there, hello, we don't do anything here actually
-  Engine::get_singleton()->unregister_singleton("UltralightSingleton");
-  delete ultralight_singleton;
 }
 
 extern "C" {

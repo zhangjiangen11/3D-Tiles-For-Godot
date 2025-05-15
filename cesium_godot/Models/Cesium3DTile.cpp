@@ -14,6 +14,7 @@
 #include "godot_cpp/classes/mesh.hpp"
 #include "CesiumGltf/PropertyTableView.h"
 #include "CesiumGltf/Model.h"
+#include <cstdint>
 #include <vector>
 
 const glm::dvec3& Cesium3DTile::get_original_position() {
@@ -104,6 +105,17 @@ Node* Cesium3DTile::create_collision_node_custom_trimesh() {
 	return staticBody;
 }
 
+
+const Dictionary& Cesium3DTile::get_metadata_table(int32_t index) const {
+	return this->m_metadata.get_table(index);
+}
+
+int32_t Cesium3DTile::get_table_count() const {
+	return this->m_metadata.get_table_count();
+}
+
 void Cesium3DTile::_bind_methods() {
+    ClassDB::bind_method(D_METHOD("get_metadata_table", "index"), &Cesium3DTile::get_metadata_table);
+    ClassDB::bind_method(D_METHOD("get_table_count"), &Cesium3DTile::get_table_count);
     ClassDB::bind_method(D_METHOD("generate_tile_collision"), &Cesium3DTile::generate_tile_collision);
 }

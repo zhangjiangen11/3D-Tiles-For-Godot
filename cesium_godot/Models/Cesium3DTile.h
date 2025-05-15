@@ -3,6 +3,8 @@
 
 #include "CesiumGltf/Model.h"
 #include "Models/TileMetadata.h"
+#include "godot_cpp/variant/dictionary.hpp"
+#include <cstdint>
 #if defined(CESIUM_GD_EXT)
 #include "godot_cpp/classes/mesh_instance3d.hpp"
 #include "godot_cpp/classes/concave_polygon_shape3d.hpp"
@@ -35,6 +37,10 @@ public:
 	void generate_tile_collision();
 	
 	void add_metadata(const CesiumGltf::Model* model, const CesiumGltf::ExtensionModelExtStructuralMetadata* metadata);
+	
+	const Dictionary& get_metadata_table(int32_t idx) const;
+
+	int32_t get_table_count() const;
 	
 private:
 
