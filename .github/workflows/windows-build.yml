@@ -30,8 +30,7 @@ jobs:
         arch: x64
 
     - name: Build Extension (Single Precision)
-      run: scons platform=windows arch=x64 compileTarget=extension target=template_release production=yes
-
+      run: scons platform=windows arch=x64 compileTarget=extension target=template_release buildCesium=true
     - name: Verify Build Output
       run: dir godot3dtiles/bin
 

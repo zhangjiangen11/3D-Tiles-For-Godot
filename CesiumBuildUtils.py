@@ -108,10 +108,15 @@ def configure_native(argumentsDict):
 
 
 def compile_native(argumentsDict):
-    shouldBuildResponse = input(
-        "Do you wanna build Cesium Native (Choose yes if it's the first install)? [y/n]")
+    shouldBuildArg = argumentsDict.get("buildCesium", None)
+    if shouldBuildArg is None:
+        shouldBuildResponse = input(
+            "Do you wanna build Cesium Native (Choose yes if it's the first install)? [y/n]")
+        shouldBuildArg = shouldBuildResponse.capitalize()[0] == 'Y'
+    else:
+        shouldBuildArg = shouldBuildArg.upper() == "YES" or shouldBuildArg.upper() == "TRUE"
 
-    if shouldBuildResponse.capitalize()[0] != 'Y':
+    if not shouldBuildArg:
         return
 
     print("Building Cesium Native, this might take a few minutes...")
