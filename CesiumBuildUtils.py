@@ -97,7 +97,7 @@ def configure_native(argumentsDict):
     os.environ["VCPKG_TRIPLET"] = triplet
     # Run Cmake with the /MT flag on
     result = subprocess.run(
-        ["cmake", "-DCESIUM_MSVC_STATIC_RUNTIME_ENABLED=ON", '-DCMAKE_POLICY_VERSION_MINIMUM="3.5"', "DGIT_LFS_SKIP_SMUDGE=1", "-DVCPKG_TRIPLET=%s" % triplet, "."])
+        ["cmake", "-DCESIUM_MSVC_STATIC_RUNTIME_ENABLED=ON", '-DCMAKE_POLICY_VERSION_MINIMUM="3.5"',  "-DGIT_LFS_SKIP_SMUDGE=1", "-DVCPKG_TRIPLET=%s" % triplet, "."])
 
     # We pray this works haha
     if result.returncode != 0:
