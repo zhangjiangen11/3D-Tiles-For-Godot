@@ -1,11 +1,15 @@
+
 name: Windows Single Precision Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch:
+
+env:
+  GIT_LFS_SKIP_SMUDGE: "1"
 
 jobs:
   build:
@@ -14,29 +18,30 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python 3.8
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.8'
 
     - name: Install SCons
       run: pip install scons
 
-    - name: Setup MSVC Build Environment
-      uses: ilammy/msvc-dev-cmd@v1
+    - name: Setup MSVC 2022
+      uses: microsoft/setup-msbuild@v1.3
       with:
-        arch: x64
+        vs-version: '17.7'
+        include-optional: true
 
     - name: Build Extension (Single Precision)
-      run: scons platform=windows arch=x64 compileTarget=extension target=template_release production=yes
+      run: scons platform=windows arch=x64 compileTarget=extension target=template_release buildCesium=true
 
     - name: Verify Build Output
       run: dir godot3dtiles/bin
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: godot3dtiles-single-precision
         path: godot3dtiles/

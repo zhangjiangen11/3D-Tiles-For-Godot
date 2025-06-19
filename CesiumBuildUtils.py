@@ -57,7 +57,7 @@ def get_compile_target_definition(argsDict) -> str:
 
 def clone_native_repo_if_needed():
     clone_repo_if_needed(ROOT_DIR_EXT + "/native", "Cesium Native",
-                         "https://github.com/CesiumGS/cesium-native.git", "v0.46.0", "ae62bd8c6a7fbce08a541eecd86a313bfb906e15")
+                         "https://github.com/CesiumGS/cesium-native.git", "v0.48.0", "95498106dbac35de7ca87bc52c926a94b2091938")
 
 
 def clone_bindings_repo_if_needed():
@@ -97,7 +97,7 @@ def configure_native(argumentsDict):
     os.environ["VCPKG_TRIPLET"] = triplet
     # Run Cmake with the /MT flag on
     result = subprocess.run(
-        ["cmake", "-DCESIUM_MSVC_STATIC_RUNTIME_ENABLED=ON", "DGIT_LFS_SKIP_SMUDGE=1", "-DVCPKG_TRIPLET=%s" % triplet, "."])
+        ["cmake", "-DCESIUM_MSVC_STATIC_RUNTIME_ENABLED=ON", '-DCMAKE_POLICY_VERSION_MINIMUM="3.5"',  "-DGIT_LFS_SKIP_SMUDGE=1", "-DVCPKG_TRIPLET=%s" % triplet, "."])
 
     # We pray this works haha
     if result.returncode != 0:
@@ -108,10 +108,15 @@ def configure_native(argumentsDict):
 
 
 def compile_native(argumentsDict):
-    shouldBuildResponse = input(
-        "Do you wanna build Cesium Native (Choose yes if it's the first install)? [y/n]")
+    shouldBuildArg = argumentsDict.get("buildCesium", None)
+    if shouldBuildArg is None:
+        shouldBuildResponse = input(
+            "Do you wanna build Cesium Native (Choose yes if it's the first install)? [y/n]")
+        shouldBuildArg = shouldBuildResponse.capitalize()[0] == 'Y'
+    else:
+        shouldBuildArg = shouldBuildArg.upper() == "YES" or shouldBuildArg.upper() == "TRUE"
 
-    if shouldBuildResponse.capitalize()[0] != 'Y':
+    if not shouldBuildArg:
         return
 
     print("Building Cesium Native, this might take a few minutes...")
