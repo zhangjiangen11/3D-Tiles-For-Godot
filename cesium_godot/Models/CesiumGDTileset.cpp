@@ -1,3 +1,4 @@
+#include "CesiumUtility/IntrusivePointer.h"
 #include "glm/ext/vector_double3.hpp"
 #include <cstdint>
 #define SPDLOG_COMPILED_LIB
@@ -279,11 +280,11 @@ void Cesium3DTileset::update_tileset(const Transform3D& cameraTransform)
 
 	const Cesium3DTilesSelection::ViewUpdateResult& updateResult = this->m_activeTileset->updateView({ currentViewState });
 
-	for (Cesium3DTilesSelection::Tile *tile : updateResult.tilesToRenderThisFrame) {
+	for (CesiumUtility::IntrusivePointer<Cesium3DTilesSelection::Tile> tile : updateResult.tilesToRenderThisFrame) {
 		this->render_tile_as_node(*tile);
 	}
 
-	for (Cesium3DTilesSelection::Tile *tile : updateResult.tilesFadingOut) {
+	for (CesiumUtility::IntrusivePointer<Cesium3DTilesSelection::Tile> tile : updateResult.tilesFadingOut) {
 		despawn_tile(*tile);
 	}
 }

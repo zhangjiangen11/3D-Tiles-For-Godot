@@ -37,8 +37,8 @@ void CesiumGDCreditSystem::update_credits() {
   }
   
   for (const auto& creditSystem : this->m_creditSystems) {
-    const std::vector<CesiumUtility::Credit>& creditsToShow = creditSystem->getCreditsToShowThisFrame();
-    for (const CesiumUtility::Credit& credit : creditsToShow) {
+    const auto& creditSnapshot = creditSystem->getSnapshot();
+    for (const CesiumUtility::Credit& credit : creditSnapshot.currentCredits) {
       const std::string& html = creditSystem->getHtml(credit) + "\n";
       finalHtml += html.c_str();
     }

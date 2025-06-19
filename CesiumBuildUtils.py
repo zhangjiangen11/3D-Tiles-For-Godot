@@ -57,7 +57,7 @@ def get_compile_target_definition(argsDict) -> str:
 
 def clone_native_repo_if_needed():
     clone_repo_if_needed(ROOT_DIR_EXT + "/native", "Cesium Native",
-                         "https://github.com/CesiumGS/cesium-native.git", "v0.46.0", "ae62bd8c6a7fbce08a541eecd86a313bfb906e15")
+                         "https://github.com/CesiumGS/cesium-native.git", "v0.48.0", "95498106dbac35de7ca87bc52c926a94b2091938")
 
 
 def clone_bindings_repo_if_needed():
